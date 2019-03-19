@@ -1,10 +1,10 @@
-package ist.sec.server;
+package pt.tecnico.sec;
 
 /**
  * Hello world!
  *
  */
-public class App 
+public class ClientApp 
 {
     public static void main( String[] args )
     {

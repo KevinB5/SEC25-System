@@ -39,7 +39,7 @@ public class Library implements ILibrary {
 	}
 	
 	
-/****Connection to the server */////	
+/****Connection to the server ****/////	
 	
 	public void startConnection(String ip, int port) {
 		try {
