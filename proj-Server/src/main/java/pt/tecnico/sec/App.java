@@ -2,6 +2,7 @@ package pt.tecnico.sec;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 
 /**
  * Aplicacao principal, lanca o notario e o Public Key Infraestructure
@@ -11,6 +12,7 @@ public class App
 {
 	private static Notary notary;
 	private static PKI pki;
+	private static ServerSocket serverSocket;
 	
     public static void main( String[] args )
     {
@@ -33,12 +35,18 @@ public class App
 
         // Create server socket
         try {
-			ServerSocket serverSocket = new ServerSocket(port);
+			serverSocket = new ServerSocket(port);
+	        System.out.printf("Server accepting connections on port %d %n", port);
+
+	        Socket clientSocket = serverSocket.accept();
+
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        System.out.printf("Server accepting connections on port %d %n", port);
+        
+
     }
       
 }
