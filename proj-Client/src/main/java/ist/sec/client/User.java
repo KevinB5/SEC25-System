@@ -50,7 +50,7 @@ public class User {
 	}
 	
 	/**
-	 * Transferir a informação da compra
+	 * Transferir a informacao da compra
 	 */
 	private void transferBuyInfo() {
 		

@@ -1,10 +1,10 @@
 package hdsNotary;
 
-public interface library extends Remote{
+public interface Library {
 
     public boolean intentionToSell(String userID, String goodID);
 
-    public Object[] getStateOfGood(goodID);
+    public Object[] getStateOfGood(String goodID);
 
     public boolean transferGood(String goodID);
 
