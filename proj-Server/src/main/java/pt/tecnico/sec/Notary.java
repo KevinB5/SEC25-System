@@ -63,4 +63,8 @@ public class Notary {
 	private void transferGood( String GoodID) {
 		
 	}
+	
+	public void readFile() {
+		
+	}
 }

@@ -12,7 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class PKI {
 
-	private HashMap <String,PrivateKey> keys = new HashMap <String,PrivateKey>();
+	private HashMap <String,PublicKey> keys = new HashMap <String,PublicKey>();
 	
 /*public static void main(String[] args) throws Exception {
 	
