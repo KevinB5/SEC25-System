@@ -1,6 +1,6 @@
-package hdsNotary;
+package pt.tecnico.sec;
 
-public interface Library {
+public interface ILibrary {
 
     public boolean intentionToSell(String userID, String goodID);
 

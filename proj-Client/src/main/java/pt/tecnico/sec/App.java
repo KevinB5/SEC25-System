@@ -1,4 +1,4 @@
-package ist.sec.client;
+package pt.tecnico.sec;
 
 /**
  * Hello world!
