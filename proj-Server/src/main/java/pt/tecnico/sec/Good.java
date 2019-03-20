@@ -13,6 +13,10 @@ public class Good {
 		state= State.NOTONSALE;
 	}
 	
+	public Good(String line) {
+		id = line;
+	}
+
 	public State getState(){
 		return this.state;
 	}

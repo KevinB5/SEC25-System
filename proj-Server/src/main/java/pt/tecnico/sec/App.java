@@ -26,6 +26,9 @@ public class App
     public static void main( String[] args )
     {
     	notary= new Notary();//atribuir aqui a porta
+    	notary.startState();
+    	
+    	
     	//notario liga o listener
     	pki= new PKI(1024);
     	//notario aceita o cliente
