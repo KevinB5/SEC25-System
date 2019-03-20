@@ -1,12 +1,15 @@
 package pt.tecnico.sec;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.Scanner;
+
 import pt.tecnico.sec.*;
 
 public class Notary {
 	
 	private String idNotary = "id1" ;
-	private HashMap<String, Good> Goods = new HashMap<String, Good>(); // <goodID,userID>
+	private HashMap<Good, String> goods = new HashMap<Good, String>(); // <goodID,userID>
 
 	
 	
@@ -22,17 +25,17 @@ public class Notary {
 	 * Verificar o pedido de venda do user
 	 */
 	private boolean verifySelling(String userID, String goodID) {
-		if(Goods.get(goodID).equals(userID))
+		if(goods.get(goodID).equals(userID))
 			return true;
 		return false;
 	}
 	
 	/**
 	 * Verificar o estado de um good e retornar ao user
-	 * @param GoodID
+	 * @param goodID
 	 * @param userID
 	 */
-	private boolean verifiyStateOfGood(String GoodID, String userID) {
+	private boolean verifiyStateOfGood(String goodID, String userID) {
 		
 		return false;
 	}
@@ -40,13 +43,13 @@ public class Notary {
 	/**
 	 * Retornar o estado do good
 	 * 
-	 * @param GoodID
+	 * @param goodID
 	 * @param userID
 	 * @return Tuple com o id do good e o seu estado
 	 */
-	private Object[] sendState( String GoodID){
-		if(Goods.containsKey(GoodID)) {
-			Object[] pair = {Goods.get(GoodID), Goods.get(GoodID).getState()};
+	private Object[] sendState( String goodID){
+		if(goods.containsKey(goodID)) {
+			Object[] pair = {goods.get(goodID), goods.get(goodID).getState()};
 			return pair;
 
 		}
@@ -56,15 +59,34 @@ public class Notary {
 	/**
 	 * Transferir o good ao user
 	 * 
-	 * @param GoodID
+	 * @param goodID
 	 * @return Transaction(?
 	 *)
 	 */
-	private void transferGood( String GoodID) {
+	private void transferGood( String goodID) {
 		
 	}
 	
-	public void readFile() {
+	public void startState() {
+		try {
+		/* não sei se se estou a escrever o caminho bem -Mário*/
+		File text = new File("..\\SEC25-System\\proj-Server\\src\\main\\java\\pt\\tecnico\\state\\goods.txt");
+		Scanner scnr = new Scanner(text);
+		while(scnr.hasNextLine()) {
+			String line = scnr.nextLine();
+			if(line.startsWith("#")) {
+				String user = new String();
+				user = line.substring(1);
+			}else{
+				Good good = new Good
+				goods.put(key, value)
+				
+			}
+			
+		}
 		
+		}catch(Exception e) {
+			System.out.println("Error in reading state file: " + e.getMessage());
+		}
 	}
 }
