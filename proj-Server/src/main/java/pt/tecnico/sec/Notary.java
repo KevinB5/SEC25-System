@@ -7,7 +7,6 @@ public class Notary {
 	
 	private String idNotary = "id1" ;
 	private HashMap<String, Good> Goods = new HashMap<String, Good>(); // <goodID,userID>
-
 	
 	
 	
@@ -67,4 +66,5 @@ public class Notary {
 	public void readFile() {
 		
 	}
+	
 }

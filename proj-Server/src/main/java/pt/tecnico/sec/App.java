@@ -3,6 +3,7 @@ package pt.tecnico.sec;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.KeyPair;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -26,12 +27,12 @@ public class App
     {
     	notary= new Notary();//atribuir aqui a porta
     	//notario liga o listener
-    	pki= new PKI();
+    	pki= new PKI(1024);
     	//notario aceita o cliente
-    	//pki gera as chaves
-    	//pki atribui a chave ao user que ligou
+    	//pki gera as chaves e pki atribui a chave ao user que ligou
+    	KeyPair keyPair = pki.generateKeys(""); //usar userID
+    //Notary.setPrivateKey(keyPair.getPrivate());
     	//notario recebe pedidos do cliente
-    	System.out.println("Fg mano");
 
         // Convert port from String to int
 
