@@ -25,32 +25,35 @@ public class App
     public static void main( String[] args )
     {
     	notary= new Notary();//atribuir aqui a porta
+    	notary.startState();
+    	
+    	
     	//notario liga o listener
-    	pki= new PKI();
-    	//notario aceita o cliente
-    	//pki gera as chaves
-    	//pki atribui a chave ao user que ligou
-    	//notario recebe pedidos do cliente
-    	System.out.println("Fg mano");
-
-        // Convert port from String to int
-
-        // Create server socket
-        try {
-			serverSocket = new ServerSocket(PORT);
-	        System.out.println("Server accepting connections on port: "+ PORT);
-
-	        Socket clientSocket = serverSocket.accept();
-	        out = new PrintWriter(clientSocket.getOutputStream(), true);
-	        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-	        String greeting = in.readLine();
-	        System.out.println(greeting);
-
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//    	pki= new PKI();
+//    	//notario aceita o cliente
+//    	//pki gera as chaves
+//    	//pki atribui a chave ao user que ligou
+//    	//notario recebe pedidos do cliente
+//    	System.out.println("Fg mano");
+//
+//        // Convert port from String to int
+//
+//        // Create server socket
+//        try {
+//			serverSocket = new ServerSocket(PORT);
+//	        System.out.println("Server accepting connections on port: "+ PORT);
+//
+//	        Socket clientSocket = serverSocket.accept();
+//	        out = new PrintWriter(clientSocket.getOutputStream(), true);
+//	        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//	        String greeting = in.readLine();
+//	        System.out.println(greeting);
+//
+//			
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
         
 
     }

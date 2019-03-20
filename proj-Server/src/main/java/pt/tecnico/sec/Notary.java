@@ -47,15 +47,15 @@ public class Notary {
 	 * @param userID
 	 * @return Tuple com o id do good e o seu estado
 	 */
-	private Object[] sendState( String goodID){
-		if(goods.containsKey(goodID)) {
-			Object[] pair = {goods.get(goodID), goods.get(goodID).getState()};
-			return pair;
-
-		}
-		return null;
-	}
-	
+//	private Object[] sendState( String goodID){
+//		if(goods.containsKey(goodID)) {
+//			Object[] pair = {goods.get(goodID), goods.get(goodID).getState()};
+//			return pair;
+//
+//		}
+//		return null;
+//	}
+//	
 	/**
 	 * Transferir o good ao user
 	 * 
@@ -68,18 +68,22 @@ public class Notary {
 	}
 	
 	public void startState() {
+		Scanner scnr = null;
 		try {
-		/* não sei se se estou a escrever o caminho bem -Mário*/
-		File text = new File("..\\SEC25-System\\proj-Server\\src\\main\\java\\pt\\tecnico\\state\\goods.txt");
-		Scanner scnr = new Scanner(text);
+			
+		String user = "";
+		/* este é o caminho mais pequeno que conseguimos pôr a funcionar -Mário */
+		File text = new File(".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt");
+		
+		scnr = new Scanner(text);
 		while(scnr.hasNextLine()) {
 			String line = scnr.nextLine();
 			if(line.startsWith("#")) {
-				String user = new String();
+				user = new String();
 				user = line.substring(1);
 			}else{
-				Good good = new Good
-				goods.put(key, value)
+				Good good = new Good(line);
+				goods.put(good, user);
 				
 			}
 			
@@ -87,6 +91,9 @@ public class Notary {
 		
 		}catch(Exception e) {
 			System.out.println("Error in reading state file: " + e.getMessage());
+		}finally {
+			scnr.close();
 		}
+		System.out.println(goods);
 	}
 }
