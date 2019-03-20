@@ -1,0 +1,23 @@
+
+*** These modified files were found in JOE when it aborted on Wed Mar 20 15:04:10 2019
+*** JOE was aborted because the terminal closed
+
+*** File '(Unnamed)'
+/afs/.ist.utl.pt/users/2/9/ist426429/SEC25-System/.git/MERGE_MSG
+
+*** File '/afs/.ist.utl.pt/users/2/9/ist426429/SEC25-System/.git/MERGE_MSG'
+I need 	
+ branch 'master' of https://github.com/KevinB5/SEC25-System
+
+# Please enter
+ a commit message to explain why this merge is necessary,
+# especially if it merges an updated upstream into a topic branch.
+#
+# Lines starting with '#' will be ignored, and an empty message aborts
+# the commit.
+
+*** File '* Startup Log *'
+Processing '/etc/joe/editorrc'...
+Processing '/etc/joe/ftyperc'...
+Finished processing /etc/joe/ftyperc
+Finished processing /etc/joe/editorrc

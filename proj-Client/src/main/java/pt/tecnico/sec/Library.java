@@ -70,11 +70,16 @@ public class Library implements ILibrary {
 	public void connectServer(String Sip, int Sport) {
 		try {
 			clientSocket = new Socket(Sip, Sport);
+			System.out.println("connected to server");
 			out = new PrintWriter(clientSocket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			System.out.println("all good");
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}catch (Exception ex) {
+			ex.printStackTrace();
 		}
 	}
 	

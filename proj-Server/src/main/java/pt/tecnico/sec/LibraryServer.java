@@ -1,11 +1,8 @@
 package pt.tecnico.sec;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -13,67 +10,39 @@ public final class LibraryServer extends Thread {
 
 	public static final int PORT_NUMBER = 8081;
 
-    protected Socket socket;
 
-    //inicialixar o socket aqui
-    //construtor público
-    private LibraryServer(Socket socket) {
-        this.socket = socket;
-        System.out.println("New client connected from " + socket.getInetAddress().getHostAddress());
-        start();
-    }
+    private LibraryServer() {
 
-    public void run() {
-        InputStream in = null;
-        OutputStream out = null;
+        ObjectInputStream in = null;
+        ObjectOutputStream out = null;
+        Socket client = null;
+        
         try {
-            in = socket.getInputStream();
-            out = socket.getOutputStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String request;
-            while ((request = br.readLine()) != null) {
-                System.out.println("Message received:" + request);
-                request += '\n';
-                out.write(request.getBytes());
-            }
+        	ServerSocket socket = new ServerSocket(PORT_NUMBER);
+            
+        	while (true) {
+	        	client = socket.accept();
+	            
+	            out = new ObjectOutputStream(client.getOutputStream()); 
+	            in = new ObjectInputStream(client.getInputStream());
+	            
+	            Good good = (Good) in.readObject();
+        	}
 
         } catch (IOException ex) {
             System.out.println("Unable to get streams from client");
+        } catch (ClassNotFoundException e) {
+        	System.out.println("Class not found exception");
         } finally {
             try {
                 in.close();
                 out.close();
-                socket.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-    
-    //
-
-    public static void main(String[] args) {
-        System.out.println("SocketServer Example");
-        ServerSocket server = null;
-        try {
-            server = new ServerSocket(PORT_NUMBER);
-            while (true) {
-                /**
-                 * create a new {@link SocketServer} object for each connection
-                 * this will allow multiple client connections
-                 */
-                new LibraryServer(server.accept());
-            }
-        } catch (IOException ex) {
-            System.out.println("Unable to start server.");
-        } finally {
-            try {
-                if (server != null)
-                    server.close();
+                client.close();
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
         }
     }
 
+   
 }
