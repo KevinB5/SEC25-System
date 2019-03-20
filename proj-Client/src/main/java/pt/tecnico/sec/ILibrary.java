@@ -2,11 +2,11 @@ package pt.tecnico.sec;
 
 public interface ILibrary {
 
-    public boolean intentionToSell(String userID, String goodID);
+    public String intentionToSell(String userID, String goodID);
 
-    public Object[] getStateOfGood(String goodID);
+    public String getStateOfGood(String goodID);
 
-    public boolean transferGood(String goodID);
+    public String transferGood(String goodID);
 
 
 }

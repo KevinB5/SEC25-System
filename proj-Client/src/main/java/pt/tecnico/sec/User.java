@@ -22,8 +22,9 @@ public class User {
 	 * Informar ao notary que quer vender um good
 	 */
 	
-	public User(int ip, int port) {
+	public User(String ip, int port) {
 		lib = new Library(ip, port);
+		
 	}
 	private void intentionToSell(String good) {
 		lib.intentionToSell(idUser, good);
@@ -35,8 +36,8 @@ public class User {
 	 * @param good
 	 * @return estado do good
 	 */
-	private GoodState getStateOfGood(String good) {
-		return GoodState.NOTONSALE;
+	private String getStateOfGood(String good) {
+		return lib.getStateOfGood(good);
 	}
 	
 	/**
