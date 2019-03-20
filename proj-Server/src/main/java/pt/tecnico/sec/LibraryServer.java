@@ -15,6 +15,8 @@ public final class LibraryServer extends Thread {
 
     protected Socket socket;
 
+    //inicialixar o socket aqui
+    //construtor público
     private LibraryServer(Socket socket) {
         this.socket = socket;
         System.out.println("New client connected from " + socket.getInetAddress().getHostAddress());
@@ -47,6 +49,8 @@ public final class LibraryServer extends Thread {
             }
         }
     }
+    
+    //
 
     public static void main(String[] args) {
         System.out.println("SocketServer Example");

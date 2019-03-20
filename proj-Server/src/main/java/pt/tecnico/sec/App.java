@@ -13,6 +13,8 @@ public class App
 	private static Notary notary;
 	private static PKI pki;
 	private static ServerSocket serverSocket;
+	private static final int PORT = 8081;
+
 	
     public static void main( String[] args )
     {
@@ -31,12 +33,11 @@ public class App
         }
 
         // Convert port from String to int
-        int port = Integer.parseInt(args[0]);
 
         // Create server socket
         try {
-			serverSocket = new ServerSocket(port);
-	        System.out.printf("Server accepting connections on port %d %n", port);
+			serverSocket = new ServerSocket(PORT);
+	        System.out.println("Server accepting connections on port: "+ PORT);
 
 	        Socket clientSocket = serverSocket.accept();
 
