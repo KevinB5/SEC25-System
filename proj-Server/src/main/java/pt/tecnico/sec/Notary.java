@@ -156,14 +156,16 @@ public class Notary {
 
 		      String line = null;
 		      boolean foundOwner =false;
+		      boolean written = false;
 
 		      //Read from the original file and write to the new
 		      //unless content matches data to be removed.
 		      while ((line = reader.readLine()) != null) {
 
 		        if (!line.trim().equals(goodID)) {
-		        	if(foundOwner) {
+		        	if(foundOwner&!written) {
 		        		pwriter.println(goodID);
+		        		written=true;
 		        	}
 		        	else if(line.trim().equals('#'+newOwner))
 		        		foundOwner=true;
