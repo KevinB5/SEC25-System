@@ -48,22 +48,15 @@ public class App
         try {
 			serverSocket = new ServerSocket(PORT);
 	        System.out.println("Server accepting connections on port: "+ PORT);
+	        
+	        while (true) {
 
 	        Socket clientSocket = serverSocket.accept();
-	        out = new PrintWriter(clientSocket.getOutputStream(), true);
-	        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        	while(true) {
-
-		        String cmd = in.readLine();
-		        try {
-					String res = notary.execute(cmd);
-					out.println(res);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		        
-        	}
+	        
+	        new Thread(new LibraryServer(clientSocket, notary)).start();
+	        }
+	        
+	        
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
