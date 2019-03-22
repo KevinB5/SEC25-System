@@ -1,6 +1,12 @@
 package pt.tecnico.sec;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -13,6 +19,8 @@ public class Notary {
 	private static final String NOK ="Not OK";
 	private HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,userID>
+	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
+
 
 	
 	private enum GoodState {
@@ -113,6 +121,7 @@ public class Notary {
 			if(states.get(goodID).equals(GoodState.ONSALE)) {
 				goods.replace(goodID, buyer);
 				states.replace(goodID, GoodState.NOTONSALE);
+				this.upDateFile(goodID, buyer);
 				printGoods();
 				return OK;
 			}
@@ -126,13 +135,71 @@ public class Notary {
 		System.out.println(goods);
 	}
 	
+	private void upDateFile(String goodID, String newOwner) {
+		try {
+
+		      File inFile = new File(path);
+
+		      if (!inFile.isFile()) {
+		        System.out.println("Parameter is not an existing file");
+		        return;
+		      }
+
+		      //Construct the new file that will later be renamed to the original filename.
+		      File tempFile = new File(inFile.getAbsolutePath() + ".tmp");
+
+		      BufferedReader reader = new BufferedReader(new FileReader(path));
+		      PrintWriter pwriter = new PrintWriter(new FileWriter(tempFile));
+
+		      String line = null;
+		      boolean foundOwner =false;
+
+		      //Read from the original file and write to the new
+		      //unless content matches data to be removed.
+		      while ((line = reader.readLine()) != null) {
+
+		        if (!line.trim().equals(goodID)) {
+		        	if(foundOwner) {
+		        		pwriter.println(goodID);
+		        	}
+		        	else if(line.trim().equals('#'+newOwner))
+		        		foundOwner=true;
+		          pwriter.println(line);
+		          pwriter.flush();
+		        }
+		      }
+		      pwriter.close();
+		      reader.close();
+		      
+		      
+
+		      //Delete the original file
+		      if (!inFile.delete()) {
+		        System.out.println("Could not delete file");
+		        return;
+		      }
+
+		      //Rename the new file to the filename the original file had.
+		      if (!tempFile.renameTo(inFile))
+		        System.out.println("Could not rename file");
+
+		    }
+		    catch (FileNotFoundException ex) {
+		      ex.printStackTrace();
+		    }
+		    catch (IOException ex) {
+		      ex.printStackTrace();
+		    }
+		
+	}
+	
 	public void startState() {
 		Scanner scnr = null;
 		try {
 			
 		String user = "";
 		/* este é o caminho mais pequeno que conseguimos pôr a funcionar -Mário */
-		File text = new File(".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt");
+		File text = new File(path);
 		
 		scnr = new Scanner(text);
 		while(scnr.hasNextLine()) {
