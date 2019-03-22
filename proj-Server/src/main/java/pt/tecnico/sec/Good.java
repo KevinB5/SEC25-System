@@ -29,5 +29,9 @@ public class Good {
 			state= State.ONSALE;			
 	}
 	
+		public String getID() {
+			return this.id;
+		}
+	
 
 }
