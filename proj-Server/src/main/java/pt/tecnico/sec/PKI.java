@@ -1,27 +1,39 @@
 package pt.tecnico.sec;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.*;
 import java.util.HashMap;
 
-import static javax.xml.bind.DatatypeConverter.printHexBinary;
 
 import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
 
 public class PKI {
 
-	private final int keySize = 1024;
+	private int keySize ;
 	private HashMap <String,PublicKey> keys = new HashMap <String,PublicKey>();
 	
-public KeyPair createKeys(String keyPath) throws GeneralSecurityException, IOException {
-    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-    keyGen.initialize(this.keySize);
-    KeyPair keys = keyGen.generateKeyPair();
-    
-    return keys;
+public PKI(int keySize) {
+	this.keySize = keySize ;
+}
+	
+
+// Temos que configurar o SSH ?
+public KeyPair createKeys(String userID) {
+    KeyPairGenerator keyGen;
+    KeyPair keyPair = null;
+	try {
+		keyGen = KeyPairGenerator.getInstance("RSA");
+		keyGen.initialize(this.keySize);
+		keyPair = keyGen.generateKeyPair();
+		
+		PublicKey pubKey = keyPair.getPublic();
+		keys.put(userID,pubKey);
+		return keyPair;
+	} catch (NoSuchAlgorithmException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	return keyPair;
 }
 
 public byte[] encrypt(PrivateKey privateKey, String message) throws Exception {

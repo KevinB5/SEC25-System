@@ -20,7 +20,10 @@ public class Notary {
 	private HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,userID>
 	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
-
+	
+	public Notary() {
+		
+	}
 
 	
 	private enum GoodState {

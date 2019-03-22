@@ -32,8 +32,8 @@ public class App
     	
     	
     	//notario liga o listener
-    	//pki= new PKI(1024);
-    	pki = new PKI();
+    	pki= new PKI(1024);
+    	//pki = new PKI();
     	
     	//notario aceita o cliente
     	//pki gera as chaves e pki atribui a chave ao user que ligou
