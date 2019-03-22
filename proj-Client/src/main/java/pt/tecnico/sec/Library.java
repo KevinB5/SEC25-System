@@ -15,10 +15,10 @@ public class Library implements ILibrary {
     private BufferedReader in;
     private String ip;
     private int port;
-    private static final String SELL = "intentionSell";
-    private static final String STATE = "goodState";
-    private static final String BUY = "buyGood";
-    private static final String TRANSFER = "transferGood";
+    private static final String SELL = "sell";
+    private static final String STATE = "state";
+    private static final String BUY = "buy";
+    private static final String TRANSFER = "transfer";
     
 
     
@@ -44,15 +44,17 @@ public class Library implements ILibrary {
 	}
 
 	@Override
-	public String transferGood(String goodID) {
-		String msg=TRANSFER +" "+ goodID; 
+	public String transferGood(String userID, String buyer,String goodID) {
+		String msg=TRANSFER +" "+userID +" "+ buyer+" "+ goodID; 
 		return sendMessage(msg);
 	}
-	
+
+	/*
 	private String execRequest(String request) throws Exception{
 		String [] res = request.split(" ");
-		if(!res[0].equals(STATE) | res[0].equals(BUY)|res[0].equals(SELL)| res[0].equals(TRANSFER))
-			throw new Exception("not valid operation");
+		if(!res[0].equals(STATE) | res[0].equals(BUY)|res[0].equals(SELL)| res[0].equals(TRANSFER)) {
+			
+			throw new Exception("not valid operation");}
 
 		if(res[0].equals(STATE)) {
 			String r= "";
@@ -100,7 +102,10 @@ public class Library implements ILibrary {
 	        
 			try {
 				resp = in.readLine();
-				return execRequest(resp);
+				//return execRequest(resp);
+				//this.stopConnectServer();
+				System.out.println(resp);
+				return resp;
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

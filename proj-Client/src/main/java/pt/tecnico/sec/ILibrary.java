@@ -6,7 +6,6 @@ public interface ILibrary {
 
     public String getStateOfGood(String goodID);
 
-    public String transferGood(String goodID);
-
+    public String transferGood(String user, String buyerID, String goodID);
 
 }
