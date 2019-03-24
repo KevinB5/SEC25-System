@@ -46,6 +46,7 @@ public class App
 
         // Create server socket
         try {
+        	System.out.println(0%2+"****");
 			serverSocket = new ServerSocket(PORT);
 	        System.out.println("Server accepting connections on port: "+ PORT);
 	        
