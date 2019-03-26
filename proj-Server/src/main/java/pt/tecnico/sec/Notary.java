@@ -6,7 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -147,6 +149,8 @@ public class Notary {
 		        System.out.println("Parameter is not an existing file");
 		        return;
 		      }
+		      
+
 
 		      //Construct the new file that will later be renamed to the original filename.
 		      File tempFile = new File(inFile.getAbsolutePath() + ".tmp");
@@ -205,7 +209,7 @@ public class Notary {
 		String user = "";
 		/* este é o caminho mais pequeno que conseguimos pôr a funcionar -Mário */
 		File text = new File(path);
-		
+	      		
 		scnr = new Scanner(text);
 		while(scnr.hasNextLine()) {
 			String line = scnr.nextLine();

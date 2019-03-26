@@ -37,10 +37,14 @@ public class eIDLib_PKCS11 {
 	        pteid.Init(""); // Initializes the eID Lib
 	        pteid.SetSODChecking(false); // Don't check the integrity of the ID, address and photo (!)
 
+	        
+	        
 	        PKCS11 pkcs11;
 	        String osName = System.getProperty("os.name");
 	        String javaVersion = System.getProperty("java.version");
 	    
+	        
+	        
 	        java.util.Base64.Encoder encoder = java.util.Base64.getEncoder();
 	     
 	        String libName = "libpteidpkcs11.so";
