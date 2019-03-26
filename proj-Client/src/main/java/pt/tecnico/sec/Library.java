@@ -27,6 +27,7 @@ public class Library {
     private static final String TRANSFER = "transfer";
 	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\ports.txt";
     private static int PORT;
+   // private PKI pki = new PKI(PKI.KEYSIZE);
 
     
 
@@ -128,6 +129,7 @@ public class Library {
 			}catch(Exception e) {
 				System.out.println("Operation not valid");
 			}
+			//resp = pki.encrypt(,resp); falta buscar a chave privada do user
 	        return resp;
 
 	    }

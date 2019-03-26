@@ -9,19 +9,38 @@ import javax.crypto.Cipher;
 
 public class PKI {
 
-	private int keySize ;
-	private HashMap <String,PublicKey> keys = new HashMap <String,PublicKey>();
+	public static int KEYSIZE ;
+	public static HashMap <String,PublicKey> KEYS = new HashMap <String,PublicKey>();
+	private KeyStore keyStore;
 	
 public PKI(int keySize) {
-	this.keySize = keySize ;
+	KEYSIZE = keySize ;
+	try {
+		this.keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+	} catch (KeyStoreException e) {
+		e.printStackTrace();
+	}
 }
 
-public PKI() {
-}
-	
-
-// Temos que configurar o SSH ?
-
+//public KeyPair createKeys(String userID) {
+//    KeyPairGenerator keyGen;
+//    KeyPair keyPair = null;
+//	try {
+//		keyGen = KeyPairGenerator.getInstance("RSA");
+//		keyGen.initialize(KEYSIZE);
+//
+//		keyPair = keyGen.generateKeyPair();
+//					
+//		PublicKey pubKey = keyPair.getPublic();
+//		KEYS.put(userID,pubKey);
+//		
+//		//keyStore.add()
+//				
+//		} catch (NoSuchAlgorithmException e) {
+//			e.printStackTrace();
+//		}
+//		return keyPair;
+//}
 
 public byte[] encrypt(PrivateKey privateKey, String message) throws Exception {
     Cipher cipher = Cipher.getInstance("RSA");  
@@ -41,5 +60,6 @@ public String teste() {
 	return "Ok";
 }
     
+
 
 }
