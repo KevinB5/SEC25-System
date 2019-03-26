@@ -33,11 +33,12 @@ public class App
     	
     	//notario liga o listener
     	pki= new PKI(1024);
+    	System.out.println(pki.teste());
     	//pki = new PKI();
     	
     	//notario aceita o cliente
     	//pki gera as chaves e pki atribui a chave ao user que ligou
-    	KeyPair keyPair = pki.createKeys(""); //usar userID
+    	//KeyPair keyPair = pki.createKeys(""); //usar userID
     	
     //Notary.setPrivateKey(keyPair.getPrivate());
     	//notario recebe pedidos do cliente
@@ -46,7 +47,6 @@ public class App
 
         // Create server socket
         try {
-        	System.out.println(0%2+"****");
 			serverSocket = new ServerSocket(PORT);
 	        System.out.println("Server accepting connections on port: "+ PORT);
 	        

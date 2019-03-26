@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -22,11 +26,13 @@ public class User {
 	private static final String OK ="Ok";
 	private static final String NOK ="Not OK";
 	private String ip;
-	private static final String path = "goods.txt";
+	private static final String path = "..\\sec25-system\\goods.txt";
 	private static final String path2 = ".\\src\\main\\java\\pt\\tecnico\\state\\ports.txt";
 
 	private static ServerSocket serverSocket=null;
     private static int PORT;
+	private int keySize ;
+
 
 
 	
@@ -97,6 +103,23 @@ public class User {
 		}
 		System.out.println(goods);
 		
+	}
+	
+	private KeyPair createKeys(String userID) {
+	    KeyPairGenerator keyGen;
+	    KeyPair keyPair = null;
+		try {
+			keyGen = KeyPairGenerator.getInstance("RSA");
+			keyGen.initialize(this.keySize);
+			keyPair = keyGen.generateKeyPair();
+			
+			PublicKey pubKey = keyPair.getPublic();
+			return keyPair;
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return keyPair;
 	}
 	
 	private void getPort() {

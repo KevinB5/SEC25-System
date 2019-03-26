@@ -15,26 +15,13 @@ public class PKI {
 public PKI(int keySize) {
 	this.keySize = keySize ;
 }
+
+public PKI() {
+}
 	
 
 // Temos que configurar o SSH ?
-public KeyPair createKeys(String userID) {
-    KeyPairGenerator keyGen;
-    KeyPair keyPair = null;
-	try {
-		keyGen = KeyPairGenerator.getInstance("RSA");
-		keyGen.initialize(this.keySize);
-		keyPair = keyGen.generateKeyPair();
-		
-		PublicKey pubKey = keyPair.getPublic();
-		keys.put(userID,pubKey);
-		return keyPair;
-	} catch (NoSuchAlgorithmException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-	return keyPair;
-}
+
 
 public byte[] encrypt(PrivateKey privateKey, String message) throws Exception {
     Cipher cipher = Cipher.getInstance("RSA");  
@@ -48,6 +35,10 @@ public byte[] decrypt(PublicKey publicKey, byte [] encrypted) throws Exception {
     cipher.init(Cipher.DECRYPT_MODE, publicKey);
     
     return cipher.doFinal(encrypted);
+}
+
+public String teste() {
+	return "Ok";
 }
     
 
