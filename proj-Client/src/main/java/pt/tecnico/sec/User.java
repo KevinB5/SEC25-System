@@ -26,7 +26,7 @@ public class User {
 	private static final String OK ="Ok";
 	private static final String NOK ="Not OK";
 	private String ip;
-	private static final String path = "..\\sec25-system\\goods.txt";
+	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
 	private static final String path2 = ".\\src\\main\\java\\pt\\tecnico\\state\\ports.txt";
 
 	private static ServerSocket serverSocket=null;
