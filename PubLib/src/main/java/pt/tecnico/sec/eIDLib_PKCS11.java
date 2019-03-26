@@ -109,8 +109,7 @@ public class eIDLib_PKCS11 {
             
             //Verificar assinature
             sig.update("data".getBytes(Charset.forName("UTF-8")));
-            
-            System.out.println(sig.getClass().getSimpleName());
+           
             
             if(sig.verify(signature)) {
             	System.out.println("            //Valid");
