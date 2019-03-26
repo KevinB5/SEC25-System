@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.security.Signature;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -37,19 +38,20 @@ public class eIDLib_PKCS11 {
 	        pteid.Init(""); // Initializes the eID Lib
 	        pteid.SetSODChecking(false); // Don't check the integrity of the ID, address and photo (!)
 
-	        
-	        
 	        PKCS11 pkcs11;
 	        String osName = System.getProperty("os.name");
 	        String javaVersion = System.getProperty("java.version");
 	    
-	        
-	        
 	        java.util.Base64.Encoder encoder = java.util.Base64.getEncoder();
 	     
 	        String libName = "libpteidpkcs11.so";
+	       
 	        
 	        X509Certificate cert=getCertFromByteArray(getCertificateInBytes(0));
+	        
+	        //Código de assinar
+	        Signature sig = Signature.getInstance(cert.getSigAlgName());
+	        sig.initVerify(cert);
 	        
 	        if (-1 != osName.indexOf("Windows"))
                 libName = "pteidpkcs11.dll";
@@ -104,6 +106,17 @@ public class eIDLib_PKCS11 {
             //Assinatura para usar 
             //Lab 2 editar	
             byte[] signature = pkcs11.C_Sign(p11_session, "data".getBytes(Charset.forName("UTF-8")));
+            
+            //Verificar assinature
+            sig.update("data".getBytes(Charset.forName("UTF-8")));
+            
+            System.out.println(sig.getClass().getSimpleName());
+            
+            if(sig.verify(signature)) {
+            	System.out.println("            //Valid");
+            }else {
+            	System.out.println("            //Not valid");
+            }
             
             pteid.Exit(pteid.PTEID_EXIT_LEAVE_CARD); //OBRIGATORIO Termina a eID Lib
 	        }  catch (Throwable e)
