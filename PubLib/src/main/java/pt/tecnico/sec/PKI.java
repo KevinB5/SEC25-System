@@ -10,7 +10,7 @@ import javax.crypto.Cipher;
 public class PKI {
 
 	public static int KEYSIZE ;
-	public static HashMap <String,PublicKey> KEYS = new HashMap <String,PublicKey>();
+	private static HashMap <String,PublicKey> KEYS = new HashMap <String,PublicKey>();// userID, Key
 	private KeyStore keyStore;
 	
 public PKI(int keySize) {
@@ -20,6 +20,12 @@ public PKI(int keySize) {
 	} catch (KeyStoreException e) {
 		e.printStackTrace();
 	}
+}
+
+public PublicKey getKey(String uID) throws Exception {
+	if(!KEYS.containsKey(uID))
+		throw new Exception("No such user");
+	return KEYS.get(uID);
 }
 
 //public KeyPair createKeys(String userID) {
