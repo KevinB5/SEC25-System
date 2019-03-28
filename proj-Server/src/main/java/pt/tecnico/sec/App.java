@@ -28,7 +28,6 @@ public class App
     public static void main( String[] args ) throws GeneralSecurityException, IOException
     {
     	notary= new Notary();//atribuir aqui a porta
-    	notary.startState();
     	
     	
     	//notario liga o listener

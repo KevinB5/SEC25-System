@@ -18,6 +18,7 @@ public class PKI {
 public PKI(int keySize) {
 	KEYSIZE = keySize ;
 	try {
+		//get instance do keystore
 		this.KEYSTORE = KeyStore.getInstance(KeyStore.getDefaultType());
 	} catch (KeyStoreException e) {
 		e.printStackTrace();
@@ -25,12 +26,32 @@ public PKI(int keySize) {
 }
 
 public PublicKey getKey(String uID) throws Exception {
+	
 	if(!KEYS.containsKey(uID))
 		throw new Exception("No such user");
 	return KEYS.get(uID);
 }
 
-public KeyPair createKeys(String userID) {
+public PrivateKey getMyKey(String id, String password) {//userID, password
+	
+    KeyStore.ProtectionParameter protParam =
+            new KeyStore.PasswordProtection(password.toCharArray());
+	
+    KeyStore.PrivateKeyEntry pkEntry;
+    PrivateKey myPrivateKey = null ;
+	try {
+		pkEntry = (KeyStore.PrivateKeyEntry)
+		        KEYSTORE.getEntry(id , protParam);
+				myPrivateKey = pkEntry.getPrivateKey();
+
+	} catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
+		e.printStackTrace();
+	}
+        return myPrivateKey;
+	
+}
+
+public KeyPair createKeys(String userID, String word) {
     KeyPairGenerator keyGen;
     KeyPair keyPair = null;
 	try {
@@ -44,7 +65,8 @@ public KeyPair createKeys(String userID) {
 
 		//KEYSTORE.setKeyEntry(userID, keyPair.getPrivate(), );
 		
-		char[] password = new char[] {'a','b'};
+		char[] password = word.toCharArray();
+		
 		KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry((SecretKey) keyPair.getPrivate());
 		KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(password);
 		KEYSTORE.setEntry(userID,skEntry,protParam);
@@ -58,6 +80,7 @@ public KeyPair createKeys(String userID) {
 		return keyPair;
 }
 
+
 public byte[] encrypt(PrivateKey privateKey, String message) throws Exception {
     Cipher cipher = Cipher.getInstance("RSA");  
     cipher.init(Cipher.ENCRYPT_MODE, privateKey);  
@@ -65,12 +88,14 @@ public byte[] encrypt(PrivateKey privateKey, String message) throws Exception {
     return cipher.doFinal(message.getBytes());  
 }
 
+
 public byte[] decrypt(PublicKey publicKey, byte [] encrypted) throws Exception {
     Cipher cipher = Cipher.getInstance("RSA");  
     cipher.init(Cipher.DECRYPT_MODE, publicKey);
     
     return cipher.doFinal(encrypted);
 }
+
 
 public String teste() {
 	return "Ok";

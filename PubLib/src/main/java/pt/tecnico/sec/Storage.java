@@ -85,13 +85,12 @@ public class Storage {
 	
 	
 	
-	public Collection getGoods(String userID) {
+	public ArrayList<String> getGoods(String userID) {
 		ArrayList<String> res = new ArrayList<String>();
 		for(String goodID: goods.keySet() ) {
 			if(userID.equals(goods.get(goodID)))
 				res.add(goodID);
 				}
-		System.out.println(res);
 		return res;
 	}
 	

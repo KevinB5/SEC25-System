@@ -13,7 +13,9 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Scanner;
 
 
@@ -26,12 +28,13 @@ public class User {
 	private static final String OK ="Ok";
 	private static final String NOK ="Not OK";
 	private String ip;
-	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
 	private static final String path2 = ".\\src\\main\\java\\pt\\tecnico\\state\\ports.txt";
 
 	private static ServerSocket serverSocket=null;
     private static int PORT;
 	private int keySize ;
+	private PKI keyManager;
+	private static String PASS;
 
 
 
@@ -48,12 +51,27 @@ public class User {
 	 */
 	
 	public User(String id, String ip, int Svport) {
+		
 		idUser = id;
 		this.ip=ip;
-		this.start();
 		this.getPort();
-		lib = new Library(id, ip, Svport, PORT);
 		
+		lib = new Library(id, ip, Svport, PORT);
+		Storage store = new Storage();
+		
+		ArrayList<String> res =store.getGoods(id);
+		for(String good : store.getGoods(id)) {
+			goods.put(good, GoodState.NOTONSALE);
+		};
+		printgoods();
+		
+		keyManager = new PKI(1024);
+		Random random = new Random();	
+		
+		int rnd = random.nextInt();
+		PASS = idUser + rnd;
+		
+		keyManager.createKeys(this.idUser, PASS);
 	}
 	
 	public int gtPort() {
@@ -71,39 +89,7 @@ public class User {
 	}
 	
 	
-	
-	private void start() {
-		File text = new File(path);
-		String lines ="";
-
-		Scanner scnr;
-		try {
-			scnr = new Scanner(text);
-			while(scnr.hasNextLine()) {
-				lines += " "+scnr.nextLine();	
-			}
-		
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		String [] res = lines.split(" ");
-		
-		for (int i =0; i< res.length; i++) {
-			if(res[i].startsWith("#")&& res[i].substring(1).equals(this.idUser)) {
-				System.out.println(res[i].substring(1));
-				int j = i+1;
-				while(j< res.length && !res[j].startsWith("#") ) {
-					goods.put(res[j], GoodState.NOTONSALE);
-					j++;
-				}
-				break;
-			}
-		}
-		System.out.println(goods);
-		
-	}
+	/*
 	
 	private KeyPair createKeys(String userID) {
 	    KeyPairGenerator keyGen;
@@ -120,7 +106,7 @@ public class User {
 			e.printStackTrace();
 		}
 		return keyPair;
-	}
+	}*/
 	
 	private void getPort() {
 			File text = new File(path2);
