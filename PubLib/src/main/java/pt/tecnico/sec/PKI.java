@@ -2,21 +2,23 @@ package pt.tecnico.sec;
 
 import java.io.IOException;
 import java.security.*;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 
 
 import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
 
 public class PKI {
 
 	public static int KEYSIZE ;
 	private static HashMap <String,PublicKey> KEYS = new HashMap <String,PublicKey>();// userID, Key
-	private KeyStore keyStore;
+	public static KeyStore KEYSTORE;
 	
 public PKI(int keySize) {
 	KEYSIZE = keySize ;
 	try {
-		this.keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+		this.KEYSTORE = KeyStore.getInstance(KeyStore.getDefaultType());
 	} catch (KeyStoreException e) {
 		e.printStackTrace();
 	}
@@ -28,25 +30,33 @@ public PublicKey getKey(String uID) throws Exception {
 	return KEYS.get(uID);
 }
 
-//public KeyPair createKeys(String userID) {
-//    KeyPairGenerator keyGen;
-//    KeyPair keyPair = null;
-//	try {
-//		keyGen = KeyPairGenerator.getInstance("RSA");
-//		keyGen.initialize(KEYSIZE);
-//
-//		keyPair = keyGen.generateKeyPair();
-//					
-//		PublicKey pubKey = keyPair.getPublic();
-//		KEYS.put(userID,pubKey);
-//		
-//		//keyStore.add()
-//				
-//		} catch (NoSuchAlgorithmException e) {
-//			e.printStackTrace();
-//		}
-//		return keyPair;
-//}
+public KeyPair createKeys(String userID) {
+    KeyPairGenerator keyGen;
+    KeyPair keyPair = null;
+	try {
+		keyGen = KeyPairGenerator.getInstance("RSA");
+		keyGen.initialize(KEYSIZE);
+
+		keyPair = keyGen.generateKeyPair();
+					
+		PublicKey pubKey = keyPair.getPublic();
+		KEYS.put(userID,pubKey);
+
+		//KEYSTORE.setKeyEntry(userID, keyPair.getPrivate(), );
+		
+		char[] password = new char[] {'a','b'};
+		KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry((SecretKey) keyPair.getPrivate());
+		KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(password);
+		KEYSTORE.setEntry(userID,skEntry,protParam);
+				
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (KeyStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return keyPair;
+}
 
 public byte[] encrypt(PrivateKey privateKey, String message) throws Exception {
     Cipher cipher = Cipher.getInstance("RSA");  
