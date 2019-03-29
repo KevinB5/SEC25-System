@@ -17,7 +17,21 @@ correr clientes(cada um num terminal diferente)
  
  
  ----
- Comunicacao
- 
- falta criar buffers para cada user
+ Garantia de frescura, 
+  contador: 
+   nao começar do zero: começar de um numero aleatório e ir incrementando
+   
+   numero tem de ser acordado entre cliente e notário:
+   
+   1- conectam-se
+   2- Notário: userX counter = random
+   3- UserX: OK
+   4- User: not counter = random2
+   5 - Notário: OK
+   
+  
+  Escrita/Persistência de Dados:
+  
+  FALTA: garantir que se a maquina do servidor falhar o ficheiro nao fica escrito a meio-- se falhar volta ao estado anterior; (guardar em dois ficheiros maybe(?))
+   
  
