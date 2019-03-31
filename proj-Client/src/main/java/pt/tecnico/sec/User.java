@@ -242,8 +242,8 @@ public class User {
 	 * @param good
 	 * @return estado do good
 	 */
-	private String getStateOfGood(String good) {
-		return lib.getStateOfGood(good);
+	private void getStateOfGood(String good) {
+		System.out.println(lib.getStateOfGood(good));
 	}
 	
 	/**
@@ -253,7 +253,13 @@ public class User {
 	 */
 	private void buyGood (String user, String good) {
 		
-		String res=  lib.buyGood(user, good);
+		String res = "";
+		try {
+			res = lib.buyGood(user, good);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		if(res.equals(OK)) {
 			goods.put(good, GoodState.NOTONSALE);
@@ -300,6 +306,7 @@ public class User {
     	System.out.println("trying to buy "+ res[1]+res[2]);
     	if(op .equals("intentionbuy")) {//buy buyerID goodID
     		String ret = "no such good";
+    		System.out.println(res[2]);
     		if(goods.containsKey(res[2])) {
     			ret= lib.sellGood(this.idUser, res[1], res[2]);//sellerID, goodID
 	    		if(ret.equals("Ok"))

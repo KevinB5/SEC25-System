@@ -75,7 +75,6 @@ public class Library {
 	public String getStateOfGood(String goodID) {
 		String msg= STATE + " " + goodID;
 		Message result=  send( new Message(idUser, msg, null, null));
-		
 		return result.getText();
 	}
 
@@ -143,17 +142,19 @@ public class Library {
 	
 	
 	
-	 public String sendMessage(int mode, String msg) {
+	 public String sendMessage(int mode, String msg) throws Exception {
 		 PrintWriter printer;
 		 BufferedReader reader;
+		 String resp= "";
+		 try {
 		 	if(mode == 0) {
 		 		printer= outU;
 		 		reader = inU;
 		 	}
 		 		outU.println(msg);
-	        String resp= "";
 	        
-			try {
+	        
+			
 				resp = inU.readLine();
 				//return execRequest(resp);
 				//this.stopConnectServer();
@@ -163,6 +164,9 @@ public class Library {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}catch(NullPointerException ne) {
+				throw new Exception("Must connect to user first");
+			
 			}catch(Exception e) {
 				System.out.println("Operation not valid");
 			}
@@ -197,9 +201,10 @@ public class Library {
 	    }
 
 
-	public String buyGood(String userID, String goodID) {//buyerID, goodID
+	public String buyGood(String userID, String goodID) throws Exception {//buyerID, goodID
 		String msg = "intentionbuy "+ userID +" " +goodID;
-		Message result = send(new Message(idUser, msg,null, null));
+		//Message result = send(new Message(idUser, msg,null, null));
+		//sendMessage(0,msg);
 		
 		return sendMessage(1, msg);
 	}
