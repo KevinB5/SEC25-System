@@ -112,9 +112,10 @@ public class User {
 		System.out.println(goods);
 	}
 	
+	
 	public void connectToUsers() {
-		for(String key : usrPorts.keySet()) {
-			lib.connectUser(ip, Integer.parseInt(usrPorts.get(key)));
+		for(String id : usrPorts.keySet()) {
+			lib.connectUser(ip, id, Integer.parseInt(usrPorts.get(id)));
 		}		
 	}
 	
@@ -308,7 +309,7 @@ public class User {
     		String ret = "no such good";
     		System.out.println(res[2]);
     		if(goods.containsKey(res[2])) {
-    			ret= lib.sellGood(this.idUser, res[1], res[2]);//sellerID, goodID
+    			ret= lib.sellGood(this.idUser, res[1], res[2]);//sellerID,buyerID,  goodID
 	    		if(ret.equals("Ok"))
 	    			goods.remove(res[2], goods.get(res[2]));
 	    		this.printgoods();

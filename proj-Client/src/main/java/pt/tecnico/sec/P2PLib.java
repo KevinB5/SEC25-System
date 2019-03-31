@@ -67,7 +67,6 @@ public class P2PLib implements Runnable{
 
         private ClientTask(Socket clientSocket) {
             this.clientSocket = clientSocket;
-			System.out.println("heeeeeeeeeeeeeey from client task");
 
         }
 

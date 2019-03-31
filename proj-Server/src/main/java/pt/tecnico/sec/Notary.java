@@ -135,7 +135,6 @@ public class Notary {
     	String op =  res[0];
 
     	if(op .equals("sell")) {
-        	System.out.println("EPAAA");
 
     		String rs=this.verifySelling(user, res[1]);//userID, goodID
     		return new Message(this.idNotary, rs, null, null);
@@ -150,7 +149,9 @@ public class Notary {
     		this.buyGood(res[1]);*/
     	
     	if(op.equals("transfer")) {
-    		String rs=  this.transferGood(user,res[2],res[3]);//seller, buyer, goodID
+        	System.out.println("EPAAA " + res[1] + res[2]);
+
+    		String rs=  this.transferGood(user,res[1],res[2]);//seller, buyer, goodID
     		return new Message(this.idNotary, rs, null, null);
 
     	}
@@ -169,9 +170,10 @@ public class Notary {
 	private String transferGood( String seller,String buyer , String goodID) {
 		if(goods.get(goodID).equals(seller)) {
 			if(states.get(goodID).equals(GoodState.ONSALE)) {
-				goods.replace(goodID, buyer);
-				states.replace(goodID, GoodState.NOTONSALE);
 				store.upDateFile(goodID, buyer);
+System.out.println("FDS PUTA DE MERDA");
+				goods.replace(goodID, buyer); System.out.println("replacing " + goodID + " " + buyer);
+				states.replace(goodID, GoodState.NOTONSALE);
 				printGoods();
 				return OK;
 			}

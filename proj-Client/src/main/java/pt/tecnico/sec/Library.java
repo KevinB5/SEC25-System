@@ -13,6 +13,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Library {
@@ -31,6 +32,9 @@ public class Library {
     private static final String BUY = "buy";
     private static final String TRANSFER = "transfer";
 	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\ports.txt";
+	private HashMap <String, PrintWriter> writters = new HashMap<String, PrintWriter>();
+	private HashMap <String, BufferedReader> readers = new HashMap<String, BufferedReader>();
+
     private static int PORT;
     private User user;
    // private PKI pki = new PKI(PKI.KEYSIZE);
@@ -80,7 +84,7 @@ public class Library {
 
 	
 	public String transferGood(String userID, String buyer,String goodID) {
-		String msg=TRANSFER +" "+userID +" "+ buyer+" "+ goodID; 
+		String msg=TRANSFER +" "+ buyer+" "+ goodID; 
 		Message result=  send( new Message(idUser, msg, null, null));
 		
 		return result.getText();
@@ -107,16 +111,16 @@ public class Library {
 	}
 
 	
-	public void connectUser(String Uip, int Uport) {
+	public void connectUser( String Uip,String userID, int Uport) {
 		try {
-			System.out.println("heres nothing");
+			System.out.println("connecting to "+userID);
 
 			clientSocket = new Socket(Uip, Uport);
 			System.out.println("connected to server at port: "+ Uport);
 			outU = new PrintWriter(clientSocket.getOutputStream(), true);
 			inU= new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			System.out.println("all good");
-
+			writters.put(userID, outU);
+			readers.put(userID, inU);
 			
 		}catch(IOException ie) {
 			ie.printStackTrace();
@@ -142,15 +146,15 @@ public class Library {
 	
 	
 	
-	 public String sendMessage(int mode, String msg) throws Exception {
+	 public String sendMessage(String uID, String msg) throws Exception {
 		 PrintWriter printer;
 		 BufferedReader reader;
 		 String resp= "";
 		 try {
-		 	if(mode == 0) {
-		 		printer= outU;
-		 		reader = inU;
-		 	}
+		 	
+		 		printer= this.writters.get(uID);
+		 		reader = this.readers.get(uID);
+		
 		 		outU.println(msg);
 	        
 	        
@@ -202,11 +206,11 @@ public class Library {
 
 
 	public String buyGood(String userID, String goodID) throws Exception {//buyerID, goodID
-		String msg = "intentionbuy "+ userID +" " +goodID;
+		String msg = "intentionbuy "+ this.idUser +" " +goodID;
 		//Message result = send(new Message(idUser, msg,null, null));
 		//sendMessage(0,msg);
 		
-		return sendMessage(1, msg);
+		return sendMessage(userID, msg);
 	}
 
 
