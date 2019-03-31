@@ -1,4 +1,4 @@
-# SEC25-System
+﻿# SEC25-System
 
 compilar e correr :
 
@@ -13,9 +13,14 @@ correr clientes(cada um num terminal diferente)
  1-inserir id(numero) 
  2-connect
  
- 
- 
- 
+comandos para as operacoes:
+(Terminal)
+
+state + <goodID>
+
+sell + <goodID>
+
+buy + <sellerID> + <goodID> 
  ----
  Garantia de frescura, 
   contador: 

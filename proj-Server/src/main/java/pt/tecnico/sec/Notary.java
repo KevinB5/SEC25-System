@@ -30,6 +30,8 @@ public class Notary {
 		store = new Storage();
 		goods = store.getGoods();
 		System.out.println(goods);
+		for(String goodID: goods.keySet())
+			states.put(goodID, GoodState.NOTONSALE);
 	}
 	
 	String getID() {
@@ -84,6 +86,7 @@ public class Notary {
 			return "No such good";
 		String state = "<";
 		state += goods.get(goodID) + " , " + states.get(goodID).toString()+">";
+		System.out.println(state);
 		return state;
 	}
 	
@@ -138,7 +141,7 @@ public class Notary {
     		return new Message(this.idNotary, rs, null, null);
     		}
     	if(op.equals("state")) {
-    		String rs=  this.verifiyStateOfGood(res[2]);//userID 1, goodID 2
+    		String rs=  this.verifiyStateOfGood(res[1]);// goodID 2
     		return new Message(this.idNotary, rs, null, null);
 
     	}
