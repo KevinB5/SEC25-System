@@ -25,10 +25,13 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-public class eIDLib_PKCS11 {
+public class eIDLib{
 
 	// Falta buscar as chaves RSA e assinar os objectos propriamente
-	public eIDLib_PKCS11() {
+	public eIDLib() {
+		
+	}
+	public void start() {
 		 try
 	        {
 	            
@@ -125,7 +128,7 @@ public class eIDLib_PKCS11 {
 		    }
 	}
 	
-	private static  byte[] getCertificateInBytes(int n) {
+	public static  byte[] getCertificateInBytes(int n) {
         byte[] certificate_bytes = null;
         try {
             PTEID_Certif[] certs = pteid.GetCertificates();

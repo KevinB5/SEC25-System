@@ -3,20 +3,44 @@ package pt.tecnico.sec;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
+
+import sun.security.x509.AlgorithmId;
+import sun.security.x509.CertificateAlgorithmId;
+import sun.security.x509.CertificateSerialNumber;
+import sun.security.x509.CertificateValidity;
+import sun.security.x509.CertificateVersion;
+import sun.security.x509.CertificateX509Key;
+import sun.security.x509.X500Name;
+import sun.security.x509.X509CertImpl;
+import sun.security.x509.X509CertInfo;
 
 
 public class User {
@@ -33,8 +57,9 @@ public class User {
 	private static ServerSocket serverSocket=null;
     private static int PORT;
 	private int keySize ;
-	private PKI keyManager;
 	private static String PASS;
+	public static KeyStore KEYSTORE;
+
 
 
 
@@ -56,7 +81,7 @@ public class User {
 		this.ip=ip;
 		this.getPort();
 		
-		lib = new Library(id, ip, Svport, PORT);
+		lib = new Library(this, ip, Svport);
 		Storage store = new Storage();
 		
 		ArrayList<String> res =store.getGoods(id);
@@ -65,17 +90,22 @@ public class User {
 		};
 		printgoods();
 		
-		keyManager = new PKI(1024);
 		Random random = new Random();	
 		
 		int rnd = random.nextInt();
 		PASS = idUser + rnd;
 		
-		keyManager.createKeys(this.idUser, PASS);
+		PublicKey pub = this.createKeys(id, PASS);
+		lib.sendKey(pub);
+
 	}
 	
 	public int gtPort() {
 		return this.PORT;
+	}
+	
+	public String getID() {
+		return this.idUser;
 	}
 	
 	public void printgoods() {
@@ -86,6 +116,22 @@ public class User {
 		for(String key : usrPorts.keySet()) {
 			lib.connectUser(ip, Integer.parseInt(usrPorts.get(key)));
 		}		
+	}
+	
+	byte[] sign(String data) throws InvalidKeyException, Exception{
+		Signature rsa = Signature.getInstance("SHA1withRSA"); 
+		rsa.initSign(this.getKey(PASS));
+		rsa.update(data.getBytes());
+		System.out.println("Signing " + data);
+		return rsa.sign();
+	}
+	
+	 boolean verifySignature(byte[] data, byte[] signature, String uID) throws Exception {
+		Signature sig = Signature.getInstance("SHA1withRSA");
+		sig.initVerify(lib.getKey(uID));
+		sig.update(data);
+		
+		return sig.verify(signature);
 	}
 	
 	
@@ -175,11 +221,18 @@ public class User {
     }
     
 	private void intentionToSell(String good) {
-		String res =lib.intentionToSell(idUser, good);
+		String res="";
+		try {
+			res = lib.intentionToSell(idUser, good);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println(res);
 		if( res.equals(OK))
 			goods.replace(good, GoodState.ONSALE);
 		System.out.println(goods);
+		
 		
 	}
 	
@@ -259,4 +312,118 @@ public class User {
     	else
     		return "no valid operation " + command ;
 	}
+	
+	private PrivateKey getKey(String password) {//userID, password
+		
+	    KeyStore.ProtectionParameter protParam =
+	            new KeyStore.PasswordProtection(password.toCharArray());
+		
+	    KeyStore.PrivateKeyEntry pkEntry;
+	    PrivateKey myPrivateKey = null ;
+		try {
+			/*pkEntry = (KeyStore.PrivateKeyEntry)
+			        KEYSTORE.getEntry(id , protParam);*/
+			
+					myPrivateKey = (PrivateKey) KEYSTORE.getKey(this.idUser, password.toCharArray());
+
+		} catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
+			e.printStackTrace();
+		}
+		System.out.println("handing out private key ");
+	        return myPrivateKey;
+		
+	}
+
+	private PublicKey createKeys(String userID, String word) {
+	    KeyPairGenerator keyGen;
+	    KeyPair keyPair = null;
+	    PublicKey pubKey = null;
+	    char [] pwdArray = "password".toCharArray();
+		try {
+			
+			this.KEYSTORE = KeyStore.getInstance(KeyStore.getDefaultType());
+			
+			
+			KEYSTORE.load(null, pwdArray);
+			
+			try(FileOutputStream fos = new FileOutputStream("newKeyStoreFileName.jks")) {
+			    KEYSTORE.store(fos, pwdArray);
+			}
+			
+			keyGen = KeyPairGenerator.getInstance("RSA");
+			keyGen.initialize(1024);
+
+			keyPair = keyGen.generateKeyPair();
+						
+			pubKey = keyPair.getPublic();
+			//KEYS.put(userID,pubKey);
+			
+			System.out.println("saving Public key for "+ userID);
+			
+			
+			char[] password = word.toCharArray();
+			 
+			X509Certificate cert = this.generateCertificate(userID, keyPair, 0, "SHA1withRSA");
+			
+			Certificate[] chain = {cert};
+			
+			  
+			
+			KeyStore.PrivateKeyEntry skEntry = new KeyStore.PrivateKeyEntry((PrivateKey) keyPair.getPrivate(), chain);
+			KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(password);
+
+			KEYSTORE.setEntry(userID,skEntry,protParam);
+		//KEYSTORE.setKeyEntry(userID,(PrivateKey) keyPair.getPrivate(), password, null);
+					
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			} catch (KeyStoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (CertificateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (GeneralSecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return pubKey;
+	}
+	
+	private X509Certificate generateCertificate(String dn, KeyPair pair, int days, String algorithm)
+			  throws GeneralSecurityException, IOException
+			{
+			  PrivateKey privkey = pair.getPrivate();
+			  X509CertInfo info = new X509CertInfo();
+			  Date from = new Date();
+			  Date to = new Date(from.getTime() + days * 86400000l);
+			  CertificateValidity interval = new CertificateValidity(from, to);
+			  BigInteger sn = new BigInteger(64, new SecureRandom());
+			  X500Name owner = new X500Name("CN="+dn);
+			 
+			  info.set(X509CertInfo.VALIDITY, interval);
+			  info.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(sn));
+			  info.set(X509CertInfo.SUBJECT, owner);
+			  info.set(X509CertInfo.ISSUER,owner);
+			  info.set(X509CertInfo.KEY, new CertificateX509Key(pair.getPublic()));
+			  info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
+			  AlgorithmId algo = new AlgorithmId(AlgorithmId.md5WithRSAEncryption_oid);
+			  info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algo));
+			 
+			  // Sign the cert to identify the algorithm that's used.
+			  X509CertImpl cert = new X509CertImpl(info);
+			  cert.sign(privkey, algorithm);
+			 
+			  // Update the algorith, and resign.
+			  algo = (AlgorithmId)cert.get(X509CertImpl.SIG_ALG);
+			  info.set(CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, algo);
+			  cert = new X509CertImpl(info);
+			  cert.sign(privkey, algorithm);
+			  return cert;
+			}   
+
 }

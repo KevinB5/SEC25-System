@@ -27,12 +27,11 @@ public class App
 	
     public static void main( String[] args ) throws GeneralSecurityException, IOException
     {
-    	notary= new Notary();//atribuir aqui a porta
     	
     	
     	//notario liga o listener
-    	pki= new PKI(1024);
-    	System.out.println(pki.teste());
+    	notary= new Notary();//atribuir aqui a porta
+
     	//pki = new PKI();
     	
     	//notario aceita o cliente

@@ -5,18 +5,23 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.PublicKey;
 import java.util.Scanner;
 
 public class Library {
 	
 	private Socket clientSocket;
 	private ServerSocket serverSocket;
-    private PrintWriter out;
-    private BufferedReader in;
+    private ObjectOutputStream out;
+    private ObjectInputStream in;
+    
     private PrintWriter outU;
     private BufferedReader inU;
     private String ip;
@@ -27,41 +32,59 @@ public class Library {
     private static final String TRANSFER = "transfer";
 	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\ports.txt";
     private static int PORT;
+    private User user;
    // private PKI pki = new PKI(PKI.KEYSIZE);
 
     
 
 
     
-    public Library(String id, String _ip, int _port, int PORT) {
+    public Library(User user, String _ip, int _port) {
     	this.ip =_ip;
     	this.connectServer(_ip, _port);
-    	this.idUser = id;
-    	this.PORT = PORT;
+    	this.idUser = user.getID();
+    	this.PORT = user.gtPort();
+    	this.user = user;
     	
     }
     
 
- 
+   public PublicKey getKey(String uID) {
+	   Message msg = new Message(idUser, "getKey uID",null, null );
+	   
+	   Message ret = send(msg);
+	   return (PublicKey) ret.getObj();
+   }
+   
+   public Message sendKey(PublicKey key) {
+	   Message epa =send(new Message(this.idUser, "StoreKey",null, key));
+	   return epa;
+   }
 
 
-	public String intentionToSell(String userID, String goodID) {
-		String msg =SELL + " " + userID + " " +goodID;
+	public String intentionToSell(String userID, String goodID) throws InvalidKeyException, Exception {
+		String res =SELL +  " " +goodID+ " ";
+		String msg = res + new String(user.sign(res));
 		
-		return sendMessage(0, msg);
+		Message result=  send( new Message(idUser, msg, null, null));
+		
+		return result.getText();
 	}
 
 	
 	public String getStateOfGood(String goodID) {
 		String msg= STATE + " " + goodID;
+		Message result=  send( new Message(idUser, msg, null, null));
 		
-		return sendMessage(0, msg);
+		return result.getText();
 	}
 
 	
 	public String transferGood(String userID, String buyer,String goodID) {
 		String msg=TRANSFER +" "+userID +" "+ buyer+" "+ goodID; 
-		return sendMessage(0, msg);
+		Message result=  send( new Message(idUser, msg, null, null));
+		
+		return result.getText();
 	}
 
 	
@@ -72,8 +95,8 @@ public class Library {
 
 			clientSocket = new Socket(Sip, Sport);
 			System.out.println("connected to server at port: "+ Sport);
-			out = new PrintWriter(clientSocket.getOutputStream(), true);
-			in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            out = new ObjectOutputStream(clientSocket.getOutputStream()); 
+            in = new ObjectInputStream(clientSocket.getInputStream());
 			System.out.println("all good");
 
 		} catch (BindException e) {
@@ -101,23 +124,37 @@ public class Library {
 		}
 	} 
 	
+	public Message send(Message intent) {
+		Message res = null;
+		try {
+			out.writeObject(intent);
+			res = (Message)in.readObject();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return res;
+		
+	}
+	
+	
+	
 	 public String sendMessage(int mode, String msg) {
 		 PrintWriter printer;
 		 BufferedReader reader;
 		 	if(mode == 0) {
-		 		printer= out;
-		 		reader= in;
-		 	}
-		 	
-		 	else {
 		 		printer= outU;
 		 		reader = inU;
 		 	}
-		 		printer.println(msg);
+		 		outU.println(msg);
 	        String resp= "";
 	        
 			try {
-				resp = reader.readLine();
+				resp = inU.readLine();
 				//return execRequest(resp);
 				//this.stopConnectServer();
 				System.out.println(resp);
@@ -133,6 +170,7 @@ public class Library {
 	        return resp;
 
 	    }
+	    
 	 
 	 public void stopConnectServer() {
 	        try {
@@ -161,7 +199,9 @@ public class Library {
 
 	public String buyGood(String userID, String goodID) {//buyerID, goodID
 		String msg = "intentionbuy "+ userID +" " +goodID;
-		return sendMessage(1,msg );
+		Message result = send(new Message(idUser, msg,null, null));
+		
+		return sendMessage(1, msg);
 	}
 
 

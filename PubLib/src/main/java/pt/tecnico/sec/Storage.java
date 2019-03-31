@@ -79,7 +79,7 @@ public class Storage {
 		}*/
 	}
 	
-	public HashMap getGoods() {
+	public HashMap<String, String> getGoods() {
 		return goods;//goodID, userID
 	}
 	

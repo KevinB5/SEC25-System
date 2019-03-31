@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.security.Signature;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -16,22 +17,37 @@ import pt.tecnico.sec.*;
 
 public class Notary {
 	
-	private String idNotary = "id1" ;
+	private String idNotary = "notary" ;
 	private static final String OK ="Ok";
 	private static final String NOK ="Not OK";
 	private HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,userID>
 	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
 	private Storage store;
+	private PKI keyManager;
 	
 	public Notary() {
 		store = new Storage();
 		goods = store.getGoods();
+		System.out.println(goods);
+	}
+	
+	String getID() {
+		return this.idNotary;
 	}
 
 	
 	private enum GoodState {
 		ONSALE,NOTONSALE
+	}
+	
+	 private boolean verifySignature(String data, byte[] signature, String uID) throws Exception {
+		
+		Signature sig = Signature.getInstance("SHA1withRSA");
+		sig.initVerify(PKI.getInstance().getKey(uID));
+		sig.update(data.getBytes());
+		
+		return sig.verify(signature);
 	}
 	
 	/**
@@ -46,6 +62,7 @@ public class Notary {
 	 * @throws Exception 
 	 */
 	private String verifySelling(String userID, String goodID) throws Exception {
+		System.out.println("Verifying "+goodID);
 		if(!goods.containsKey(goodID))
 			return "No such good";
 		if(goods.get(goodID).equals(userID)) {
@@ -94,27 +111,50 @@ public class Notary {
 	 * @throws Exception
 	 */
 	
-	public String execute(String command) throws Exception {
+	public Message execute(Message command) throws Exception {
 
-    	String [] res = command.split(" ");
+		Message result = null;
+    	String [] res = command.getText().split(" ");
     	if(res.length<2)
     		throw new Exception("Operation not valid: misgging arguments");
+    	String data = "";
+    	
+    	for (int i=0; i<res.length -1; i++)
+    		data+= res[i];
+    	
+    	String user = command.getID();
+    	
+    //this.verifySignature(data, res[-1].getBytes(), user);
+    	
+    	//System.out.println(verifySignature(data, res[res.length-1].getBytes(), user));
+    	
+    	
     	String op =  res[0];
 
     	if(op .equals("sell")) {
+        	System.out.println("EPAAA");
 
-    		return this.verifySelling(res[1], res[2]);//userID, goodID
+    		String rs=this.verifySelling(user, res[1]);//userID, goodID
+    		return new Message(this.idNotary, rs, null, null);
+    		}
+    	if(op.equals("state")) {
+    		String rs=  this.verifiyStateOfGood(res[2]);//userID 1, goodID 2
+    		return new Message(this.idNotary, rs, null, null);
+
     	}
-    	if(op.equals("state"))
-    		return this.verifiyStateOfGood(res[1]);//goodID
     	/*
     	if(op.equals("buy"))
     		this.buyGood(res[1]);*/
     	
-    	if(op.equals("transfer"))
-    		return this.transferGood(res[1],res[2],res[3]);//buyer, seller, goodID
+    	if(op.equals("transfer")) {
+    		String rs=  this.transferGood(user,res[2],res[3]);//seller, buyer, goodID
+    		return new Message(this.idNotary, rs, null, null);
+
+    	}
     	else
-    		return "no valid operation";
+    		return new Message(this.idNotary, "no valid operation", null,null);
+    	
+    	
 	}
 	/**
 	 * Transferir o good ao user

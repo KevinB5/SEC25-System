@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.PublicKey;
 
 public final class LibraryServer  implements Runnable {
 
@@ -23,29 +24,40 @@ public final class LibraryServer  implements Runnable {
 
 	@Override
 	public void run() {
-		 BufferedReader in = null;
-	        PrintWriter out = null;
+		 ObjectInputStream in = null;
+	        ObjectOutputStream out = null;
 	        
 	        try {
+	            out = new ObjectOutputStream(clientSocket.getOutputStream()); 
+	            in = new ObjectInputStream(clientSocket.getInputStream());
 	            
 	        	while (true) {
+	        		/*
 	        		out = new PrintWriter(clientSocket.getOutputStream(), true);
-	    	        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-		           /* out = new ObjectOutputStream(client.getOutputStream()); 
-		            in = new ObjectInputStream(client.getInputStream());*/
+	    	        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));*/
+
 		            
-			        String cmd = in.readLine();
-			        try {
-						String res = notary.execute(cmd);
-						out.println(res);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-		            
+			        Message msg = (Message) in.readObject();
+			        
+			        String cmd = msg.getText();
+			        String[] spl = cmd.split(" ");
+			        
+			        if (spl[0].equals("StoreKey")) {
+			        	out.writeObject( PKI.getInstance().setKey(msg.getID(), (PublicKey) msg.getObj()));
+			        }
+			        else {
+			        	
+				        try {
+							Message res = notary.execute(msg);
+							out.writeObject(res);;
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+			        }
 	        	}
 
-	        } catch (IOException ex) {
+	        } catch (IOException | ClassNotFoundException ex) {
 	            System.out.println("Unable to get streams from client");
 	        } finally {
 	            try {
