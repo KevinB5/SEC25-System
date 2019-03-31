@@ -17,7 +17,10 @@ import java.util.Scanner;
 
 
 public class Storage {
-	private static String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";;
+	//private static String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
+	//private static String path = "../../"
+	private static String filename = "\\goods.txt";
+	private static String path = originPath() + filename;
 	private static HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	
 	private static final String[] users = {"user1", "user2"};
@@ -32,6 +35,16 @@ public class Storage {
 		start();
 		//System.out.println(path.getParent());
 
+	}
+	
+	private static String originPath() {
+		String origin = System.getProperty("user.dir");
+		int lastBar = 0;
+		for(int i=0; i < origin.length() ; i++) {
+			if(origin.charAt(i)=='\\')
+				lastBar=i;
+		}
+		return origin.substring(0,lastBar);
 	}
 	
 	private void start() {
