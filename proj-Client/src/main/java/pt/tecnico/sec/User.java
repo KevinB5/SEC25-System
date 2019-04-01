@@ -96,7 +96,15 @@ public class User {
 		PASS = idUser + rnd;
 		
 		PublicKey pub = this.createKeys(id, PASS);
-		lib.sendKey(pub);
+		try {
+			lib.sendKey(pub);
+		} catch (InvalidKeyException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Invalid key");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 	
@@ -244,7 +252,12 @@ public class User {
 	 * @return estado do good
 	 */
 	private void getStateOfGood(String good) {
-		System.out.println(lib.getStateOfGood(good));
+		try {
+			System.out.println(lib.getStateOfGood(good));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -275,7 +288,13 @@ public class User {
 	 */
 	private String transferGood(String buyer, String good) {
 		
-		String res= lib.transferGood(idUser, buyer, good);
+		String res= "";
+		try {
+			res = lib.transferGood(idUser, buyer, good);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		if(res.equals(OK)) {
 			sellGood(good);

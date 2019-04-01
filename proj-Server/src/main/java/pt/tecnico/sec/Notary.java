@@ -127,38 +127,44 @@ public class Notary {
     	
     	String user = command.getID();
     	
-    //this.verifySignature(data, res[-1].getBytes(), user);
+		if(this.verifySignature(command.getText(), command.getSig(), command.getID())) {
+			
+			System.out.println("user's "+ user + " signature validated");
     	
-    	//System.out.println(verifySignature(data, res[res.length-1].getBytes(), user));
-    	
-    	
-    	String op =  res[0];
-
-    	if(op .equals("sell")) {
-    		System.out.println(this.verifySignature(command.getText(), command.getSig(), command.getID()));
-
-
-    		String rs=this.verifySelling(user, res[1]);//userID, goodID
-    		return new Message(this.idNotary, rs, null, null);
-    		}
-    	if(op.equals("state")) {
-    		String rs=  this.verifiyStateOfGood(res[1]);// goodID 2
-    		return new Message(this.idNotary, rs, null, null);
-
-    	}
-    	/*
-    	if(op.equals("buy"))
-    		this.buyGood(res[1]);*/
-    	
-    	if(op.equals("transfer")) {
-
-    		String rs=  this.transferGood(user,res[1],res[2]);//seller, buyer, goodID
-    		return new Message(this.idNotary, rs, null, null);
-
-    	}
-    	else
-    		return new Message(this.idNotary, "no valid operation", null,null);
-    	
+	    //this.verifySignature(data, res[-1].getBytes(), user);
+	    	
+	    	//System.out.println(verifySignature(data, res[res.length-1].getBytes(), user));
+	    	
+	    	
+	    	String op =  res[0];
+	
+	    	if(op .equals("sell")) {
+	
+	
+	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
+	    		return new Message(this.idNotary, rs, null, null);
+	    		}
+	    	if(op.equals("state")) {
+	    		String rs=  this.verifiyStateOfGood(res[1]);// goodID 2
+	    		return new Message(this.idNotary, rs, null, null);
+	
+	    	}
+	    	/*
+	    	if(op.equals("buy"))
+	    		this.buyGood(res[1]);*/
+	    	
+	    	if(op.equals("transfer")) {
+	
+	    		String rs=  this.transferGood(user,res[1],res[2]);//seller, buyer, goodID
+	    		return new Message(this.idNotary, rs, null, null);
+	
+	    	}
+	    	else
+	    		return new Message(this.idNotary, "no valid operation", null,null);
+	    	
+		}
+		else
+			return null;
     	
 	}
 	/**
