@@ -53,15 +53,16 @@ public class Library {
     }
     
 
-   public PublicKey getKey(String uID) {
-	   Message msg = new Message(idUser, "getKey uID",null, null );
+   public PublicKey getKey(String uID) throws InvalidKeyException, Exception {
+	   String ms = "getKey uID";
+	   Message msg = new Message(idUser,ms ,user.sign(ms), null );
 	   
 	   Message ret = send(msg);
 	   return (PublicKey) ret.getObj();
    }
    
-   public Message sendKey(PublicKey key) {
-	   Message epa =send(new Message(this.idUser, "StoreKey",null, key));
+   public Message sendKey(PublicKey key) throws InvalidKeyException, Exception {
+	   Message epa =send(new Message(this.idUser, "StoreKey",user.sign("StoreKey"), key));
 	   return epa;
    }
 
@@ -70,22 +71,22 @@ public class Library {
 		String res =SELL +  " " +goodID+ " ";
 		String msg = res + new String(user.sign(res));
 		
-		Message result=  send( new Message(idUser, msg, null, null));
+		Message result=  send( new Message(idUser, msg, user.sign(msg), null));
 		
 		return result.getText();
 	}
 
 	
-	public String getStateOfGood(String goodID) {
+	public String getStateOfGood(String goodID) throws InvalidKeyException, Exception {
 		String msg= STATE + " " + goodID;
-		Message result=  send( new Message(idUser, msg, null, null));
+		Message result=  send( new Message(idUser, msg, user.sign(msg), null));
 		return result.getText();
 	}
 
 	
-	public String transferGood(String userID, String buyer,String goodID) {
+	public String transferGood(String userID, String buyer,String goodID) throws InvalidKeyException, Exception {
 		String msg=TRANSFER +" "+ buyer+" "+ goodID; 
-		Message result=  send( new Message(idUser, msg, null, null));
+		Message result=  send( new Message(idUser, msg, user.sign(msg), null));
 		
 		return result.getText();
 	}
@@ -215,7 +216,7 @@ public class Library {
 
 
 	
-	public String sellGood(String userID, String buyerID, String goodID) {//buyerID, goodID
+	public String sellGood(String userID, String buyerID, String goodID) throws InvalidKeyException, Exception {//buyerID, goodID
 		System.out.println("Confirming with notary");
 
 		String res = this.transferGood(userID, buyerID, goodID);

@@ -79,29 +79,30 @@ public class Storage {
 		Scanner scnr = null;
 		PrintWriter pwriter = null;
 		try {
+			//System.out.println(systemFile.isFile());
 				
 			String user = "";
 			//este é o caminho mais pequeno que conseguimos pôr a funcionar -Mário 
 			//File text = new File(path);
-		     pwriter = new PrintWriter(new FileWriter(systemFile));
+		    //pwriter = new PrintWriter(new FileWriter(systemFile));
 
-			scnr = new Scanner(text);
+			scnr = new Scanner(systemFile);
 			while(scnr.hasNextLine()) {
 				String line = scnr.nextLine();
+				System.out.println(line);
 				if(line.startsWith("#")) {
 					user = new String();
 					user = line.substring(1);
 				}else{
 					goods.put(line, user);		
 				}
-				pwriter.println(line);
+				//pwriter.println(line);
 			}
 			System.out.println("Storage" + goods);
 		}catch(Exception e) {
 			System.out.println("Error in reading state file: " + e.getMessage());
 		}finally {
 			scnr.close();
-			pwriter.close();
 		}
 		
 	
@@ -184,7 +185,7 @@ public class Storage {
 		    catch (IOException ex) {
 		      ex.printStackTrace();
 		    }
-		
+		goods.replace(goodID, newOwner);
 	}
 
 }
