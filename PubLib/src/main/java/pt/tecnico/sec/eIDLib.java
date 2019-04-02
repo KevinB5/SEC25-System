@@ -18,6 +18,7 @@ import sun.security.pkcs11.wrapper.PKCS11Constants;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
@@ -34,12 +35,11 @@ public class eIDLib{
  
 	// Falta buscar as chaves RSA e assinar os objectos propriamente
 	public eIDLib() {
-		try {
-			sig = Signature.getInstance(getCertFromByteArray(getCertificateInBytes(0)).getSigAlgName());
-		} catch (NoSuchAlgorithmException | CertificateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			sig = Signature.getInstance(getCertFromByteArray(getCertificateInBytes(0)).getSigAlgName());
+//		} catch (NoSuchAlgorithmException | CertificateException e) {
+//			e.printStackTrace();
+//		}
 		
 	}
 	public void start() {
@@ -47,7 +47,10 @@ public class eIDLib{
 	        {
 	            
 	        System.out.println("            //Load the PTEidlibj");
-
+	        System.setProperty("java.library.path", "/usr/local/lib/");
+	        Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+	        fieldSysPath.setAccessible(true);
+	        fieldSysPath.set(null, null);
 	        System.loadLibrary("pteidlibj");
 	        pteid.Init(""); // Initializes the eID Lib
 	        pteid.SetSODChecking(false); // Don't check the integrity of the ID, address and photo (!)
@@ -64,7 +67,7 @@ public class eIDLib{
 	        X509Certificate cert=getCertFromByteArray(getCertificateInBytes(0));
 	        
 	        //Código de assinar
-	        //Signature sig = Signature.getInstance(getCertFromByteArray(getCertificateInBytes(0)).getSigAlgName());
+	        Signature sig = Signature.getInstance(getCertFromByteArray(getCertificateInBytes(0)).getSigAlgName());
 	        sig.initVerify(cert);
 	        
 	        if (-1 != osName.indexOf("Windows"))
