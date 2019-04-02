@@ -37,7 +37,7 @@ public class eIDLib{
 	public eIDLib() {
 		try {
 			System.out.println("            //Load the PTEidlibj");
-	        System.setProperty("java.library.path", "/usr/local/lib/");
+	        System.setProperty("java.library.path", "/SEC25-System/PubLib/lib/");
 	        Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
 	        fieldSysPath.setAccessible(true);
 	        fieldSysPath.set(null, null);

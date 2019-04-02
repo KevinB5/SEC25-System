@@ -21,7 +21,8 @@ public class Notary {
 	private static final String OK ="Ok";
 	private static final String NOK ="Not OK";
 	private HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
-	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,userID>
+	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,state>
+	private HashMap<String, Integer> counters = new HashMap<String, Integer>(); // <goodID,counter>
 	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
 	private Storage store;
 	private PKI keyManager;
@@ -69,6 +70,7 @@ public class Notary {
 			return "No such good";
 		if(goods.get(goodID).equals(userID)) {
 			states.replace(goodID, GoodState.ONSALE);
+			counters.replace(goodID, counters.get(goodID)+1);
 			System.out.println(states);
 			
 			return OK;
@@ -85,9 +87,11 @@ public class Notary {
 		if(!goods.containsKey(goodID))
 			return "No such good";
 		String state = "<";
+		Integer counter;
 		state += goods.get(goodID) + " , " + states.get(goodID).toString()+">";
-		System.out.println(state);
-		return state;
+		counter = counters.get(goodID);
+		System.out.println(state+"|" +counter.toString());
+		return state+"|" +counter.toString();
 	}
 	
 	/**
@@ -181,7 +185,8 @@ public class Notary {
 				goods.replace(goodID, buyer); System.out.println("replacing " + goodID + " " + buyer);
 				states.replace(goodID, GoodState.NOTONSALE);
 				printGoods();
-				return OK;
+				counters.replace(goodID,counters.get(goodID)+1);
+				return OK;	
 			}
 			else
 				return "Good not on sale";

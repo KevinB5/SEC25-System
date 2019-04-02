@@ -4,6 +4,7 @@ public class Good {
 	
 	private String id;
 	private State state;
+	private int counter;
 	
 	private enum State {
 		ONSALE,NOTONSALE
@@ -19,6 +20,14 @@ public class Good {
 
 	public State getState(){
 		return this.state;
+	}
+	
+	public int getCounter() {
+		return this.counter;
+	}
+	
+	public void updateCounter() {
+		counter++;
 	}
 	
 	public void switchState() {
