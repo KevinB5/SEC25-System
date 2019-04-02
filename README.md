@@ -41,9 +41,14 @@ Enviar mensagem (ao Notário, neste caso) com desafio (por exemplo, enviar um ce
  
  
  B) Certificados (e assinaturas?) do Notário com Cartão do Cidadão
+ B.1) Segunda Chave do Notário
+ 
+ Para não ser necessário estar a usar o CC sempre que é enviada uma mensagem, o Notário cria uma segunda chave e certifica-a com a do CC. A chave do CC é usada apenas para certificar transferências de Goods.
+ 
  
  C) Persistência de dados (como garantir que uma transação certificada não é travada antes de ficar na memória do Notário?)
  possível solução: Apenas emitir a certificação *após* estar guardada num documento a transação, bem como o pedido assinado dos users.
+ 
  
  -----------------------------------------------
  
