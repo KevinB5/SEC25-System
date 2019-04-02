@@ -26,6 +26,7 @@ buy + <sellerID> + <goodID>
 --------------OBJETIVOS--------------------
 
  A) Garantia de frescura:
+
  1.Good counter:
  -começa num dado valor e é incrementado sempre que o good muda de estado
  -todos os pedidos BuyGood ou TransferGood devem fazer referencia ao counter respetivo
@@ -34,6 +35,9 @@ buy + <sellerID> + <goodID>
  -cada mensagem deve conter um timestamp
  -temos de decidir um intervalo que é tolerado para receber mensagens ou se fica ao critério do user
  Mário: acho que deixar ao critério do user é seguro (mas não é ideal, uma mensagem por exemplo com 5 min de avanço de certeza que foi repetida, por exemplo), porque acho que o notário não tem de se preocupar com timestamps, porque não recebe atualizações de estados, só pedidos que já estão garantidos pelo good counter. 
+ //PROF DISSE QUE NÃO É MUITO ÚTIL. MELHOR IDEIA: DESAFIOS
+ 
+Enviar mensagem (ao Notário, neste caso) com desafio (por exemplo, enviar um certo número num campo da mensagem) para se certificar que a mensagem é fresca.
  
  
  B) Certificados (e assinaturas?) do Notário com Cartão do Cidadão
