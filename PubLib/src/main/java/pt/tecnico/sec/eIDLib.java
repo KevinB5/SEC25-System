@@ -20,15 +20,26 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
+import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 public class eIDLib{
-
+	
+	private Signature sig;
+	
+ 
 	// Falta buscar as chaves RSA e assinar os objectos propriamente
 	public eIDLib() {
+		try {
+			sig = Signature.getInstance(getCertFromByteArray(getCertificateInBytes(0)).getSigAlgName());
+		} catch (NoSuchAlgorithmException | CertificateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 	public void start() {
@@ -53,7 +64,7 @@ public class eIDLib{
 	        X509Certificate cert=getCertFromByteArray(getCertificateInBytes(0));
 	        
 	        //Código de assinar
-	        Signature sig = Signature.getInstance(cert.getSigAlgName());
+	        //Signature sig = Signature.getInstance(getCertFromByteArray(getCertificateInBytes(0)).getSigAlgName());
 	        sig.initVerify(cert);
 	        
 	        if (-1 != osName.indexOf("Windows"))
@@ -154,4 +165,22 @@ public class eIDLib{
 	        X509Certificate cert = (X509Certificate)f.generateCertificate(in);
 	        return cert;
 	  }
+	 
+	 private boolean verifySignature(byte[] signature,String data) {
+		//Verificar assinature
+         try {
+			sig.update(data.getBytes(Charset.forName("UTF-8")));
+         
+	         if(sig.verify(signature)) {
+	        	 return true;
+	         }
+         
+         } catch (SignatureException e) {
+        	 // TODO Auto-generated catch block
+        	 e.printStackTrace();
+         }
+         return false;
+	 }
+	 
+	 
 }
