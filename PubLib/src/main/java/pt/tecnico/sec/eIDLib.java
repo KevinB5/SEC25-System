@@ -35,18 +35,8 @@ public class eIDLib{
  
 	// Falta buscar as chaves RSA e assinar os objectos propriamente
 	public eIDLib() {
-//		try {
-//			sig = Signature.getInstance(getCertFromByteArray(getCertificateInBytes(0)).getSigAlgName());
-//		} catch (NoSuchAlgorithmException | CertificateException e) {
-//			e.printStackTrace();
-//		}
-		
-	}
-	public void start() {
-		 try
-	        {
-	            
-	        System.out.println("            //Load the PTEidlibj");
+		try {
+			System.out.println("            //Load the PTEidlibj");
 	        System.setProperty("java.library.path", "/usr/local/lib/");
 	        Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
 	        fieldSysPath.setAccessible(true);
@@ -54,6 +44,40 @@ public class eIDLib{
 	        System.loadLibrary("pteidlibj");
 	        pteid.Init(""); // Initializes the eID Lib
 	        pteid.SetSODChecking(false); // Don't check the integrity of the ID, address and photo (!)
+			sig = Signature.getInstance(getCertFromByteArray(getCertificateInBytes(0)).getSigAlgName());
+			
+		} catch (NoSuchAlgorithmException | CertificateException e) {
+			e.printStackTrace();
+		} catch (NoSuchFieldException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PteidException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	public void start() {
+		 try
+	        {
+	            
+//	        System.out.println("            //Load the PTEidlibj");
+//	        System.setProperty("java.library.path", "/usr/local/lib/");
+//	        Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+//	        fieldSysPath.setAccessible(true);
+//	        fieldSysPath.set(null, null);
+//	        System.loadLibrary("pteidlibj");
+//	        pteid.Init(""); // Initializes the eID Lib
+//	        pteid.SetSODChecking(false); // Don't check the integrity of the ID, address and photo (!)
 
 	        PKCS11 pkcs11;
 	        String osName = System.getProperty("os.name");
@@ -67,7 +91,7 @@ public class eIDLib{
 	        X509Certificate cert=getCertFromByteArray(getCertificateInBytes(0));
 	        
 	        //Código de assinar
-	        Signature sig = Signature.getInstance(getCertFromByteArray(getCertificateInBytes(0)).getSigAlgName());
+//	        Signature sig = Signature.getInstance(getCertFromByteArray(getCertificateInBytes(0)).getSigAlgName());
 	        sig.initVerify(cert);
 	        
 	        if (-1 != osName.indexOf("Windows"))
@@ -121,8 +145,10 @@ public class eIDLib{
 	        
             
             //Assinatura para usar 
-            //Lab 2 editar	
+            //Lab 2 editar
+            
             byte[] signature = pkcs11.C_Sign(p11_session, "data".getBytes(Charset.forName("UTF-8")));
+
             
             //Verificar assinature
             sig.update("data".getBytes(Charset.forName("UTF-8")));
@@ -184,6 +210,8 @@ public class eIDLib{
          }
          return false;
 	 }
+	 
+	// public byte[] sign( p11_session, String text))
 	 
 	 
 }
