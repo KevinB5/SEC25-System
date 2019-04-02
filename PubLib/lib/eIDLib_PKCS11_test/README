@@ -1,0 +1,7 @@
+Download pteidlibj.jar from fenix and place it in ./lib
+
+Compile:
+ javac -cp lib/pteidlibj.jar eIDLib_PKCS11_test.java
+
+Run:
+ java -cp lib/pteidlibj.jar:. eIDLib_PKCS11_test
