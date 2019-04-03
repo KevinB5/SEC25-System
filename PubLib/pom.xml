@@ -42,7 +42,7 @@
 	    <artifactId>pteid</artifactId>
 	    <version>1.0</version>
 	    <scope>system</scope>
-    <systemPath>${project.basedir}/lib/pteidlibj.jar</systemPath>
+    <systemPath>${project.basedir}/lib/eIDLib_PKCS11_test/lib/pteidlibj.jar</systemPath>
     </dependency>
   </dependencies>
 
