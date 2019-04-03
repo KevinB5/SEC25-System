@@ -37,10 +37,16 @@ public class eIDLib{
 	public eIDLib() {
 		try {
 			System.out.println("            //Load the PTEidlibj");
-	        System.setProperty("java.library.path", "/SEC25-System/PubLib/lib/");
+			
+			String path = System.getProperty("user.dir")+"\\lib\\Temp\\";
+			
+			path = path.replaceAll("\\\\","/");
+			System.out.println(path);
+	        System.setProperty("java.library.path", path);
 	        Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
 	        fieldSysPath.setAccessible(true);
 	        fieldSysPath.set(null, null);
+	        System.out.println(System.getProperty("java.library.path"));
 	        System.loadLibrary("pteidlibj");
 	        pteid.Init(""); // Initializes the eID Lib
 	        pteid.SetSODChecking(false); // Don't check the integrity of the ID, address and photo (!)
