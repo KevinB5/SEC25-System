@@ -38,6 +38,19 @@ public class ClientApp
 	        	
         
             System.out.println( ID+nUsr +" initialized");
+            /*
+             * 
+             * HERE WE CAN INCLUDE A PRINTOUT WITH A SHORT LISTING OF ALLOWED OPERATIONS TO THE NOTARY
+             * Such as:
+             * 
+             * Greetings User1, here's a shortlist of commands you might find useful:
+             * 
+             * Intention to Sell: "notary <sellerID> <goodID,goodcounter>"
+             * ... 
+             *
+             */
+            
+            
             
             int cPort = user.gtPort();
             new Thread(new P2PLib(user, cPort)).start();

@@ -121,9 +121,9 @@ public class Notary {
 	public Message execute(Message command) throws Exception {
 
 		Message result = null;
-    	String [] res = command.getText().split(" ");
+    	String [] res = command.getText().split(" "); //received message broken up by spaces
     	if(res.length<2)
-    		throw new Exception("Operation not valid: misgging arguments");
+    		throw new Exception("Operation not valid: misgging arguments"); //message has to have at least 2 words
     	String data = "";
     	
     	for (int i=0; i<res.length -1; i++)
@@ -139,8 +139,18 @@ public class Notary {
 	    	
 	    	//System.out.println(verifySignature(data, res[res.length-1].getBytes(), user));
 	    	
+			
+			/* Types of messages:
+			 * 
+			 * "sell <goodID>" - requests that a given good be put ONSALE
+			 * 
+			 * "state <goodID>" - asks what the state (ONSALE,NOTONSALE) of a certain good is
+			 * 
+			 *  "transfer <goodID> <buyerID>" - requests that a given good is transfered
+			 * ^TRANSFER SHOULD INCLUDE A PART WHERE THE MESSAGE FROM THE BUYER SHOWING HIS INTENTION IS INCLUDED
+			 * */
 	    	
-	    	String op =  res[0];
+	    	String op =  res[0]; //the first word is the operation required
 	
 	    	if(op .equals("sell")) {
 	
