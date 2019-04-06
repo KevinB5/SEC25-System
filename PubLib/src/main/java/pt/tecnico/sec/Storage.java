@@ -23,6 +23,7 @@ public class Storage {
 	private static String path = originPath() + filename;
 	private static HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	
+	
 	private static final String[] users = {"user1", "user2"};
 	
 	private InputStream text;
@@ -37,7 +38,7 @@ public class Storage {
 
 	}
 	
-	private static String originPath() {
+	public static String originPath() {
 		String origin = System.getProperty("user.dir");
 		int lastBar = 0;
 		for(int i=0; i < origin.length() ; i++) {
@@ -188,4 +189,5 @@ public class Storage {
 		goods.replace(goodID, newOwner);
 	}
 
+	
 }

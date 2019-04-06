@@ -1,6 +1,7 @@
 package pt.tecnico.sec;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -24,7 +25,7 @@ public class Notary {
 	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,state>
 	private HashMap<String, Integer> counters = new HashMap<String, Integer>(); // <goodID,counter>
 	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
-	private static final String pathlog= ".\\src\\main\\java\\pt\\tecnico\\state\\transfer.log";
+	private final String pathLog= Storage.originPath()+"\\transfer.log";
 	private Storage store;
 	private PKI keyManager;
 	
@@ -189,7 +190,7 @@ public class Notary {
 	    			
 	    		}
 	
-	    		String rs=  this.transferGood(user,res[3],res[1]);//seller, buyer, goodID
+	    		String rs=  this.transferGood(user,res[3],res[1],command.getSig(),res[4].getBytes());//seller, buyer, goodID
 	    		return new Message(this.idNotary, rs, null, null);
 	
 	    	}
@@ -208,7 +209,7 @@ public class Notary {
 	 * @return Transaction(?
 	 *)
 	 */
-	private String transferGood( String seller,String buyer , String goodID) {
+	private String transferGood( String seller,String buyer , String goodID,byte[] sigSeller,byte[]sigBuyer) {
 		if(goods.get(goodID).equals(seller)) {
 			if(states.get(goodID).equals(GoodState.ONSALE)) {
 				store.upDateFile(goodID, buyer);
@@ -216,6 +217,7 @@ public class Notary {
 				states.replace(goodID, GoodState.NOTONSALE);
 				printGoods();
 				counters.replace(goodID,counters.get(goodID)+1);
+				writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
 				return OK;	
 			}
 			else
@@ -228,5 +230,31 @@ public class Notary {
 		System.out.println(goods);
 	}
 	
+	private void writeLog(String goodId, String seller, String buyer,String counter , byte[] sigSeller,byte[] sigBuyer) {
+		BufferedWriter bw = null;
+		FileWriter fw = null;
+
+		String data = goodId+";"+seller+";"+buyer+";"+counter+";"+sigSeller+";"+sigBuyer;
+		try {
+			File file = new File(this.pathLog);
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			fw = new FileWriter(file.getAbsoluteFile(), true);
+			bw = new BufferedWriter(fw);
+			bw.write(data);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (bw != null)
+					bw.close();
+				if (fw != null)
+					fw.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+	}
 	
 }
