@@ -52,7 +52,7 @@ public class User {
 	private static final String OK ="Ok";
 	private static final String NOK ="Not OK";
 	private String ip;
-	private static final String path2 = ".\\src\\main\\java\\pt\\tecnico\\state\\ports.txt";
+	private static final String path2 = originPath()+"\\ports.txt";
 
 	private static ServerSocket serverSocket=null;
     private static int PORT;
@@ -73,39 +73,40 @@ public class User {
 	
 	/**
 	 * Informar ao notary que quer vender um good
+	 * @throws IOException 
 	 */
 	
-	public User(String id, String ip, int Svport) {
+	public User(String id, String ip, int Svport) throws IOException {
 		
 		idUser = id;
 		this.ip=ip;
+		
 		this.getPort();
 		
-		lib = new Library(this, ip, Svport);
-		Storage store = new Storage();
-		
-		ArrayList<String> res =store.getGoods(id);
-		for(String good : store.getGoods(id)) {
-			goods.put(good, GoodState.NOTONSALE);
-		};
-		printgoods();
-		
-		Random random = new Random();	
-		
-		int rnd = random.nextInt();
-		PASS = idUser + rnd;
-		
-		PublicKey pub = this.createKeys(id, PASS);
-		try {
-			lib.sendKey(pub);
-		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
-			System.out.println("Invalid key");
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+			lib = new Library(this, ip, Svport);
+			Storage store = new Storage();
+			
+			ArrayList<String> res =store.getGoods(id);
+			for(String good : store.getGoods(id)) {
+				goods.put(good, GoodState.NOTONSALE);
+			};
+			printgoods();
+			
+			Random random = new Random();	
+			
+			int rnd = random.nextInt();
+			PASS = idUser + rnd;
+			
+			PublicKey pub = this.createKeys(id, PASS);
+			try {
+				lib.sendKey(pub);
+			} catch (InvalidKeyException e) {
+				// TODO Auto-generated catch block
+				System.out.println("Invalid key");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 	
 	public int gtPort() {
@@ -120,6 +121,15 @@ public class User {
 		System.out.println(goods);
 	}
 	
+	private static String originPath() {
+		String origin = System.getProperty("user.dir");
+		int lastBar = 0;
+		for(int i=0; i < origin.length() ; i++) {
+			if(origin.charAt(i)=='\\')
+				lastBar=i;
+		}
+		return origin.substring(0,lastBar);
+	}
 	
 	public void connectToUsers() {
 		for(String id : usrPorts.keySet()) {
