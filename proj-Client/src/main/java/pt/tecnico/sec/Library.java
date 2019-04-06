@@ -34,7 +34,7 @@ public class Library {
 	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\ports.txt";
 	private HashMap <String, PrintWriter> writters = new HashMap<String, PrintWriter>();
 	private HashMap <String, BufferedReader> readers = new HashMap<String, BufferedReader>();
-	private static final String excepMessage = "Must sign message first";
+	private static final String exceptMessage = "Must sign message first";
 
     private static int PORT;
     private User user;
@@ -131,7 +131,7 @@ public class Library {
 	
 	public Message send(Message intent) throws Exception {
 		if(intent.getSig().equals(null))
-			throw new Exception(excepMessage);
+			throw new Exception(exceptMessage);
 		Message res = null;
 		try {
 			out.writeObject(intent);

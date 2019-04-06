@@ -24,6 +24,7 @@ public class Notary {
 	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,state>
 	private HashMap<String, Integer> counters = new HashMap<String, Integer>(); // <goodID,counter>
 	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
+	private static final String pathlog= ".\\src\\main\\java\\pt\\tecnico\\state\\transfer.log";
 	private Storage store;
 	private PKI keyManager;
 	
@@ -83,15 +84,17 @@ public class Notary {
 	 * @param goodID
 	 * @param userID
 	 */
-	private String verifiyStateOfGood(String goodID) {
+	private String verifiyStateOfGood(String goodID, String challenge) {
+		/*Returns "<goodID , ONSALE/NOTONSALE , goodcounter , challenge>"  */
 		if(!goods.containsKey(goodID))
 			return "No such good";
 		String state = "<";
 		Integer counter;
-		state += goods.get(goodID) + " , " + states.get(goodID).toString()+">";
+		state += goods.get(goodID) + " , " + states.get(goodID).toString();
 		counter = counters.get(goodID);
-		System.out.println(state+"|" +counter.toString());
-		return state+"|" +counter.toString();
+		System.out.println(state+" " +counter.toString());
+		return state+" , " +counter.toString()+" , "+ challenge +">";
+		// returns "<state , counter , challenge>"
 	}
 	
 	/**
@@ -123,7 +126,7 @@ public class Notary {
 		Message result = null;
     	String [] res = command.getText().split(" "); //received message broken up by spaces
     	if(res.length<2)
-    		throw new Exception("Operation not valid: misgging arguments"); //message has to have at least 2 words
+    		throw new Exception("Operation not valid: missing arguments"); //message has to have at least 2 words
     	String data = "";
     	
     	for (int i=0; i<res.length -1; i++)
@@ -144,9 +147,9 @@ public class Notary {
 			 * 
 			 * "sell <goodID>" - requests that a given good be put ONSALE
 			 * 
-			 * "state <goodID>" - asks what the state (ONSALE,NOTONSALE) of a certain good is
+			 * "state <goodID> <challenge>" - asks what the state (ONSALE/NOTONSALE, goodcounter) of a certain good is
 			 * 
-			 *  "transfer <goodID> <buyerID>" - requests that a given good is transfered
+			 *  "transfer <goodID> <goodCounter> <buyerID> <buyerSig>" - requests that a given good is transfered
 			 * ^TRANSFER SHOULD INCLUDE A PART WHERE THE MESSAGE FROM THE BUYER SHOWING HIS INTENTION IS INCLUDED
 			 * */
 	    	
@@ -154,13 +157,23 @@ public class Notary {
 	
 	    	if(op .equals("sell")) {
 	
-	
 	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
 	    		return new Message(this.idNotary, rs, null, null);
 	    		}
 	    	if(op.equals("state")) {
-	    		String rs=  this.verifiyStateOfGood(res[1]);// goodID 2
-	    		return new Message(this.idNotary, rs, null, null);
+	    		/*
+	    		 * Returns "ONSALE/NOTONSALE <goodcounter>"
+	    		 * 
+	    		 */
+	    		if(res.length==2) {
+	    			String rs = "WARNING: State request must issue a challenge";
+	    			return new Message(this.idNotary, rs, null, null);
+	    		}else if(res.length==3) {
+	    			String rs=  this.verifiyStateOfGood(res[1],res[2]); 
+	    			return new Message(this.idNotary, rs, null, null);
+	    		}
+	    		
+	    		
 	
 	    	}
 	    	/*
@@ -168,8 +181,15 @@ public class Notary {
 	    		this.buyGood(res[1]);*/
 	    	
 	    	if(op.equals("transfer")) {
+	    		//"transfer <goodID> <goodCounter> <buyerID> <buyerSig>"
+	    		//below: first verifies counter number of seller and then confirms that buy signature is associated to a message
+	    		//"buy <goodID> <goodCounter>" from Buyer
+	    		if(res[2].equals(counters.get(res[1]).toString()) && 
+	    				this.verifySignature("buy "+res[1]+" "+counters.get(res[1]).toString(), res[4].getBytes(), res[3])) {
+	    			
+	    		}
 	
-	    		String rs=  this.transferGood(user,res[1],res[2]);//seller, buyer, goodID
+	    		String rs=  this.transferGood(user,res[3],res[1]);//seller, buyer, goodID
 	    		return new Message(this.idNotary, rs, null, null);
 	
 	    	}
