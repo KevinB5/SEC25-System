@@ -74,7 +74,7 @@ public static PKI getInstance()
 public Message setKey(String uID, PublicKey key) {
 	
 	KEYS.put(uID,key);
-	return new Message(null, "OK", null, null);
+	return new Message(null, "OK", null,null, null);
 
 }
 

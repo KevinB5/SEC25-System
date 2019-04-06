@@ -160,7 +160,7 @@ public class Notary {
 	    	if(op .equals("sell")) {
 	
 	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
-	    		return new Message(this.idNotary, rs, null, null);
+	    		return new Message(this.idNotary, rs, null,null, null);
 	    		}
 	    	if(op.equals("state")) {
 	    		/*
@@ -169,10 +169,10 @@ public class Notary {
 	    		 */
 	    		if(res.length==2) {
 	    			String rs = "WARNING: State request must issue a challenge";
-	    			return new Message(this.idNotary, rs, null, null);
+	    			return new Message(this.idNotary, rs, null, null,null);
 	    		}else if(res.length==3) {
 	    			String rs=  this.verifiyStateOfGood(res[1],res[2]); 
-	    			return new Message(this.idNotary, rs, null, null);
+	    			return new Message(this.idNotary, rs, null,null, null);
 	    		}
 	    		
 	    		
@@ -192,11 +192,11 @@ public class Notary {
 	    		}
 	
 	    		String rs=  this.transferGood(user,res[3],res[1],command.getSig(),res[4].getBytes());//seller, buyer, goodID
-	    		return new Message(this.idNotary, rs, null, null);
+	    		return new Message(this.idNotary, rs, null,null, null);
 	
 	    	}
 	    	else
-	    		return new Message(this.idNotary, "no valid operation", null,null);
+	    		return new Message(this.idNotary, "no valid operation", null,null,null);
 	    	
 		}
 		else
