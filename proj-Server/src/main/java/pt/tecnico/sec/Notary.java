@@ -11,10 +11,10 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.Signature;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import pt.tecnico.sec.*;
 
 public class Notary {
 	
@@ -25,7 +25,8 @@ public class Notary {
 	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,state>
 	private HashMap<String, Integer> counters = new HashMap<String, Integer>(); // <goodID,counter>
 	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
-	private final String pathLog= Storage.originPath()+"\\transfer.log";
+	private final String pathLog= System.getProperty("user.dir")+"\\src\\main\\java\\pt\\tecnico\\state\\transfer.log";
+	private final ArrayList<String> log = new ArrayList<String>();
 	private Storage store;
 	private PKI keyManager;
 	
@@ -254,6 +255,26 @@ public class Notary {
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
+		}
+	}
+	
+	private void readLog() {
+		File systemFile = new File(pathLog);
+		Scanner scnr = null;
+		try {
+			scnr = new Scanner(systemFile);
+			while(scnr.hasNextLine()) {
+				String line = scnr.nextLine();
+				System.out.println(line);
+				if(!line.startsWith("#")) {
+					log.add(line);		
+				}
+			}
+			System.out.println("Log " + log);
+		}catch(Exception e) {
+			System.out.println("Error in reading state file: " + e.getMessage());
+		}finally {
+			scnr.close();
 		}
 	}
 	
