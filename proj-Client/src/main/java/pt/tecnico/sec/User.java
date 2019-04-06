@@ -220,9 +220,10 @@ public class User {
     		this.buyGood(res[1], res[2]);
     	
     	if(op.equals("transfer")) {
+    		// "transfer <goodID> <goodCounter> <buyerID>"
     		if(res.length<3)
         		throw new Exception("Operation not valid: missing arguments");
-    		this.transferGood(res[1], res[2]);
+    		this.transferGood(res[1], res[2], res[3]);
 
     	}
     	
@@ -291,7 +292,7 @@ public class User {
 	 * 
 	 * @param good
 	 */
-	private String transferGood(String buyer, String good) {
+	private String transferGood(String good, String counter, String buyer) {
 		
 		String res= "";
 		try {

@@ -14,13 +14,14 @@ private final String text;
 private final byte[] signature;
 private final Object objects;
 private final String id;
+private final byte[] buyerSignature;
 
-
- public Message(String id, String text, byte[] signature, Object key) {
+ public Message(String id, String text, byte[] signature, byte[] buyerSignature, Object key) {
      this.text = text;
      this.signature = signature;
-     this.objects = key;//chave p.e
+     this.objects = key;
      this.id=id;
+     this.buyerSignature=buyerSignature;
  }
  
  public String getID() {
@@ -34,6 +35,10 @@ private final String id;
  
  public byte[] getSig() {
 	 return signature;
+ }
+ 
+ public byte[] buyerSignature() {
+	 return buyerSignature;
  }
  
  public Object getObj() {
