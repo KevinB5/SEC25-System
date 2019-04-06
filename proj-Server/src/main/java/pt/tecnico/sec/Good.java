@@ -1,10 +1,15 @@
 package pt.tecnico.sec;
 
+import java.util.HashMap;
+import java.security.Signature;
+
+
 public class Good {
 	
 	private String id;
 	private State state;
 	private int counter;
+	private HashMap<String,Signature> signatures = new HashMap<String,Signature>();
 	
 	private enum State {
 		ONSALE,NOTONSALE
