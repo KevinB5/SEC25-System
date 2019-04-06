@@ -3,6 +3,8 @@ package pt.tecnico.sec;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.BindException;
 import java.net.ServerSocket;
@@ -62,8 +64,8 @@ public class P2PLib implements Runnable{
 	
 	private class ClientTask implements Runnable {
         private final Socket clientSocket;
-		BufferedReader in = null;
-        PrintWriter out = null;
+		ObjectInputStream in = null;
+        ObjectOutputStream out = null;
 
         private ClientTask(Socket clientSocket) {
             this.clientSocket = clientSocket;
@@ -77,15 +79,15 @@ public class P2PLib implements Runnable{
             try {
             	while(true) {
 		            // Do whatever required to process the client's request
-		            out = new PrintWriter(clientSocket.getOutputStream(), true);
-			        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+    	            out = new ObjectOutputStream(clientSocket.getOutputStream()); 
+    	            in = new ObjectInputStream(clientSocket.getInputStream());
 		           /* out = new ObjectOutputStream(client.getOutputStream()); 
 		            in = new ObjectInputStream(client.getInputStream());*/
 		            
-			        String cmd = in.readLine();
+			        Message cmd = (Message) in.readObject();
 			       
 						String res = user.execute(cmd);
-						out.println(res);
+						out.writeObject(res);
             	}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

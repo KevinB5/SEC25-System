@@ -34,7 +34,11 @@ public class ClientApp
         int nUsr = Integer.parseInt(nu);
 
 
+        try {
 	        user = new User(ID + nUsr, IP, PORT);//recebe o ip e a porta 
+        }catch(IOException ioe) {
+        	System.out.println(ioe.getMessage());
+        }
 	        	
         
             System.out.println( ID+nUsr +" initialized");

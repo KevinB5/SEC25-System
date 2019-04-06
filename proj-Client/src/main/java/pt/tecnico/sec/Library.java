@@ -23,8 +23,8 @@ public class Library {
     private ObjectOutputStream out;
     private ObjectInputStream in;
     
-    private PrintWriter outU;
-    private BufferedReader inU;
+    private ObjectOutputStream outU;
+    private ObjectInputStream inU;
     private String ip;
     private final String idUser;   
     private static final String SELL = "sell";
@@ -32,8 +32,8 @@ public class Library {
     private static final String BUY = "buy";
     private static final String TRANSFER = "transfer";
 	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\ports.txt";
-	private HashMap <String, PrintWriter> writters = new HashMap<String, PrintWriter>();
-	private HashMap <String, BufferedReader> readers = new HashMap<String, BufferedReader>();
+	private HashMap <String, ObjectOutputStream> writters = new HashMap<String, ObjectOutputStream>();
+	private HashMap <String, ObjectInputStream> readers = new HashMap<String, ObjectInputStream>();
 	private static final String exceptMessage = "Must sign message first";
 
     private static int PORT;
@@ -119,8 +119,8 @@ public class Library {
 
 			clientSocket = new Socket(Uip, Uport);
 			System.out.println("connected to server at port: "+ Uport);
-			outU = new PrintWriter(clientSocket.getOutputStream(), true);
-			inU= new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			outU = new ObjectOutputStream(clientSocket.getOutputStream());
+			inU= new ObjectInputStream(clientSocket.getInputStream());
 			writters.put(userID, outU);
 			readers.put(userID, inU);
 			
@@ -150,20 +150,20 @@ public class Library {
 	
 	
 	
-	 public String sendMessage(String uID, String msg) throws Exception {
-		 PrintWriter printer;
-		 BufferedReader reader;
-		 String resp= "";
+	 public Message sendMessage(String uID, Message msg) throws Exception {
+		 ObjectOutputStream printer;
+		 ObjectInputStream reader;
+		 Message resp= null;
 		 try {
 		 	
 		 		printer= this.writters.get(uID);
 		 		reader = this.readers.get(uID);
 		
-		 		outU.println(msg);
+		 		outU.writeObject(msg);
 	        
 	        
 			
-				resp = inU.readLine();
+				resp = (Message) inU.readObject();
 				//return execRequest(resp);
 				//this.stopConnectServer();
 				System.out.println(resp);
@@ -209,12 +209,14 @@ public class Library {
 	    }
 
 
-	public String buyGood(String userID, String goodID) throws Exception {//buyerID, goodID
-		String msg = "intentionbuy "+ this.idUser +" " +goodID;
-		//Message result = send(new Message(idUser, msg,null, null));
+	public Message buyGood(String userID, String goodID) throws Exception {//buyerID, goodID
+		String msg = "intentionbuy " +goodID;
+		//manda 
+		Message result = new Message(idUser, msg,user.sign(msg), null);
 		//sendMessage(0,msg);
 		
-		return sendMessage(userID, msg);
+		return sendMessage(userID, result);
+		
 	}
 
 
