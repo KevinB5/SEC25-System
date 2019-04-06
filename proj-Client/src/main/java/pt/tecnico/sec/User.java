@@ -57,6 +57,8 @@ public class User {
 	private static ServerSocket serverSocket=null;
     private static int PORT;
 	private int keySize ;
+
+	private String challenge;
 	private static String PASS;
 	public static KeyStore KEYSTORE;
 
@@ -210,14 +212,16 @@ public class User {
     		this.intentionToSell(res[1]);
     	}
     	if(op.equals("state"))
-    		this.getStateOfGood(res[1]);
+    		if(res.length<3)
+    			throw new Exception("Operation not valid: state requests must issue a challenge");
+    		this.getStateOfGood(res[1],res[2]);
     	
     	if(op.equals("buy"))
     		this.buyGood(res[1], res[2]);
     	
     	if(op.equals("transfer")) {
     		if(res.length<3)
-        		throw new Exception("Operation not valid: misgging arguments");
+        		throw new Exception("Operation not valid: missing arguments");
     		this.transferGood(res[1], res[2]);
 
     	}
@@ -251,8 +255,9 @@ public class User {
 	 * @param good
 	 * @return estado do good
 	 */
-	private void getStateOfGood(String good) {
+	private void getStateOfGood(String good, String challenge) {
 		try {
+			this.challenge=challenge;
 			System.out.println(lib.getStateOfGood(good));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -321,7 +326,7 @@ public class User {
 
     	String [] res = command.split(" ");
     	if(res.length<2)
-    		throw new Exception("Operation not valid: misgging arguments");
+    		throw new Exception("Operation not valid: missing arguments");
     	String op =  res[0];
     	System.out.println("trying to buy "+ res[1]+res[2]);
     	if(op .equals("intentionbuy")) {//buy buyerID goodID
