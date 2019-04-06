@@ -49,6 +49,9 @@ Enviar mensagem (ao Notário, neste caso) com desafio (por exemplo, enviar um ce
  C) Persistência de dados (como garantir que uma transação certificada não é travada antes de ficar na memória do Notário?)
  possível solução: Apenas emitir a certificação *após* estar guardada num documento a transação, bem como o pedido assinado dos users.
  
+  C1) Log escreve e lê, só falta reenviar o ultimo certificado -> log(log.size()-1)
+  
+ D) Não repudiação falta reestruturar o metodo para usar um argumento na classe mensagem (Buyer signature)
  
  -----------------------------------------------
  
