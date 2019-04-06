@@ -149,14 +149,13 @@ public class Notary {
 			 * 
 			 * "state <goodID> <challenge>" - asks what the state (ONSALE/NOTONSALE, goodcounter) of a certain good is
 			 * 
-			 *  "transfer <goodID> <buyerID>" - requests that a given good is transfered
+			 *  "transfer <goodID> <goodCounter> <buyerID> <buyerSig>" - requests that a given good is transfered
 			 * ^TRANSFER SHOULD INCLUDE A PART WHERE THE MESSAGE FROM THE BUYER SHOWING HIS INTENTION IS INCLUDED
 			 * */
 	    	
 	    	String op =  res[0]; //the first word is the operation required
 	
 	    	if(op .equals("sell")) {
-	
 	
 	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
 	    		return new Message(this.idNotary, rs, null, null);
@@ -182,8 +181,15 @@ public class Notary {
 	    		this.buyGood(res[1]);*/
 	    	
 	    	if(op.equals("transfer")) {
+	    		//"transfer <goodID> <goodCounter> <buyerID> <buyerSig>"
+	    		//below: first verifies counter number of seller and then confirms that buy signature is associated to a message
+	    		//"buy <goodID> <goodCounter>" from Buyer
+	    		if(res[2].equals(counters.get(res[1]).toString()) && 
+	    				this.verifySignature("buy "+res[1]+" "+counters.get(res[1]).toString(), res[4].getBytes(), res[3])) {
+	    			
+	    		}
 	
-	    		String rs=  this.transferGood(user,res[1],res[2]);//seller, buyer, goodID
+	    		String rs=  this.transferGood(user,res[3],res[1]);//seller, buyer, goodID
 	    		return new Message(this.idNotary, rs, null, null);
 	
 	    	}
