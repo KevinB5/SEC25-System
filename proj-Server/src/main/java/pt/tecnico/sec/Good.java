@@ -27,6 +27,14 @@ public class Good {
 		return this.state;
 	}
 	
+	public Signature getSignature(String userID) {
+		return signatures.get(userID);
+	}
+	
+	public void updateSignature(String userID,Signature sig) {
+		signatures.replace(userID,sig);
+	}
+	
 	public int getCounter() {
 		return this.counter;
 	}
