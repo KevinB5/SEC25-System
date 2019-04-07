@@ -56,14 +56,14 @@ public class Library {
 
    public PublicKey getKey(String uID) throws InvalidKeyException, Exception {
 	   String ms = "getKey uID";
-	   Message msg = new Message(idUser,ms ,user.sign(ms), null );
+	   Message msg = new Message(idUser,ms ,user.sign(ms), null, null );
 	   
 	   Message ret = send(msg);
 	   return (PublicKey) ret.getObj();
    }
    
    public Message sendKey(PublicKey key) throws InvalidKeyException, Exception {
-	   Message epa =send(new Message(this.idUser, "StoreKey",user.sign("StoreKey"), key));
+	   Message epa =send(new Message(this.idUser, "StoreKey",user.sign("StoreKey"),null, key));
 	   return epa;
    }
 
@@ -72,7 +72,7 @@ public class Library {
 		String res =SELL +  " " +goodID+ " ";
 		String msg = res + new String(user.sign(res));
 		
-		Message result=  send( new Message(idUser, msg, user.sign(msg), null));
+		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null));
 		
 		return result.getText();
 	}
@@ -80,14 +80,14 @@ public class Library {
 	
 	public String getStateOfGood(String goodID) throws InvalidKeyException, Exception {
 		String msg= STATE + " " + goodID;
-		Message result=  send( new Message(idUser, msg, user.sign(msg), null));
+		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null));
 		return result.getText();
 	}
 
 	
 	public String transferGood(String userID, String buyer,String goodID) throws InvalidKeyException, Exception {
 		String msg=TRANSFER +" "+ buyer+" "+ goodID; 
-		Message result=  send( new Message(idUser, msg, user.sign(msg), null));
+		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null));
 		
 		return result.getText();
 	}
@@ -212,7 +212,7 @@ public class Library {
 	public Message buyGood(String userID, String goodID) throws Exception {//buyerID, goodID
 		String msg = "intentionbuy " +goodID;
 		//manda 
-		Message result = new Message(idUser, msg,user.sign(msg), null);
+		Message result = new Message(idUser, msg,user.sign(msg),null, null);
 		//sendMessage(0,msg);
 		
 		return sendMessage(userID, result);
