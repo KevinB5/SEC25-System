@@ -153,7 +153,7 @@ public class User {
 	
 	 boolean verifySignature(byte[] data, byte[] signature, String uID) throws Exception {
 		Signature sig = Signature.getInstance("SHA1withRSA");
-		sig.initVerify(lib.getKey(uID));
+		//TODO: sig.initVerify(lib.getKey(uID));
 		sig.update(data);
 		
 		return sig.verify(signature);
@@ -318,7 +318,7 @@ public class User {
 		
 		String res= "";
 		try {
-			res = lib.transferGood(idUser, buyer, good);
+			res = lib.transferGood(idUser, buyer, good,null);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
