@@ -43,7 +43,7 @@ public class Notary {
 			states.put(goodID, GoodState.NOTONSALE);
 			counters.put(goodID, 0);
 		}
-		PKI.createNotaryKeys(idNotary);
+		PKI.createKeys(idNotary);
 		System.out.println(states);
 	}
 	
@@ -171,7 +171,7 @@ public class Notary {
 	    	if(op .equals("sell")) {
 	
 	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
-	    		return new Message(this.idNotary, rs, PKI.encrypt(notarykey, rs),null, null,null);
+	    		return new Message(this.idNotary, rs, null,null, null,null);
 	    		}
 	    	if(op.equals("state")) {
 	    		/*
@@ -180,10 +180,11 @@ public class Notary {
 	    		 */
 	    		if(res.length==2) {
 	    			String rs = "WARNING: State request must issue a challenge";
-	    			return new Message(this.idNotary, rs, PKI.encrypt(notarykey, rs), null,null,null);
+	    			return new Message(this.idNotary, rs,null, null,null,null);
 	    		}else if(res.length==3) {
 	    			String rs=  this.verifiyStateOfGood(res[1],res[2]); 
-	    			return new Message(this.idNotary, rs, PKI.encrypt(notarykey, rs),null, null,null);
+	    			System.out.println(rs);
+	    			return new Message(this.idNotary, rs, null,null, null,null);
 	    		}
 	    		
 	    		

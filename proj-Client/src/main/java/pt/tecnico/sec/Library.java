@@ -103,6 +103,7 @@ public Message sendKey(PublicKey key) throws InvalidKeyException, Exception {
 	public String getStateOfGood(String goodID, String challenge) throws InvalidKeyException, Exception {
 		String msg= STATE + " " + goodID + " "+challenge;
 		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null, null));
+		System.out.println("STATE from notary " +result.getText());
 		return result.getText();
 	}
 

@@ -90,7 +90,6 @@ public class Storage {
 			scnr = new Scanner(systemFile);
 			while(scnr.hasNextLine()) {
 				String line = scnr.nextLine();
-				System.out.println(line);
 				if(line.startsWith("#")) {
 					user = new String();
 					user = line.substring(1);
@@ -99,7 +98,6 @@ public class Storage {
 				}
 				//pwriter.println(line);
 			}
-			System.out.println("Storage" + goods);
 		}catch(Exception e) {
 			System.out.println("Error in reading state file: " + e.getMessage());
 		}finally {
