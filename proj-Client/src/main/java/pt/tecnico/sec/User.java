@@ -229,8 +229,13 @@ public class User {
 
     		this.intentionToSell(res[1]);
     	}
+    	
     	if(op.equals("state"))
-    		this.getStateOfGood(res[1]);
+    		if(res.length<3) {
+    			System.out.println("State requests must issue challenge");
+    		}else {
+        		this.getStateOfGood(res[1],res[2]);
+    		}
     	
     	if(op.equals("buy"))
     		this.buyGood(res[1], res[2]);
@@ -271,9 +276,9 @@ public class User {
 	 * @param good
 	 * @return estado do good
 	 */
-	private void getStateOfGood(String good) {
+	private void getStateOfGood(String good, String challenge) {
 		try {
-			System.out.println(lib.getStateOfGood(good));
+			System.out.println(lib.getStateOfGood(good,challenge));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
