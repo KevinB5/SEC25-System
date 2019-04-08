@@ -78,8 +78,8 @@ public class Library {
 	}
 
 	
-	public String getStateOfGood(String goodID) throws InvalidKeyException, Exception {
-		String msg= STATE + " " + goodID;
+	public String getStateOfGood(String goodID, String challenge) throws InvalidKeyException, Exception {
+		String msg= STATE + " " + goodID + " "+challenge;
 		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null));
 		return result.getText();
 	}

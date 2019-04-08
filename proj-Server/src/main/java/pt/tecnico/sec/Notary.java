@@ -34,8 +34,11 @@ public class Notary {
 		store = new Storage();
 		goods = store.getGoods();
 		System.out.println(goods);
-		for(String goodID: goods.keySet())
+		for(String goodID: goods.keySet()) {
 			states.put(goodID, GoodState.NOTONSALE);
+			counters.put(goodID, 0);
+		}
+		System.out.println(states);
 	}
 	
 	String getID() {
@@ -89,13 +92,13 @@ public class Notary {
 	private String verifiyStateOfGood(String goodID, String challenge) {
 		/*Returns "<goodID , ONSALE/NOTONSALE , goodcounter , challenge>"  */
 		if(!goods.containsKey(goodID))
-			return "No such good";
-		String state = "<";
+			return "No such good "+challenge;
+		String state = "";
 		Integer counter;
-		state += goods.get(goodID) + " , " + states.get(goodID).toString();
+		state += goods.get(goodID) + " " + states.get(goodID).toString();
 		counter = counters.get(goodID);
 		System.out.println(state+" " +counter.toString());
-		return state+" , " +counter.toString()+" , "+ challenge +">";
+		return state+" " +counter.toString()+" "+ challenge;
 		// returns "<state , counter , challenge>"
 	}
 	
