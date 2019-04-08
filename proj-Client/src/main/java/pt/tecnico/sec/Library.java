@@ -39,10 +39,13 @@ public class Library {
     private static int PORT;
     private User user;
    // private PKI pki = new PKI(PKI.KEYSIZE);
-
     
-
-
+    /*
+     * HashMap that returns the most recent buyer signature from buyerID with an IntentToBuy goodID 
+     *  from the pair <BuyerID,GoodID>
+     */
+    private HashMap<Pair<String,String>, byte[]> buyerSigs = new HashMap<Pair<String,String>,byte[]>();
+    
     
     public Library(User user, String _ip, int _port) {
     	this.ip =_ip;
@@ -52,6 +55,8 @@ public class Library {
     	this.user = user;
     	
     }
+    
+    
     
 /*
    public PublicKey getKey(String uID) throws InvalidKeyException, Exception {
@@ -67,7 +72,20 @@ public class Library {
     	return PKI.getKey(uID);
     }
     */
-   public Message sendKey(PublicKey key) throws InvalidKeyException, Exception {
+    public void updateBuyerSigs(String buyerID, String goodID, byte[] buyersignature) {
+    	buyerSigs.put(new Pair<String,String>(buyerID,goodID),buyersignature );
+    }
+    
+    /*
+     * Returns the correspondent most recent Buyer Signature
+     */
+   public byte[] getSig(String buyerID, String goodID) {
+		return buyerSigs.get(new Pair<String,String>(buyerID,goodID));
+	}
+
+
+
+public Message sendKey(PublicKey key) throws InvalidKeyException, Exception {
 	   Message epa =send(new Message(this.idUser, "StoreKey",user.sign("StoreKey"),null, key, null));
 	   return epa;
    }
@@ -89,9 +107,9 @@ public class Library {
 	}
 
 	
-	public String transferGood(String userID, String buyer,String goodID) throws InvalidKeyException, Exception {
+	public String transferGood(String userID, String buyer,String goodID, byte[] buyerSig) throws InvalidKeyException, Exception {
 		String msg=TRANSFER +" "+ buyer+" "+ goodID; 
-		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null, null));
+		Message result=  send( new Message(idUser, msg, user.sign(msg),buyerSig, null, null));
 		
 		return result.getText();
 	}
@@ -225,10 +243,10 @@ public class Library {
 
 
 	
-	public String sellGood(String userID, String buyerID, String goodID) throws InvalidKeyException, Exception {//buyerID, goodID
+	public String sellGood(String userID, String buyerID, String goodID,byte[] buyerSig) throws InvalidKeyException, Exception {//buyerID, goodID
 		System.out.println("Confirming with notary");
 
-		String res = this.transferGood(userID, buyerID, goodID);
+		String res = this.transferGood(userID, buyerID, goodID, buyerSig);
 		
 		return res;
 	}

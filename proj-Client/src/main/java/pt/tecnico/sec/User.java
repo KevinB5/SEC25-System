@@ -359,11 +359,11 @@ public class User {
     	if(!this.verifySignature(msg.getBytes(), command.getSig(), command.getID()))
     		return error;
     	System.out.println("trying to buy "+ res[1]);
-    	if(op .equals("intentionbuy")) {//buy buyerID goodID
+    	if(op.equals("intentionbuy")) {//buy buyerID goodID
     		String ret = "no such good";
     		System.out.println(res[1]);
     		if(goods.containsKey(res[1])) {
-    			ret= lib.sellGood(this.idUser,command.getID(), res[1]);//sellerID,buyerID, goodID
+    			ret= lib.sellGood(this.idUser,command.getID(), res[1], command.getSig());//sellerID,buyerID, goodID, buyerSig
 	    		if(ret.equals("Ok"))
 	    			goods.remove(res[1], goods.get(res[1]));
 	    		this.printgoods();
