@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
+import java.security.KeyStore.ProtectionParameter;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,8 +32,9 @@ public class PKI {
 	private static HashMap <String,PublicKey> KEYS = new HashMap <String,PublicKey>();// userID, Key
 	public static KeyStore KEYSTORE;
 	private String[] users = {"user1, user2"};
-	private char[] pwdArray = "password".toCharArray();
+	private static char[] pwdArray = "password".toCharArray();
     private static PKI single_instance = null;
+    private ProtectionParameter protParam = new KeyStore.PasswordProtection(pwdArray);
 
 	
 	
@@ -74,7 +76,7 @@ public static PKI getInstance()
 public Message setKey(String uID, PublicKey key) {
 	
 	KEYS.put(uID,key);
-	return new Message(null, "OK", null,null, null);
+	return new Message(null, "OK", null,null, null,null);
 
 }
 
@@ -88,10 +90,8 @@ public PublicKey getKey(String uID) throws Exception {
 	throw new Exception("No such user "+ uID + " "+ this.KEYS.keySet().toString());
 }
 
-public PrivateKey getMyKey(String id, String password) {//userID, password
+public PrivateKey getMyKey(String id) {//userID, password
 	
-    KeyStore.ProtectionParameter protParam =
-            new KeyStore.PasswordProtection(password.toCharArray());
 	
     KeyStore.PrivateKeyEntry pkEntry;
     PrivateKey myPrivateKey = null ;
@@ -99,7 +99,7 @@ public PrivateKey getMyKey(String id, String password) {//userID, password
 		/*pkEntry = (KeyStore.PrivateKeyEntry)
 		        KEYSTORE.getEntry(id , protParam);*/
 		
-				myPrivateKey = (PrivateKey) KEYSTORE.getKey(id, password.toCharArray());
+				myPrivateKey = (PrivateKey) KEYSTORE.getKey(id, pwdArray);
 
 	} catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
 		e.printStackTrace();
@@ -109,7 +109,23 @@ public PrivateKey getMyKey(String id, String password) {//userID, password
 	
 }
 
-public KeyPair createKeys(String userID, String word) {
+
+public static KeyPair getKeyPair( String userID) {
+	  Key key = null;
+	  PublicKey publicKey = null;
+	try {
+		key = (PrivateKey) KEYSTORE.getKey(userID, pwdArray);
+		Certificate cert = KEYSTORE.getCertificate(userID);
+		publicKey = cert.getPublicKey();
+	} catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException e) {
+		e.printStackTrace();
+	}
+
+
+	  return new KeyPair(publicKey, (PrivateKey) key);
+	}
+
+public KeyPair createKeys(String userID) {
     KeyPairGenerator keyGen;
     KeyPair keyPair = null;
 	try {
@@ -124,16 +140,14 @@ public KeyPair createKeys(String userID, String word) {
 		System.out.println("saving Public key for "+ userID);
 		
 		
-		char[] password = word.toCharArray();
 		 
-		X509Certificate cert = this.generateCertificate(userID, keyPair, 0, "SHA1withRSA");
+		X509Certificate cert = generateCertificate(userID, getKeyPair(userID), 0, "SHA1withRSA");
 		
 		Certificate[] chain = {cert};
 		
 		  
 		
 		KeyStore.PrivateKeyEntry skEntry = new KeyStore.PrivateKeyEntry((PrivateKey) keyPair.getPrivate(), chain);
-		KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(password);
 
 		KEYSTORE.setEntry(userID,skEntry,protParam);
 	//KEYSTORE.setKeyEntry(userID,(PrivateKey) keyPair.getPrivate(), password, null);
@@ -177,9 +191,10 @@ public byte[] decrypt(PublicKey publicKey, byte [] encrypted) throws Exception {
 
 
 
-X509Certificate generateCertificate(String dn, KeyPair pair, int days, String algorithm)
+public static X509Certificate generateCertificate(String dn, KeyPair pair, int days, String algorithm)
 		  throws GeneralSecurityException, IOException
 		{
+		  
 		  PrivateKey privkey = pair.getPrivate();
 		  X509CertInfo info = new X509CertInfo();
 		  Date from = new Date();

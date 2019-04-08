@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.Signature;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -160,7 +161,7 @@ public class Notary {
 	    	if(op .equals("sell")) {
 	
 	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
-	    		return new Message(this.idNotary, rs, null,null, null);
+	    		return new Message(this.idNotary, rs, null,null, null,null);
 	    		}
 	    	if(op.equals("state")) {
 	    		/*
@@ -169,10 +170,10 @@ public class Notary {
 	    		 */
 	    		if(res.length==2) {
 	    			String rs = "WARNING: State request must issue a challenge";
-	    			return new Message(this.idNotary, rs, null, null,null);
+	    			return new Message(this.idNotary, rs, null, null,null,null);
 	    		}else if(res.length==3) {
 	    			String rs=  this.verifiyStateOfGood(res[1],res[2]); 
-	    			return new Message(this.idNotary, rs, null,null, null);
+	    			return new Message(this.idNotary, rs, null,null, null,null);
 	    		}
 	    		
 	    		
@@ -192,11 +193,12 @@ public class Notary {
 	    		}
 	
 	    		String rs=  this.transferGood(user,res[3],res[1],command.getSig(),res[4].getBytes());//seller, buyer, goodID
-	    		return new Message(this.idNotary, rs, null,null, null);
+	    		X509Certificate cert = PKI.generateCertificate(rs,PKI.getKeyPair(user), 7, "SHA1withRSA");
+	    		return new Message(this.idNotary, rs, null,null, null,cert);
 	
 	    	}
 	    	else
-	    		return new Message(this.idNotary, "no valid operation", null,null,null);
+	    		return new Message(this.idNotary, "no valid operation", null,null,null,null);
 	    	
 		}
 		else
@@ -219,6 +221,7 @@ public class Notary {
 				printGoods();
 				counters.replace(goodID,counters.get(goodID)+1);
 				writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
+				//enviar certificado
 				return OK;	
 			}
 			else

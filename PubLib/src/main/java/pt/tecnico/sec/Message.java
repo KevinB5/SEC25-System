@@ -2,6 +2,7 @@ package pt.tecnico.sec;
 
 import java.io.Serializable;
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 
 //must implement Serializable in order to be sent
 public class Message implements Serializable{
@@ -15,13 +16,15 @@ private final byte[] signature;
 private final Object objects;
 private final String id;
 private final byte[] buyerSignature;
+private final X509Certificate cert;
 
- public Message(String id, String text, byte[] signature, byte[] buyerSignature, Object key) {
+ public Message(String id, String text, byte[] signature, byte[] buyerSignature, Object key, X509Certificate cert) {
      this.text = text;
      this.signature = signature;
      this.objects = key;
      this.id=id;
      this.buyerSignature=buyerSignature;
+     this.cert = cert;
  }
  
  public String getID() {
