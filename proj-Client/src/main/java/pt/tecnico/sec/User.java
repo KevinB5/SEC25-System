@@ -48,6 +48,7 @@ public class User {
 	
 	private HashMap<String,GoodState> goods = new HashMap<String,GoodState>();
 	private HashMap<String,String> usrPorts = new HashMap<String,String>();
+	private ArrayList<String> allUsers = new ArrayList<String>();
 	private Library lib;
 	private static final String OK ="Ok";
 	private static final String NOK ="Not OK";
@@ -73,15 +74,17 @@ public class User {
 	
 	/**
 	 * Informar ao notary que quer vender um good
-	 * @throws IOException 
+	 * @throws Exception 
 	 */
 	
-	public User(String id, String ip, int Svport) throws IOException {
+	public User(String id, String ip, int Svport) throws Exception {
 		
 		idUser = id;
 		this.ip=ip;
 		
 		this.getPort();
+		
+		if(allUsers.contains(idUser)) {
 		
 			lib = new Library(this, ip, Svport);
 			Storage store = new Storage();
@@ -107,6 +110,9 @@ public class User {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}else {
+			throw new Exception();
+		}
 	}
 	
 	public int gtPort() {
@@ -181,7 +187,12 @@ public class User {
 			try {
 				scnr = new Scanner(text);
 				while(scnr.hasNextLine()) {
-					lines += " "+scnr.nextLine();	
+					String line = scnr.nextLine();
+					lines += " "+line;	
+					if(line.charAt(0)==('#')) {
+						allUsers.add(line.replace("#",""));
+						System.out.println("USER: "+line.replace("#",""));
+					}
 				}
 			
 			} catch (FileNotFoundException e) {
@@ -192,7 +203,6 @@ public class User {
 			String [] res = lines.split(" ");
 			String uid ="";
 			for (int i =0; i< res.length; i++) {
-
 
 				if(i%2==0)
 					uid=res[i];

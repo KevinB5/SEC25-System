@@ -38,6 +38,8 @@ public class ClientApp
 	        user = new User(ID + nUsr, IP, PORT);//recebe o ip e a porta 
         }catch(IOException ioe) {
         	System.out.println(ioe.getMessage());
+        }catch (Exception login) {
+        	login.printStackTrace();
         }
 	        	
         
