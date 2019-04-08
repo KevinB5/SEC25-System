@@ -39,6 +39,7 @@ public class Notary {
 			states.put(goodID, GoodState.NOTONSALE);
 			counters.put(goodID, 0);
 		}
+		PKI.createNotaryKeys(idNotary);
 		System.out.println(states);
 	}
 	

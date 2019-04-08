@@ -31,10 +31,11 @@ public class PKI {
 	public static int KEYSIZE ;
 	private static HashMap <String,PublicKey> KEYS = new HashMap <String,PublicKey>();// userID, Key
 	public static KeyStore KEYSTORE;
+	private static KeyPair notarykey;
 	private String[] users = {"user1, user2"};
 	private static char[] pwdArray = "password".toCharArray();
     private static PKI single_instance = null;
-    private ProtectionParameter protParam = new KeyStore.PasswordProtection(pwdArray);
+    private static ProtectionParameter protParam = new KeyStore.PasswordProtection(pwdArray);
 
 	
 	
@@ -125,7 +126,7 @@ public static KeyPair getKeyPair( String userID) {
 	  return new KeyPair(publicKey, (PrivateKey) key);
 	}
 
-public KeyPair createKeys(String userID) {
+public static KeyPair createKeys(String userID) {
     KeyPairGenerator keyGen;
     KeyPair keyPair = null;
 	try {
@@ -222,6 +223,12 @@ public static X509Certificate generateCertificate(String dn, KeyPair pair, int d
 		  cert = new X509CertImpl(info);
 		  cert.sign(privkey, algorithm);
 		  return cert;
-		}   
+		}
+
+public static void createNotaryKeys(String notaryID) {
+	notarykey= createKeys(notaryID);
+	// TODO Auto-generated method stub
+	
+}   
 
 }
