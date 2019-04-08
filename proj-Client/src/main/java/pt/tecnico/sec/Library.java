@@ -56,23 +56,22 @@ public class Library {
 
    public PublicKey getKey(String uID) throws InvalidKeyException, Exception {
 	   String ms = "getKey uID";
-	   Message msg = new Message(idUser,ms ,user.sign(ms), null, null );
+	   Message msg = new Message(idUser,ms ,user.sign(ms), null, null, null );
 	   
 	   Message ret = send(msg);
 	   return (PublicKey) ret.getObj();
    }
    
    public Message sendKey(PublicKey key) throws InvalidKeyException, Exception {
-	   Message epa =send(new Message(this.idUser, "StoreKey",user.sign("StoreKey"),null, key));
+	   Message epa =send(new Message(this.idUser, "StoreKey",user.sign("StoreKey"),null, key, null));
 	   return epa;
    }
 
 
 	public String intentionToSell(String userID, String goodID) throws InvalidKeyException, Exception {
-		String res =SELL +  " " +goodID+ " ";
-		String msg = res + new String(user.sign(res));
+		String msg =SELL +  " " +goodID;
 		
-		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null));
+		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null, null));
 		
 		return result.getText();
 	}
@@ -80,14 +79,14 @@ public class Library {
 	
 	public String getStateOfGood(String goodID, String challenge) throws InvalidKeyException, Exception {
 		String msg= STATE + " " + goodID + " "+challenge;
-		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null));
+		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null, null));
 		return result.getText();
 	}
 
 	
 	public String transferGood(String userID, String buyer,String goodID) throws InvalidKeyException, Exception {
 		String msg=TRANSFER +" "+ buyer+" "+ goodID; 
-		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null));
+		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null, null));
 		
 		return result.getText();
 	}
@@ -173,7 +172,7 @@ public class Library {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}catch(NullPointerException ne) {
-				throw new Exception("Must connect to user first");
+				System.out.println("Must connect to user first");
 			
 			}catch(Exception e) {
 				System.out.println("Operation not valid");
@@ -209,10 +208,10 @@ public class Library {
 	    }
 
 
-	public Message buyGood(String userID, String goodID) throws Exception {//buyerID, goodID
-		String msg = "intentionbuy " +goodID;
+	public Message buyGood(String userID, String goodID, String counter) throws Exception {//buyerID, goodID
+		String msg = "intentionbuy " +goodID +" "+ counter;
 		//manda 
-		Message result = new Message(idUser, msg,user.sign(msg),null, null);
+		Message result = new Message(idUser, msg,user.sign(msg),null, null, null);
 		//sendMessage(0,msg);
 		
 		return sendMessage(userID, result);

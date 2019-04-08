@@ -225,10 +225,9 @@ public class User {
 
     	String op =  res[0];
 
-    	if(op .equals("sell")) {
-
+    	if(op.equals("sell")) {
     		this.intentionToSell(res[1]);
-    	}
+    	}else
     	
     	if(op.equals("state"))
     		if(res.length<3) {
@@ -238,14 +237,18 @@ public class User {
     		}
     	
     	if(op.equals("buy"))
-    		this.buyGood(res[1], res[2]);
+    		if(res.length<3) {
+    			System.out.println("correct syntax: buy <userID> <goodID> <counter>");
+    		}else {
+    			this.buyGood(res[1], res[2], res[3]);
+    		}
     	
     	if(op.equals("transfer")) {
     		if(res.length<3)
-        		throw new Exception("Operation not valid: misgging arguments");
+        		throw new Exception("Operation not valid: missing arguments");
     		this.transferGood(res[1], res[2]);
 
-    	}
+    	}else
     	
     	if(op.equals("connect"))
     		this.connectToUsers();
@@ -290,11 +293,11 @@ public class User {
 	 * 
 	 * @param good
 	 */
-	private void buyGood (String user, String good) {
+	private void buyGood (String user, String good, String counter) {
 		
 		String res = "";
 		try {
-			Message msg  = lib.buyGood(user, good);
+			Message msg  = lib.buyGood(user, good,counter);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
