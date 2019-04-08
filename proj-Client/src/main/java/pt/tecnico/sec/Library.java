@@ -53,7 +53,7 @@ public class Library {
     	
     }
     
-
+/*
    public PublicKey getKey(String uID) throws InvalidKeyException, Exception {
 	   String ms = "getKey uID";
 	   Message msg = new Message(idUser,ms ,user.sign(ms), null, null, null );
@@ -61,7 +61,12 @@ public class Library {
 	   Message ret = send(msg);
 	   return (PublicKey) ret.getObj();
    }
-   
+  */
+    /*
+    public PublicKey getKey(String uID) throws InvalidKeyException, Exception {
+    	return PKI.getKey(uID);
+    }
+    */
    public Message sendKey(PublicKey key) throws InvalidKeyException, Exception {
 	   Message epa =send(new Message(this.idUser, "StoreKey",user.sign("StoreKey"),null, key, null));
 	   return epa;
