@@ -43,7 +43,10 @@ public final class LibraryServer  implements Runnable {
 			        String[] spl = cmd.split(" ");
 			        
 			        if (spl[0].equals("StoreKey")) {
-			        	out.writeObject( PKI.getInstance().setKey(msg.getID(), (PublicKey) msg.getObj()));
+			        	if(PKI.getInstance().getKey(msg.getID())== null) {
+			        		out.writeObject( PKI.getInstance().setKey(msg.getID(), (PublicKey) msg.getObj()));
+			        		
+			        	}
 			        }
 			        else {
 			        	
@@ -59,7 +62,10 @@ public final class LibraryServer  implements Runnable {
 
 	        } catch (IOException | ClassNotFoundException ex) {
 	            System.out.println("Unable to get streams from client");
-	        } finally {
+	        } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
 	            try {
 	                in.close();
 	                out.close();

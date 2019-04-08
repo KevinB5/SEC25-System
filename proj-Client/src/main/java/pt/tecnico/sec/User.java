@@ -350,8 +350,10 @@ public class User {
 
 		String msg = command.getText();
     	String [] res = msg.split(" ");
-    	if(res.length<2)
-    		throw new Exception("Operation not valid: missing arguments");
+    	if(res.length<2) {
+    		System.out.println("Operation not valid: missing arguments");
+    		return "";
+    	}
     	String op =  res[0];
     	String error = "Not valid";
     	if(!this.verifySignature(msg.getBytes(), command.getSig(), command.getID()))
