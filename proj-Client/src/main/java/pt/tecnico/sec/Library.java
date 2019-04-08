@@ -44,7 +44,7 @@ public class Library {
      * HashMap that returns the most recent buyer signature from buyerID with an IntentToBuy goodID 
      *  from the pair <BuyerID,GoodID>
      */
-    private HashMap<Pair<String,String>, byte[]> buyerSigs = new HashMap<Pair<String,String>,byte[]>();
+    //private HashMap<Pair<String,String>, byte[]> buyerSigs = new HashMap<Pair<String,String>,byte[]>();
     
     
     public Library(User user, String _ip, int _port) {
@@ -72,18 +72,18 @@ public class Library {
     	return PKI.getKey(uID);
     }
     */
-    public void updateBuyerSigs(String buyerID, String goodID, byte[] buyersignature) {
-    	buyerSigs.put(new Pair<String,String>(buyerID,goodID),buyersignature );
-    }
+//    public void updateBuyerSigs(String buyerID, String goodID, byte[] buyersignature) {
+//    	buyerSigs.put(new Pair<String,String>(buyerID,goodID),buyersignature );
+//    }
     
     /*
      * Returns the correspondent most recent Buyer Signature
-     */
+     *//*
    public byte[] getSig(String buyerID, String goodID) {
 		return buyerSigs.get(new Pair<String,String>(buyerID,goodID));
 	}
 
-
+*/
 
 public Message sendKey(PublicKey key) throws InvalidKeyException, Exception {
 	   Message epa =send(new Message(this.idUser, "StoreKey",user.sign("StoreKey"),null, key, null));

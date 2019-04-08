@@ -74,24 +74,24 @@ public static PKI getInstance()
     return single_instance; 
 } 
 
-public Message setKey(String uID, PublicKey key) {
+public static Message setKey(String uID, PublicKey key) {
 	
 	KEYS.put(uID,key);
 	return new Message(null, "OK", null,null, null,null);
 
 }
 
-public PublicKey getKey(String uID) throws Exception {
+public static PublicKey getKey(String uID) throws Exception {
 	System.out.println("key= "+ uID);
 	System.out.println(KEYS.containsKey(uID));
 	
-	if(KEYS.containsKey(uID))
+	if(KEYS.containsKey(uID)) {
 		return KEYS.get(uID);
-
-	throw new Exception("No such user "+ uID + " "+ this.KEYS.keySet().toString());
+	}else
+	throw new Exception("No such user "+ uID + " "+ KEYS.keySet().toString());
 }
 
-public PrivateKey getMyKey(String id) {//userID, password
+public static PrivateKey getMyKey(String id) {//userID, password
 	
 	
     KeyStore.PrivateKeyEntry pkEntry;
@@ -131,6 +131,7 @@ public static KeyPair createKeys(String userID) {
     KeyPair keyPair = null;
 	try {
 		keyGen = KeyPairGenerator.getInstance("RSA");
+		KEYSIZE=1024;
 		keyGen.initialize(KEYSIZE);
 
 		keyPair = keyGen.generateKeyPair();
@@ -142,7 +143,7 @@ public static KeyPair createKeys(String userID) {
 		
 		
 		 
-		X509Certificate cert = generateCertificate(userID, getKeyPair(userID), 0, "SHA1withRSA");
+		/*X509Certificate cert = generateCertificate(userID, getKeyPair(userID), 0, "SHA1withRSA");
 		
 		Certificate[] chain = {cert};
 		
@@ -164,7 +165,7 @@ public static KeyPair createKeys(String userID) {
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			e.printStackTrace();*/
 		} catch (GeneralSecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -173,7 +174,7 @@ public static KeyPair createKeys(String userID) {
 }
 
 
-public byte[] encrypt(PrivateKey privateKey, String message) throws Exception {
+public static byte[] encrypt(PrivateKey privateKey, String message) throws Exception {
     Cipher cipher = Cipher.getInstance("RSA");  
     cipher.init(Cipher.ENCRYPT_MODE, privateKey);  
 
@@ -226,9 +227,13 @@ public static X509Certificate generateCertificate(String dn, KeyPair pair, int d
 		}
 
 public static void createNotaryKeys(String notaryID) {
-	notarykey= createKeys(notaryID);
+	notarykey = createKeys(notaryID);
 	// TODO Auto-generated method stub
 	
+}
+
+public static boolean containsKeyofUser(String id) {
+	return KEYS.containsKey(id);
 }   
 
 }

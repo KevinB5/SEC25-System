@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -31,6 +33,8 @@ public class Notary {
 	private Storage store;
 	private PKI keyManager;
 	
+	
+	
 	public Notary() {
 		store = new Storage();
 		goods = store.getGoods();
@@ -46,7 +50,6 @@ public class Notary {
 	String getID() {
 		return this.idNotary;
 	}
-
 	
 	private enum GoodState {
 		ONSALE,NOTONSALE
@@ -129,6 +132,9 @@ public class Notary {
 	 */
 	
 	public Message execute(Message command) throws Exception {
+		PrivateKey notarykey = PKI.getMyKey(idNotary);
+//		System.out.println("This is the notary key");
+//		System.out.println(notarykey);
 
 		Message result = null;
     	String [] res = command.getText().split(" "); //received message broken up by spaces
@@ -165,7 +171,7 @@ public class Notary {
 	    	if(op .equals("sell")) {
 	
 	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
-	    		return new Message(this.idNotary, rs, null,null, null,null);
+	    		return new Message(this.idNotary, rs, PKI.encrypt(notarykey, rs),null, null,null);
 	    		}
 	    	if(op.equals("state")) {
 	    		/*
@@ -174,10 +180,10 @@ public class Notary {
 	    		 */
 	    		if(res.length==2) {
 	    			String rs = "WARNING: State request must issue a challenge";
-	    			return new Message(this.idNotary, rs, null, null,null,null);
+	    			return new Message(this.idNotary, rs, PKI.encrypt(notarykey, rs), null,null,null);
 	    		}else if(res.length==3) {
 	    			String rs=  this.verifiyStateOfGood(res[1],res[2]); 
-	    			return new Message(this.idNotary, rs, null,null, null,null);
+	    			return new Message(this.idNotary, rs, PKI.encrypt(notarykey, rs),null, null,null);
 	    		}
 	    		
 	    		

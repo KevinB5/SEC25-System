@@ -30,7 +30,7 @@ public final class LibraryServer  implements Runnable {
 	        try {
 	            out = new ObjectOutputStream(clientSocket.getOutputStream()); 
 	            in = new ObjectInputStream(clientSocket.getInputStream());
-	            
+	            out.writeObject(new Message("notary","key2", null, null, PKI.getKey("notary"), null));
 	        	while (true) {
 	        		/*
 	        		out = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -43,9 +43,8 @@ public final class LibraryServer  implements Runnable {
 			        String[] spl = cmd.split(" ");
 			        
 			        if (spl[0].equals("StoreKey")) {
-			        	if(PKI.getInstance().getKey(msg.getID())== null) {
-			        		out.writeObject( PKI.getInstance().setKey(msg.getID(), (PublicKey) msg.getObj()));
-			        		
+			        	if(!PKI.getInstance().containsKeyofUser(msg.getID())) {
+			        		out.writeObject( PKI.getInstance().setKey(msg.getID(), (PublicKey) msg.getObj()));			        		
 			        	}
 			        }
 			        else {

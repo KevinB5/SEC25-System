@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
+import javax.crypto.Cipher;
+
 import sun.security.x509.AlgorithmId;
 import sun.security.x509.CertificateAlgorithmId;
 import sun.security.x509.CertificateSerialNumber;
@@ -60,6 +62,7 @@ public class User {
 	private int keySize ;
 	private static String PASS;
 	public static KeyStore KEYSTORE;
+	public PublicKey notarypublickey;
 
 
 
@@ -356,6 +359,14 @@ public class User {
     	}
     	String op =  res[0];
     	String error = "Not valid";
+    	if(command.getID()=="notary") {
+    		//if notary is sending second key we update
+    		if(command.getText()=="key2") {
+    			//TODO: meter condição para verificar se foi assinado com a chave do CC
+    			notarypublickey=(PublicKey) command.getObj();
+    		}else
+    		if(this.verifySignatureNotary(msg.getBytes(), command.getSig()));
+    	}else
     	if(!this.verifySignature(msg.getBytes(), command.getSig(), command.getID()))
     		return error;
     	System.out.println("trying to buy "+ res[1]);
@@ -375,6 +386,12 @@ public class User {
     		return "no valid operation " + command ;
 	}
 	
+	private boolean verifySignatureNotary(byte[] bytes, byte[] sig) throws Exception {
+		Cipher cipher = Cipher.getInstance("RSA");  
+	    cipher.init(Cipher.DECRYPT_MODE, notarypublickey);
+	    return (bytes==cipher.doFinal(sig));
+	}
+
 	private PrivateKey getKey(String password) {//userID, password
 		
 	    KeyStore.ProtectionParameter protParam =
