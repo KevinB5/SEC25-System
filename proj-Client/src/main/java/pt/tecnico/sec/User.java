@@ -49,7 +49,9 @@ public class User {
 	private String idUser ;
 	
 	private HashMap<String,GoodState> goods = new HashMap<String,GoodState>();
+	private HashMap<String,String> counters = new HashMap<String,String>();
 	private HashMap<String,String> usrPorts = new HashMap<String,String>();
+	private HashMap<String,byte[]> buyersigs = new HashMap<String,byte[]>();
 	private ArrayList<String> allUsers = new ArrayList<String>();
 	private Library lib;
 	private static final String OK ="OK";
@@ -64,6 +66,7 @@ public class User {
 	private static String PASS;
 	public static KeyStore KEYSTORE;
 	public PublicKey notarypublickey;
+	private String challenge;
 
 
 
@@ -238,22 +241,22 @@ public class User {
     	}else
     	
     	if(op.equals("state"))
-    		if(res.length<3) {
-    			System.out.println("State requests must issue challenge");
+    		if(res.length!=2) {
+    			System.out.println("correct syntax: state <goodID>");
     		}else {
-        		this.getStateOfGood(res[1],res[2]);
+        		this.getStateOfGood(res[1]);
     		}
     	
     	if(op.equals("buy"))
-    		if(res.length<4) {
-    			System.out.println("correct syntax: buy <userID> <goodID> <counter>");
+    		if(res.length!=3) {
+    			System.out.println("correct syntax: buy <sellerID> <goodID>");
     		}else {
-    			this.buyGood(res[1], res[2], res[3]);
+    			this.buyGood(res[1], res[2]);
     		}
     	
     	if(op.equals("transfer")) {
-    		if(res.length<3)
-        		throw new Exception("Operation not valid: missing arguments");
+    		if(res.length!=3)
+        		System.out.println("correct syntax: transfer <buyerID> <goodID>");
     		this.transferGood(res[1], res[2]);
 
     	}else
@@ -268,17 +271,15 @@ public class User {
 	private void intentionToSell(String good) {
 		String res="";
 		try {
-			res = lib.intentionToSell(idUser, good);
+			res = lib.intentionToSell(idUser, good, counters.get(good));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println(res);
+		//System.out.println(res);
 		if( res.equals(OK)) {
 			goods.replace(good, GoodState.ONSALE);
-
-			System.out.println("WHOOHOOO");
-			System.out.println(goods);
+			System.out.println(good +" is on sale");
 		}
 		
 		
@@ -290,9 +291,12 @@ public class User {
 	 * @param good
 	 * @return estado do good
 	 */
-	private void getStateOfGood(String good, String challenge) {
+	private void getStateOfGood(String good) {
 		try {
-			System.out.println(lib.getStateOfGood(good,challenge));
+			//Random string of 20 lowercase characters
+			challenge = generateRandomString(20);
+			//update counter
+			counters.replace(good,lib.getStateOfGood(good,challenge));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -303,9 +307,10 @@ public class User {
 	 * Informar ao notary que quer comprar um dado good
 	 * 
 	 * @param good
+	 * @param  
 	 */
-	private void buyGood (String user, String good, String counter) {
-		
+	private void buyGood (String user, String good) {
+		String counter = counters.get(user);
 		String res = "";
 		try {
 			Message msg  = lib.buyGood(user, good,counter);
@@ -325,11 +330,11 @@ public class User {
 	 * 
 	 * @param good
 	 */
-	private String transferGood(String buyer, String good) {
-		
+	private void transferGood(String buyer, String good) {
+		String counter=counters.get(good);
 		String res= "";
 		try {
-			res = lib.transferGood(idUser, buyer, good,null);
+			res = lib.transferGood(idUser, buyer, good, counter, buyersigs.get(buyer));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -340,8 +345,6 @@ public class User {
 			goods.remove(good);
 			printgoods();
 		}
-		
-		return res;
 		
 	}
 	
@@ -356,8 +359,22 @@ public class User {
 		
 	}
 	
+	private String generateRandomString(Integer n) {
+		//n: size of string
+		String randomstring = "";
+		int i;
+		for(i=0; i < n; i++){
+			Random rnd = new Random();
+			char c = (char) (rnd.nextInt(26) + 'a');
+			randomstring+=c;
+		}
+		return randomstring;
+		
+	}
+	
 	
 	public String execute(Message command) throws Exception {
+		//"correct syntax: buy <sellerID> <goodID>"
 
 		String msg = command.getText();
     	String [] res = msg.split(" ");
@@ -377,12 +394,12 @@ public class User {
     	}else
     	if(!this.verifySignature(msg.getBytes(), command.getSig(), command.getID()))
     		return error;
-    	System.out.println("trying to buy "+ res[1]);
+    	
     	if(op.equals("intentionbuy")) {//buy buyerID goodID
     		String ret = "no such good";
-    		System.out.println(res[1]);
-    		if(goods.containsKey(res[1])) {
-    			ret= lib.sellGood(this.idUser,command.getID(), res[1], command.getSig());//sellerID,buyerID, goodID, buyerSig
+    		System.out.println("trying to buy "+ res[2]);
+    		if(goods.containsKey(res[2])) {
+    			ret=lib.transferGood(this.idUser, command.getID(), res[2],counters.get(res[2]), command.getSig());
 	    		if(ret.equals("Ok"))
 	    			goods.remove(res[1], goods.get(res[1]));
 	    		this.printgoods();

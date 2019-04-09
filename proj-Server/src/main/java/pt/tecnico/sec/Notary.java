@@ -197,12 +197,12 @@ public class Notary {
 	    		this.buyGood(res[1]);*/
 	    	
 	    	if(op.equals("transfer")) {
-	    		//"transfer <goodID> <goodCounter> <buyerID> <buyerSig>"
+	    		//"transfer <buyerID> <goodID> <goodcounter>"
 	    		//below: first verifies counter number of seller and then confirms that buy signature is associated to a message
-	    		//"buy <goodID> <goodCounter>" from Buyer
-	    		System.out.println(res[2] + res[1]);
-	    		if(res[2].equals(counters.get(res[1]).toString()) && 
-	    				this.verifySignature("buy "+res[1]+" "+counters.get(res[1]).toString(), res[4].getBytes(), res[3])) {
+	    		//System.out.println(res[2] + res[1]);
+	    		if(res[3].equals(counters.get(res[2]).toString()) && 
+	    				//"buy <userID> <goodID> <goodCounter>
+	    				this.verifySignature("buy "+user+" "+res[1]+" "+counters.get(res[2]).toString(), command.buyerSignature(), res[1])) {
 	    			
 	    		}
 	

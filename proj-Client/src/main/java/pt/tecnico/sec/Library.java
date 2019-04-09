@@ -13,6 +13,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -97,8 +98,8 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 }
 
 
-	public String intentionToSell(String userID, String goodID) throws InvalidKeyException, Exception {
-		String msg =SELL +  " " +goodID;
+	public String intentionToSell(String userID, String goodID, String counter) throws InvalidKeyException, Exception {
+		String msg =SELL +  " " +goodID + " "+ counter;
 		
 		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null, null));
 		
@@ -109,15 +110,26 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	public String getStateOfGood(String goodID, String challenge) throws InvalidKeyException, Exception {
 		String msg= STATE + " " + goodID + " "+challenge;
 		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null, null));
-		System.out.println("STATE from notary " +result.getText());
-		return result.getText();
+		String[] split = result.getText().split(" ");
+		if(split[split.length-1].equals(challenge)) {
+			//Get message from Notary excluding challenge and counter
+			String text="";
+			int i;
+			for(i=0;i<split.length-2;i++) {
+				text+=split[i]+" ";
+			}
+			System.out.println("STATE from notary " +text);
+		}else
+		System.out.println("STATE from notary: notary failed challenge");
+		//returns counter
+		return split[split.length-2];
 	}
 
 	
-	public String transferGood(String userID, String buyer,String goodID, byte[] buyerSig) throws InvalidKeyException, Exception {
-		String msg=TRANSFER +" "+ buyer+" "+ goodID; 
+	public String transferGood(String userID, String buyer,String goodID, String counter, byte[] buyerSig) throws InvalidKeyException, Exception {
+		String msg=TRANSFER +" "+ buyer+" "+ goodID +" "+ counter; 
 		Message result=  send( new Message(idUser, msg, user.sign(msg),buyerSig, null, null));
-		
+	
 		return result.getText();
 	}
 
@@ -240,21 +252,21 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	public Message buyGood(String userID, String goodID, String counter) throws Exception {//buyerID, goodID
 		String msg = "intentionbuy " +goodID +" "+ counter;
 		//manda 
-		Message result = new Message(idUser, msg,user.sign(msg),null, null, null);
+		Message result = sendMessage(userID,new Message(idUser, msg,user.sign(msg),null, null, null));
 		//sendMessage(0,msg);
 		
 		return sendMessage(userID, result);
 		
 	}
 
-
+/*
 	
 	public String sellGood(String userID, String buyerID, String goodID,byte[] buyerSig) throws InvalidKeyException, Exception {//buyerID, goodID
-		System.out.println("Confirming with notary");
+		System.out.println("Confirming transfer with notary");
 
 		String res = this.transferGood(userID, buyerID, goodID, buyerSig);
 		
 		return res;
 	}
-
+*/
 }
