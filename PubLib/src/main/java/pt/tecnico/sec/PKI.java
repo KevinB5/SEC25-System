@@ -1,7 +1,9 @@
 package pt.tecnico.sec;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.KeyStore.ProtectionParameter;
@@ -36,6 +38,7 @@ public class PKI {
 	private static char[] pwdArray = "password".toCharArray();
     private static PKI single_instance = null;
     private static ProtectionParameter protParam = new KeyStore.PasswordProtection(pwdArray);
+    private static String PATH;
 
 	
 	
@@ -43,12 +46,15 @@ private PKI() {
 	KEYSIZE = 1024 ;
 	try {
 		//get instance do keystore
-		this.KEYSTORE = KeyStore.getInstance(KeyStore.getDefaultType());
+		this.KEYSTORE = KeyStore.getInstance("JKS");
+
 		
 		
 		KEYSTORE.load(null, pwdArray);
+		Storage st = new Storage();
+		PATH = st.originPath()+ "\\KeyStoreFile.jks";
 		
-		try(FileOutputStream fos = new FileOutputStream("newKeyStoreFileName.jks")) {
+		try(FileOutputStream fos = new FileOutputStream(PATH) ){
 		    KEYSTORE.store(fos, pwdArray);
 		}
 		
@@ -74,21 +80,38 @@ public static PKI getInstance()
     return single_instance; 
 } 
 
-public static Message setKey(String uID, PublicKey key) {
+public static void setKey(String uID, X509Certificate cert) {
 	
-	KEYS.put(uID,key);
-	return new Message(null, "OK", null,null, null,null);
+	//KEYS.put(uID,key);
+	System.out.println(KEYS.keySet().toString());
+	try {
+
+		KEYSTORE.setCertificateEntry(uID, cert);
+		   FileOutputStream output = new FileOutputStream(PATH);
+		    KEYSTORE.store(output, pwdArray);
+		    output.close();
+	} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	//return new Message(null, "OK", null,null, null,null);
 
 }
 
 public static PublicKey getKey(String uID) throws Exception {
-	System.out.println("key= "+ uID);
-	System.out.println(KEYS.containsKey(uID));
 	
-	if(KEYS.containsKey(uID)) {
-		return KEYS.get(uID);
-	}else
-	throw new Exception("No such user "+ uID + " "+ KEYS.keySet().toString());
+	KeyStore keyStore= KeyStore.getInstance("JKS");
+	FileInputStream fos = new FileInputStream(PATH);
+
+
+	keyStore.load(fos, pwdArray);
+
+
+System.out.println(KEYSTORE.containsAlias(uID));
+System.out.println(KEYSTORE.aliases());
+	
+	return keyStore.getCertificate(uID).getPublicKey();
+	
 }
 
 public static PrivateKey getMyKey(String id) {//userID, password

@@ -90,6 +90,12 @@ public Message sendKey(PublicKey key) throws InvalidKeyException, Exception {
 	   return epa;
    }
 
+public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
+	String msg = "Get "+uid;
+	Message result = send(new Message(this.idUser, msg,user.sign(msg) , null, null, null ));
+	return (PublicKey) result.getObj();
+}
+
 
 	public String intentionToSell(String userID, String goodID) throws InvalidKeyException, Exception {
 		String msg =SELL +  " " +goodID;
@@ -159,6 +165,7 @@ public Message sendKey(PublicKey key) throws InvalidKeyException, Exception {
 		try {
 			out.writeObject(intent);
 			res = (Message)in.readObject();
+			System.out.println(res.getText());
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -184,8 +191,6 @@ public Message sendKey(PublicKey key) throws InvalidKeyException, Exception {
 		
 		 		outU.writeObject(msg);
 	        
-	        
-			
 				resp = (Message) inU.readObject();
 				//return execRequest(resp);
 				//this.stopConnectServer();

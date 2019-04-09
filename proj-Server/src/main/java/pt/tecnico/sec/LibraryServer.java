@@ -30,7 +30,7 @@ public final class LibraryServer  implements Runnable {
 	        try {
 	            out = new ObjectOutputStream(clientSocket.getOutputStream()); 
 	            in = new ObjectInputStream(clientSocket.getInputStream());
-	            out.writeObject(new Message("notary","key2", null, null, PKI.getKey("notary"), null));
+	            //out.writeObject(new Message("notary","key2", null, null, PKI.getKey("notary"), null));
 	        	while (true) {
 	        		/*
 	        		out = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -40,24 +40,36 @@ public final class LibraryServer  implements Runnable {
 			        Message msg = (Message) in.readObject();
 			        
 			        String cmd = msg.getText();
+			        System.out.println(cmd);
 			        String[] spl = cmd.split(" ");
 			        
-			        if (spl[0].equals("StoreKey")) {
+			       /*
 			        	if(!PKI.getInstance().containsKeyofUser(msg.getID())) {
-			        		out.writeObject( PKI.getInstance().setKey(msg.getID(), (PublicKey) msg.getObj()));			        		
+			        		PKI.getInstance().setKey(msg.getID(), (PublicKey) msg.getObj());			        		
 			        	}
 			        }
+			        
+			        else if(spl[0].equals("Get")) {
+			        	if(PKI.getInstance().containsKeyofUser(msg.getID())) {
+			        	PublicKey pub =null;
+			        		pub = PKI.getInstance().getKey(spl[1]);
+			        		Message res= new Message("pki", "key", null, null, pub, null);
+			        		out.writeObject(res);
+			        	}
+					
+			        }
 			        else {
+			        */
 			        	
 				        try {
 							Message res = notary.execute(msg);
-							out.writeObject(res);;
+							out.writeObject(res);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 			        }
-	        	}
+	        	//}
 
 	        } catch (IOException | ClassNotFoundException ex) {
 	            System.out.println("Unable to get streams from client");

@@ -22,7 +22,7 @@ import java.util.Scanner;
 public class Notary {
 	
 	private String idNotary = "notary" ;
-	private static final String OK ="Ok";
+	private static final String OK ="OK";
 	private static final String NOK ="Not OK";
 	private HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,state>
@@ -43,6 +43,7 @@ public class Notary {
 			states.put(goodID, GoodState.NOTONSALE);
 			counters.put(goodID, 0);
 		}
+		PKI.getInstance();
 		PKI.createKeys(idNotary);
 		System.out.println(states);
 	}
@@ -58,7 +59,8 @@ public class Notary {
 	 private boolean verifySignature(String data, byte[] signature, String uID) throws Exception {
 		
 		Signature sig = Signature.getInstance("SHA1withRSA");
-		sig.initVerify(PKI.getInstance().getKey(uID));
+		PKI.getInstance();
+		sig.initVerify(PKI.getKey(uID));
 		sig.update(data.getBytes());
 		
 		return sig.verify(signature);
@@ -98,12 +100,12 @@ public class Notary {
 		/*Returns "<goodID , ONSALE/NOTONSALE , goodcounter , challenge>"  */
 		if(!goods.containsKey(goodID))
 			return "No such good "+challenge;
+		
 		String state = "";
-		Integer counter;
+		int counter;
 		state += goods.get(goodID) + " " + states.get(goodID).toString();
 		counter = counters.get(goodID);
-		System.out.println(state+" " +counter.toString());
-		return state+" " +counter.toString()+" "+ challenge;
+		return state+" " +counter+" "+ challenge;
 		// returns "<state , counter , challenge>"
 	}
 	
@@ -132,18 +134,16 @@ public class Notary {
 	 */
 	
 	public Message execute(Message command) throws Exception {
-		PrivateKey notarykey = PKI.getMyKey(idNotary);
+		//PrivateKey notarykey = PKI.getMyKey(idNotary);
 //		System.out.println("This is the notary key");
 //		System.out.println(notarykey);
 
-		Message result = null;
+		//Message result = null;
     	String [] res = command.getText().split(" "); //received message broken up by spaces
     	if(res.length<2)
     		throw new Exception("Operation not valid: missing arguments"); //message has to have at least 2 words
-    	String data = "";
-    	
-    	for (int i=0; i<res.length -1; i++)
-    		data+= res[i];
+    	//String data = "";
+
     	
     	String user = command.getID();
     	
@@ -171,6 +171,7 @@ public class Notary {
 	    	if(op .equals("sell")) {
 	
 	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
+	    		System.out.println("Returning "+rs);
 	    		return new Message(this.idNotary, rs, null,null, null,null);
 	    		}
 	    	if(op.equals("state")) {
@@ -178,10 +179,11 @@ public class Notary {
 	    		 * Returns "ONSALE/NOTONSALE <goodcounter>"
 	    		 * 
 	    		 */
-	    		if(res.length==2) {
+	    		if(res.length!=3) {
 	    			String rs = "WARNING: State request must issue a challenge";
 	    			return new Message(this.idNotary, rs,null, null,null,null);
-	    		}else if(res.length==3) {
+	    		}
+	    		else {
 	    			String rs=  this.verifiyStateOfGood(res[1],res[2]); 
 	    			System.out.println(rs);
 	    			return new Message(this.idNotary, rs, null,null, null,null);
@@ -198,6 +200,7 @@ public class Notary {
 	    		//"transfer <goodID> <goodCounter> <buyerID> <buyerSig>"
 	    		//below: first verifies counter number of seller and then confirms that buy signature is associated to a message
 	    		//"buy <goodID> <goodCounter>" from Buyer
+	    		System.out.println(res[2] + res[1]);
 	    		if(res[2].equals(counters.get(res[1]).toString()) && 
 	    				this.verifySignature("buy "+res[1]+" "+counters.get(res[1]).toString(), res[4].getBytes(), res[3])) {
 	    			

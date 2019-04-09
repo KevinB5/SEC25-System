@@ -52,7 +52,7 @@ public class User {
 	private HashMap<String,String> usrPorts = new HashMap<String,String>();
 	private ArrayList<String> allUsers = new ArrayList<String>();
 	private Library lib;
-	private static final String OK ="Ok";
+	private static final String OK ="OK";
 	private static final String NOK ="Not OK";
 	private String ip;
 	private static final String path2 = originPath()+"\\ports.txt";
@@ -103,8 +103,10 @@ public class User {
 			int rnd = random.nextInt();
 			PASS = idUser + rnd;
 			
-			PublicKey pub = this.createKeys(id, PASS);
-			try {
+			X509Certificate cert = this.createKeys(id, PASS);
+			PKI.getInstance();
+			PKI.setKey(idUser, cert);
+			/*try {
 				lib.sendKey(pub);
 			} catch (InvalidKeyException e) {
 				// TODO Auto-generated catch block
@@ -112,7 +114,7 @@ public class User {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 		}else {
 			throw new Exception();
 		}
@@ -156,7 +158,9 @@ public class User {
 	
 	 boolean verifySignature(byte[] data, byte[] signature, String uID) throws Exception {
 		Signature sig = Signature.getInstance("SHA1withRSA");
-		//TODO: sig.initVerify(lib.getKey(uID));
+		PKI.getInstance();
+		//System.out.println(lib.getKey(uID));
+		sig.initVerify(PKI.getKey(uID));
 		sig.update(data);
 		
 		return sig.verify(signature);
@@ -240,7 +244,7 @@ public class User {
     		}
     	
     	if(op.equals("buy"))
-    		if(res.length<3) {
+    		if(res.length<4) {
     			System.out.println("correct syntax: buy <userID> <goodID> <counter>");
     		}else {
     			this.buyGood(res[1], res[2], res[3]);
@@ -269,9 +273,12 @@ public class User {
 			e.printStackTrace();
 		}
 		System.out.println(res);
-		if( res.equals(OK))
+		if( res.equals(OK)) {
 			goods.replace(good, GoodState.ONSALE);
-		System.out.println(goods);
+
+			System.out.println("WHOOHOOO");
+			System.out.println(goods);
+		}
 		
 		
 	}
@@ -413,11 +420,12 @@ public class User {
 		
 	}
 
-	private PublicKey createKeys(String userID, String word) {
+	private X509Certificate createKeys(String userID, String word) {
 	    KeyPairGenerator keyGen;
 	    KeyPair keyPair = null;
 	    PublicKey pubKey = null;
 	    char [] pwdArray = "password".toCharArray();
+	    X509Certificate cert = null;
 		try {
 			
 			this.KEYSTORE = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -442,7 +450,13 @@ public class User {
 			
 			char[] password = word.toCharArray();
 			 
-			X509Certificate cert = this.generateCertificate(userID, keyPair, 0, "SHA1withRSA");
+			cert = this.generateCertificate(userID, keyPair, 0, "SHA1withRSA");
+			
+			//guardar o certificado na keystore para poder obter a pubkey
+			
+			
+			
+			
 			
 			Certificate[] chain = {cert};
 			
@@ -470,7 +484,7 @@ public class User {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			return pubKey;
+			return cert;
 	}
 	
 	private X509Certificate generateCertificate(String dn, KeyPair pair, int days, String algorithm)
