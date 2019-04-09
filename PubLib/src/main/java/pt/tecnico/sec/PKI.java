@@ -33,7 +33,7 @@ public class PKI {
 	public static int KEYSIZE ;
 	private static HashMap <String,PublicKey> KEYS = new HashMap <String,PublicKey>();// userID, Key
 	public static KeyStore KEYSTORE;
-	private static KeyPair notarykey;
+	private static KeyPair notarykey; 
 	private String[] users = {"user1, user2"};
 	private static char[] pwdArray = "password".toCharArray();
     private static PKI single_instance = null;
@@ -52,8 +52,8 @@ private PKI() {
 		
 		KEYSTORE.load(null, pwdArray);
 		Storage st = new Storage();
-		PATH = st.originPath()+ "\\KeyStoreFile.jks";
-		
+		PATH = Storage.originPath()+ "/KeyStoreFile.jks";
+		System.out.println(PATH);
 		try(FileOutputStream fos = new FileOutputStream(PATH) ){
 		    KEYSTORE.store(fos, pwdArray);
 		}
@@ -90,6 +90,7 @@ public static void setKey(String uID, X509Certificate cert) {
 		   FileOutputStream output = new FileOutputStream(PATH);
 		    KEYSTORE.store(output, pwdArray);
 		    output.close();
+		    System.out.println("xxx" +PATH);
 	} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();

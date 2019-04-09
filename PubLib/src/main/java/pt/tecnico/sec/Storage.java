@@ -19,7 +19,8 @@ import java.util.Scanner;
 public class Storage {
 	//private static String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
 	//private static String path = "../../"
-	private static String filename = "\\goods.txt";
+	private static String line = System.getProperty("file.separator");
+	private static String filename = line +"goods.txt";
 	private static String path = originPath() + filename;
 	private static HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	
@@ -40,11 +41,13 @@ public class Storage {
 	
 	public static String originPath() {
 		String origin = System.getProperty("user.dir");
+		System.out.println(origin);
 		int lastBar = 0;
 		for(int i=0; i < origin.length() ; i++) {
-			if(origin.charAt(i)=='\\')
+			if(origin.charAt(i)==line.charAt(0))
 				lastBar=i;
 		}
+		System.out.println(origin.substring(0,lastBar));
 		return origin.substring(0,lastBar);
 	}
 	
@@ -73,7 +76,7 @@ public class Storage {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}*/
-
+		System.out.println(path);
 		systemFile = new File(path);
 
 		
