@@ -55,7 +55,8 @@ public class User {
 	private static final String OK ="OK";
 	private static final String NOK ="Not OK";
 	private String ip;
-	private static final String path2 = originPath()+"\\ports.txt";
+	private static String line = System.getProperty("file.separator");
+	private static final String path2 = originPath()+ line + "ports.txt";
 
 	private static ServerSocket serverSocket=null;
     private static int PORT;
@@ -136,7 +137,7 @@ public class User {
 		String origin = System.getProperty("user.dir");
 		int lastBar = 0;
 		for(int i=0; i < origin.length() ; i++) {
-			if(origin.charAt(i)=='\\')
+			if(origin.charAt(i)==line.charAt(0))
 				lastBar=i;
 		}
 		return origin.substring(0,lastBar);
