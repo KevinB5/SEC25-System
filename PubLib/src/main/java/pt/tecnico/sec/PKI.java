@@ -1,5 +1,6 @@
 package pt.tecnico.sec;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -50,9 +51,14 @@ private PKI() {
 
 		
 		
-		KEYSTORE.load(null, pwdArray);
+		//KEYSTORE.load(null, pwdArray);
 		Storage st = new Storage();
 		PATH = Storage.originPath()+ "/KeyStoreFile.jks";
+
+		File keystorefile = new File(PATH);
+		InputStream keystoreStream = new FileInputStream(keystorefile);
+		KEYSTORE.load(keystoreStream, pwdArray);
+		
 		System.out.println(PATH);
 		try(FileOutputStream fos = new FileOutputStream(PATH) ){
 		    KEYSTORE.store(fos, pwdArray);
@@ -85,6 +91,9 @@ public static void setKey(String uID, X509Certificate cert) {
 	//KEYS.put(uID,key);
 	System.out.println(KEYS.keySet().toString());
 	try {
+		File keystorefile = new File(PATH);
+		InputStream keystoreStream = new FileInputStream(keystorefile);
+		KEYSTORE.load(keystoreStream, pwdArray);
 
 		KEYSTORE.setCertificateEntry(uID, cert);
 		   FileOutputStream output = new FileOutputStream(PATH);
