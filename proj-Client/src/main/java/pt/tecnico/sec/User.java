@@ -331,15 +331,15 @@ public class User {
 	 */
 	private void buyGood (String user, String good) {
 		String counter = counters.get(good);
-		for(String c : counters.values())
-			System.out.println(c);
+//		for(String c : counters.values())
+//			System.out.println(c);
 		if(counter==null) {
 			System.out.println("Need to verify state first");
 			return;
 		}
 		String res = "";
 		try {
-			Message msg  = lib.buyGood(user, good,counter);
+			lib.buyGood(user, good,counter);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -428,6 +428,7 @@ public class User {
     			ret=lib.transferGood(this.idUser, command.getID(), res[1],counters.get(res[1]), command.getSig());
 	    		if(ret.equals("OK"))
 	    			goods.remove(res[1], goods.get(res[1]));
+	    			lib.sendMessage(command.getID(),new Message(idUser, ret, sign(ret), null, null, null));
 	    		this.printgoods();
 	    		}
     		return ret;

@@ -145,7 +145,7 @@ public class Notary {
 
     	
     	String user = command.getID();
-    	
+    	//System.out.println("signature verification: "+this.verifySignature(command.getText(), command.getSig(), command.getID()));
 		if(this.verifySignature(command.getText(), command.getSig(), command.getID())) {
 			
 			System.out.println("user's "+ user + " signature validated");
@@ -166,7 +166,8 @@ public class Notary {
 			 * */
 	    	
 	    	String op =  res[0]; //the first word is the operation required
-	
+	    	//System.out.println("res: "+res);
+	    	//System.out.println("xxxopxxx: " + "xxx"+op+"xxx");
 	    	if(op .equals("sell")) {
 	
 	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
@@ -213,13 +214,13 @@ public class Notary {
 	
 	    	}
 	    	else
-	    		return new Message(this.idNotary, "no valid operation", null,null,null,null);
+	    		return new Message(this.idNotary, "no valid operation1", null,null,null,null);
 	    	
 		}
 		else
-			return new Message(this.idNotary, "no valid operation", null,null,null,null);
+			return new Message(this.idNotary, "no valid operation2", null,null,null,null);
 		
-		return new Message(this.idNotary, "no valid operation", null,null,null,null);
+		return new Message(this.idNotary, "no valid operation3", null,null,null,null);
     	
 	}
 	/**

@@ -225,10 +225,11 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		 		//
 		 		
 				//
-		 		resp = (Message) inU.readObject();
+		 		
+		 		//resp = (Message) inU.readObject();
 				//return execRequest(resp);
 				//this.stopConnectServer();
-				System.out.println(resp);
+				System.out.println("inU.readObject() " + inU.readObject());
 				return resp;
 
 			} catch (IOException e) {
@@ -238,7 +239,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				System.out.println("Must connect to user first");
 			
 			}catch(Exception e) {
-				System.out.println("Operation not valid");
+				e.printStackTrace();
 			}
 			//resp = pki.encrypt(,resp); falta buscar a chave privada do user
 	        return resp;
@@ -271,13 +272,12 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	    }
 
 
-	public Message buyGood(String userID, String goodID, String counter) throws Exception {//buyerID, goodID
+	public void buyGood(String userID, String goodID, String counter) throws Exception {//buyerID, goodID
 		String msg = "intentionbuy " +goodID +" "+ counter;
 		//manda 
-		Message result = sendMessage(userID,new Message(idUser, msg,user.sign(msg),null, null, null));
+		sendMessage(userID,new Message(idUser, msg, user.sign(msg),null, null, null));
+		//return sendMessage(userID,new Message(idUser, msg,user.sign(msg),null, null, null));
 		//sendMessage(0,msg);
-		
-		return sendMessage(userID, result);
 		
 	}
 
