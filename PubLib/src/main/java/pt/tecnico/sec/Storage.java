@@ -94,13 +94,15 @@ public class Storage {
 			while(scnr.hasNextLine()) {
 				String line = scnr.nextLine();
 				if(line.startsWith("#")) {
-					user = new String();
 					user = line.substring(1);
 				}else{
-					goods.put(line, user);		
+					goods.put(line, user);
+					System.out.println(line+" "+user);
 				}
 				//pwriter.println(line);
 			}
+			System.out.println("STORAGE:");
+			System.out.println(goods);
 		}catch(Exception e) {
 			System.out.println("Error in reading state file: " + e.getMessage());
 		}finally {

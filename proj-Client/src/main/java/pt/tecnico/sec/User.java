@@ -296,7 +296,7 @@ public class User {
 			//Random string of 20 lowercase characters
 			challenge = generateRandomString(20);
 			//update counter
-			counters.replace(good,lib.getStateOfGood(good,challenge));
+			counters.put(good,lib.getStateOfGood(good,challenge));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -310,7 +310,14 @@ public class User {
 	 * @param  
 	 */
 	private void buyGood (String user, String good) {
-		String counter = counters.get(user);
+		String counter = counters.get(good);
+		System.out.println("counter "+counter);
+		for(String c : counters.values())
+			System.out.println(c);
+		if(counter==null) {
+			System.out.println("Need to verify state first");
+			return;
+		}
 		String res = "";
 		try {
 			Message msg  = lib.buyGood(user, good,counter);
@@ -397,10 +404,10 @@ public class User {
     	
     	if(op.equals("intentionbuy")) {//buy buyerID goodID
     		String ret = "no such good";
-    		System.out.println("trying to buy "+ res[2]);
-    		if(goods.containsKey(res[2])) {
-    			ret=lib.transferGood(this.idUser, command.getID(), res[2],counters.get(res[2]), command.getSig());
-	    		if(ret.equals("Ok"))
+    		System.out.println("trying to buy "+ res[1]);
+    		if(goods.containsKey(res[1])) {
+    			ret=lib.transferGood(this.idUser, command.getID(), res[1],counters.get(res[1]), command.getSig());
+	    		if(ret.equals("OK"))
 	    			goods.remove(res[1], goods.get(res[1]));
 	    		this.printgoods();
 	    		}

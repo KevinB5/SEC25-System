@@ -46,6 +46,8 @@ public class Notary {
 		PKI.getInstance();
 		PKI.createKeys(idNotary);
 		System.out.println(states);
+		System.out.println(goods);
+		System.out.println(counters);
 	}
 	
 	String getID() {
@@ -168,12 +170,13 @@ public class Notary {
 	    	
 	    	String op =  res[0]; //the first word is the operation required
 	
+	    	System.out.println("OP: "+op);
 	    	if(op .equals("sell")) {
 	
 	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
 	    		System.out.println("Returning "+rs);
 	    		return new Message(this.idNotary, rs, null,null, null,null);
-	    		}
+	    		}else
 	    	if(op.equals("state")) {
 	    		/*
 	    		 * Returns "ONSALE/NOTONSALE <goodcounter>"
@@ -191,7 +194,7 @@ public class Notary {
 	    		
 	    		
 	
-	    	}
+	    	}else
 	    	/*
 	    	if(op.equals("buy"))
 	    		this.buyGood(res[1]);*/
@@ -202,13 +205,12 @@ public class Notary {
 	    		//System.out.println(res[2] + res[1]);
 	    		if(res[3].equals(counters.get(res[2]).toString()) && 
 	    				//"buy <userID> <goodID> <goodCounter>
-	    				this.verifySignature("buy "+user+" "+res[1]+" "+counters.get(res[2]).toString(), command.buyerSignature(), res[1])) {
-	    			
+	    				this.verifySignature("intentionbuy"+" "+res[2]+" "+counters.get(res[2]).toString(), command.buyerSignature(), res[1])) {
+		    		String rs=  this.transferGood(user,res[3],res[1],command.getSig(),command.buyerSignature());//seller, buyer, goodID
+		    		X509Certificate cert = PKI.generateCertificate(rs,PKI.getKeyPair(user), 7, "SHA1withRSA");
+		    		return new Message(this.idNotary, rs, null,null, null,cert);
 	    		}
 	
-	    		String rs=  this.transferGood(user,res[3],res[1],command.getSig(),res[4].getBytes());//seller, buyer, goodID
-	    		X509Certificate cert = PKI.generateCertificate(rs,PKI.getKeyPair(user), 7, "SHA1withRSA");
-	    		return new Message(this.idNotary, rs, null,null, null,cert);
 	
 	    	}
 	    	else
@@ -216,7 +218,9 @@ public class Notary {
 	    	
 		}
 		else
-			return null;
+			return new Message(this.idNotary, "no valid operation", null,null,null,null);
+		
+		return new Message(this.idNotary, "no valid operation", null,null,null,null);
     	
 	}
 	/**
@@ -227,6 +231,8 @@ public class Notary {
 	 *)
 	 */
 	private String transferGood( String seller,String buyer , String goodID,byte[] sigSeller,byte[]sigBuyer) {
+		//for(String s: goods.keySet()) {System.out.println(s);}
+		System.out.println(goods.get(goodID)+" "+seller);
 		if(goods.get(goodID).equals(seller)) {
 			if(states.get(goodID).equals(GoodState.ONSALE)) {
 				store.upDateFile(goodID, buyer);
@@ -239,7 +245,7 @@ public class Notary {
 				return OK;	
 			}
 			else
-				return "Good not on sale";
+				return NOK;
 		}
 		return NOK;
 	}

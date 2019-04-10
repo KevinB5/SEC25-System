@@ -122,6 +122,8 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		}else
 		System.out.println("STATE from notary: notary failed challenge");
 		//returns counter
+		System.out.println(split[split.length-1]);
+		System.out.println(split[split.length-2]);
 		return split[split.length-2];
 	}
 
