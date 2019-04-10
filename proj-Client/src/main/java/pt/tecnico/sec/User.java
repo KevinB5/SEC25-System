@@ -156,7 +156,7 @@ public class User {
 		Signature rsa = Signature.getInstance("SHA1withRSA"); 
 		rsa.initSign(this.getKey(PASS));
 		rsa.update(data.getBytes());
-		System.out.println("Signing " + data);
+		//System.out.println("Signing " + data);
 		return rsa.sign();
 	}
 	
@@ -237,7 +237,12 @@ public class User {
     	String op =  res[0];
 
     	if(op.equals("sell")) {
+    		if(res.length!=2) {
+    			System.out.println("correct syntax: sell <goodID>");
+    		}else {
+    		this.getStateOfGoodInvisible(res[1]);
     		this.intentionToSell(res[1]);
+    		}
     	}else
     	
     	if(op.equals("state"))
@@ -251,15 +256,16 @@ public class User {
     		if(res.length!=3) {
     			System.out.println("correct syntax: buy <sellerID> <goodID>");
     		}else {
+    			//this.getStateOfGoodInvisible(res[1]);
     			this.buyGood(res[1], res[2]);
     		}
-    	
+    	/*
     	if(op.equals("transfer")) {
     		if(res.length!=3)
         		System.out.println("correct syntax: transfer <buyerID> <goodID>");
     		this.transferGood(res[1], res[2]);
 
-    	}else
+    	}else*/
     	
     	if(op.equals("connect"))
     		this.connectToUsers();
@@ -291,6 +297,7 @@ public class User {
 	 * @param good
 	 * @return estado do good
 	 */
+	
 	private void getStateOfGood(String good) {
 		try {
 			//Random string of 20 lowercase characters
@@ -303,6 +310,19 @@ public class User {
 		}
 	}
 	
+	private void getStateOfGoodInvisible(String good) {
+		try {
+			//Random string of 20 lowercase characters
+			challenge = generateRandomString(20);
+			//update counter
+			counters.put(good,lib.getStateOfGoodInvisible(good,challenge));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
 	/**
 	 * Informar ao notary que quer comprar um dado good
 	 * 
@@ -311,7 +331,6 @@ public class User {
 	 */
 	private void buyGood (String user, String good) {
 		String counter = counters.get(good);
-		System.out.println("counter "+counter);
 		for(String c : counters.values())
 			System.out.println(c);
 		if(counter==null) {

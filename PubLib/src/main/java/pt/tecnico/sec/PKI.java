@@ -59,7 +59,7 @@ private PKI() {
 		InputStream keystoreStream = new FileInputStream(keystorefile);
 		KEYSTORE.load(keystoreStream, pwdArray);
 		
-		System.out.println(PATH);
+		//System.out.println(PATH);
 		try(FileOutputStream fos = new FileOutputStream(PATH) ){
 		    KEYSTORE.store(fos, pwdArray);
 		}
@@ -89,7 +89,7 @@ public static PKI getInstance()
 public static void setKey(String uID, X509Certificate cert) {
 	
 	//KEYS.put(uID,key);
-	System.out.println(KEYS.keySet().toString());
+	//System.out.println(KEYS.keySet().toString());
 	try {
 		File keystorefile = new File(PATH);
 		InputStream keystoreStream = new FileInputStream(keystorefile);
@@ -99,7 +99,7 @@ public static void setKey(String uID, X509Certificate cert) {
 		   FileOutputStream output = new FileOutputStream(PATH);
 		    KEYSTORE.store(output, pwdArray);
 		    output.close();
-		    System.out.println("xxx" +PATH);
+		    //System.out.println("xxx" +PATH);
 	} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
@@ -117,8 +117,8 @@ public static PublicKey getKey(String uID) throws Exception {
 	keyStore.load(fos, pwdArray);
 
 
-System.out.println(KEYSTORE.containsAlias(uID));
-System.out.println(KEYSTORE.aliases());
+//System.out.println(KEYSTORE.containsAlias(uID));
+//System.out.println(KEYSTORE.aliases());
 	
 	return keyStore.getCertificate(uID).getPublicKey();
 	
@@ -138,7 +138,7 @@ public static PrivateKey getMyKey(String id) {//userID, password
 	} catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
 		e.printStackTrace();
 	}
-	System.out.println("handing out private key ");
+	//System.out.println("handing out private key ");
         return myPrivateKey;
 	
 }
@@ -226,11 +226,13 @@ public byte[] decrypt(PublicKey publicKey, byte [] encrypted) throws Exception {
 
 
 
-public static X509Certificate generateCertificate(String dn, KeyPair pair, int days, String algorithm)
+public static X509Certificate generateCertificate(String dn,  int days, String algorithm)
 		  throws GeneralSecurityException, IOException
 		{
-		  
-		  PrivateKey privkey = pair.getPrivate();
+		  System.out.println("PRIVATE: "+notarykey.getPrivate());
+		  System.out.println("PUBLIC: "+notarykey.getPublic());
+
+		  PrivateKey privkey = notarykey.getPrivate();
 		  X509CertInfo info = new X509CertInfo();
 		  Date from = new Date();
 		  Date to = new Date(from.getTime() + days * 86400000l);
@@ -242,7 +244,7 @@ public static X509Certificate generateCertificate(String dn, KeyPair pair, int d
 		  info.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(sn));
 		  info.set(X509CertInfo.SUBJECT, owner);
 		  info.set(X509CertInfo.ISSUER,owner);
-		  info.set(X509CertInfo.KEY, new CertificateX509Key(pair.getPublic()));
+		  info.set(X509CertInfo.KEY, new CertificateX509Key(notarykey.getPublic()));
 		  info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
 		  AlgorithmId algo = new AlgorithmId(AlgorithmId.md5WithRSAEncryption_oid);
 		  info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algo));

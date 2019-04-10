@@ -45,9 +45,6 @@ public class Notary {
 		}
 		PKI.getInstance();
 		PKI.createKeys(idNotary);
-		System.out.println(states);
-		System.out.println(goods);
-		System.out.println(counters);
 	}
 	
 	String getID() {
@@ -170,11 +167,10 @@ public class Notary {
 	    	
 	    	String op =  res[0]; //the first word is the operation required
 	
-	    	System.out.println("OP: "+op);
 	    	if(op .equals("sell")) {
 	
 	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
-	    		System.out.println("Returning "+rs);
+	    		//System.out.println("Returning "+rs);
 	    		return new Message(this.idNotary, rs, null,null, null,null);
 	    		}else
 	    	if(op.equals("state")) {
@@ -188,7 +184,7 @@ public class Notary {
 	    		}
 	    		else {
 	    			String rs=  this.verifiyStateOfGood(res[1],res[2]); 
-	    			System.out.println(rs);
+	    			//System.out.println(rs);
 	    			return new Message(this.idNotary, rs, null,null, null,null);
 	    		}
 	    		
@@ -206,9 +202,12 @@ public class Notary {
 	    		if(res[3].equals(counters.get(res[2]).toString()) && 
 	    				//"buy <userID> <goodID> <goodCounter>
 	    				this.verifySignature("intentionbuy"+" "+res[2]+" "+counters.get(res[2]).toString(), command.buyerSignature(), res[1])) {
-		    		String rs=  this.transferGood(user,res[3],res[1],command.getSig(),command.buyerSignature());//seller, buyer, goodID
-		    		X509Certificate cert = PKI.generateCertificate(rs,PKI.getKeyPair(user), 7, "SHA1withRSA");
-		    		return new Message(this.idNotary, rs, null,null, null,cert);
+		    		String rs=  this.transferGood(user,res[1],res[2],command.getSig(),command.buyerSignature());//seller, buyer, goodID
+		    		if(rs!=NOK) {
+			    		X509Certificate cert = PKI.generateCertificate(rs, 7, "SHA1withRSA");
+			    		return new Message(this.idNotary, rs, null,null, null,cert);
+		    		}
+		    		
 	    		}
 	
 	
@@ -232,7 +231,6 @@ public class Notary {
 	 */
 	private String transferGood( String seller,String buyer , String goodID,byte[] sigSeller,byte[]sigBuyer) {
 		//for(String s: goods.keySet()) {System.out.println(s);}
-		System.out.println(goods.get(goodID)+" "+seller);
 		if(goods.get(goodID).equals(seller)) {
 			if(states.get(goodID).equals(GoodState.ONSALE)) {
 				store.upDateFile(goodID, buyer);
@@ -242,7 +240,7 @@ public class Notary {
 				counters.replace(goodID,counters.get(goodID)+1);
 				writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
 				//enviar certificado
-				return OK;	
+				return goodID+" "+seller+" "+ buyer+" "+counters.get(goodID)+ " "+sigSeller + " "+sigBuyer;	
 			}
 			else
 				return NOK;

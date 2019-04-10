@@ -41,13 +41,11 @@ public class Storage {
 	
 	public static String originPath() {
 		String origin = System.getProperty("user.dir");
-		System.out.println(origin);
 		int lastBar = 0;
 		for(int i=0; i < origin.length() ; i++) {
 			if(origin.charAt(i)==line.charAt(0))
 				lastBar=i;
 		}
-		System.out.println(origin.substring(0,lastBar));
 		return origin.substring(0,lastBar);
 	}
 	
@@ -76,7 +74,6 @@ public class Storage {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}*/
-		System.out.println(path);
 		systemFile = new File(path);
 
 		
@@ -86,7 +83,6 @@ public class Storage {
 			//System.out.println(systemFile.isFile());
 				
 			String user = "";
-			//este é o caminho mais pequeno que conseguimos pôr a funcionar -Mário 
 			//File text = new File(path);
 		    //pwriter = new PrintWriter(new FileWriter(systemFile));
 
@@ -97,12 +93,9 @@ public class Storage {
 					user = line.substring(1);
 				}else{
 					goods.put(line, user);
-					System.out.println(line+" "+user);
 				}
 				//pwriter.println(line);
 			}
-			System.out.println("STORAGE:");
-			System.out.println(goods);
 		}catch(Exception e) {
 			System.out.println("Error in reading state file: " + e.getMessage());
 		}finally {

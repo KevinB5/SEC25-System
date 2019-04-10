@@ -118,12 +118,10 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			for(i=0;i<split.length-2;i++) {
 				text+=split[i]+" ";
 			}
-			System.out.println("STATE from notary " +text);
+			System.out.println("STATE from notary: " +text);
 		}else
 		System.out.println("STATE from notary: notary failed challenge");
 		//returns counter
-		System.out.println(split[split.length-1]);
-		System.out.println(split[split.length-2]);
 		return split[split.length-2];
 	}
 
@@ -158,7 +156,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	
 	public void connectUser( String Uip,String userID, int Uport) {
 		try {
-			System.out.println("connecting to "+userID);
+			System.out.println("connecting to "+userID+"...");
 
 			clientSocket = new Socket(Uip, Uport);
 			System.out.println("connected to server at port: "+ Uport);
@@ -168,7 +166,8 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			readers.put(userID, inU);
 			
 		}catch(IOException ie) {
-			ie.printStackTrace();
+			System.out.println(userID + " is not connected");
+			//ie.printStackTrace();
 		}
 	} 
 	
@@ -192,7 +191,25 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		
 	}
 	
+	/*
 	
+	public Message sendMessage(String uID, Message msg) throws Exception {
+		Message res = null;
+		try {
+			outU.writeObject(msg);
+			res = (Message)inU.readObject();
+			System.out.println(res.getText());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return res;
+		
+	}
+	*/
 	
 	 public Message sendMessage(String uID, Message msg) throws Exception {
 		 ObjectOutputStream printer;
@@ -202,10 +219,13 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		 	
 		 		printer= this.writters.get(uID);
 		 		reader = this.readers.get(uID);
-		
+		 		
 		 		outU.writeObject(msg);
-	        
-				resp = (Message) inU.readObject();
+		 		//outU.reset();
+		 		//
+		 		
+				//
+		 		resp = (Message) inU.readObject();
 				//return execRequest(resp);
 				//this.stopConnectServer();
 				System.out.println(resp);
@@ -261,6 +281,17 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		
 	}
 
+
+
+	public String getStateOfGoodInvisible(String goodID, String challenge) throws InvalidKeyException, Exception {
+		String msg= STATE + " " + goodID + " "+challenge;
+		Message result=  send( new Message(idUser, msg, user.sign(msg),null, null, null));
+		String[] split = result.getText().split(" ");
+		if(split[split.length-1].equals(challenge)) {
+		return split[split.length-2];}
+		else
+			return "";
+	}
 /*
 	
 	public String sellGood(String userID, String buyerID, String goodID,byte[] buyerSig) throws InvalidKeyException, Exception {//buyerID, goodID
