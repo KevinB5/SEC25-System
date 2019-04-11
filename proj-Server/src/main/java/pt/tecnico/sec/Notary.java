@@ -207,7 +207,7 @@ public class Notary {
 	    			String rs=  this.transferGood(user,res[1],res[2],command.getSig(),command.buyerSignature());//seller, buyer, goodID
 		    		if(!rs.equals(NOK)) {
 		    			System.out.println("oky doky");
-			    		X509Certificate cert = PKI.generateCertificate(rs, 7, "SHA1withRSA");
+			    		X509Certificate cert = null;
 			    		return new Message(this.idNotary, rs, null,null, null,cert);
 		    		}
 		    		

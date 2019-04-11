@@ -10,9 +10,9 @@ public class test {
 		eIDLib eid = new eIDLib();
 		//eid.start();
 		X509Certificate cert = null;
-		
+		/*
 		try {
-			cert = PKI.generateCertificate("user1" , 7, "SHA1withRSA");
+			//cert = PKI.generateCertificate("user1" , 7, "SHA1withRSA");
 		} catch (GeneralSecurityException e) {
 			// TODO Auto-generated catch block
 			
@@ -20,7 +20,7 @@ public class test {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		
 		if(eid.verifySignature(eid.sign(cert,"teste"),"teste"))
 			System.out.println("VALIDOU");
