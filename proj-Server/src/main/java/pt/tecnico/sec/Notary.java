@@ -80,10 +80,11 @@ public class Notary {
 		System.out.println("Verifying "+goodID);
 		if(!goods.containsKey(goodID))
 			return "No such good";
+		int novo = counters.get(goodID)+1;
 		if(goods.get(goodID).equals(userID)) {
 			states.replace(goodID, GoodState.ONSALE);
-			counters.replace(goodID, counters.get(goodID)+1);
-			System.out.println(states);
+			counters.replace(goodID,novo );
+			System.out.println(counters.get(goodID));
 			
 			return OK;
 		}
@@ -166,6 +167,7 @@ public class Notary {
 			 * */
 	    	
 	    	String op =  res[0]; //the first word is the operation required
+	    	System.out.println(op);
 	    	//System.out.println("res: "+res);
 	    	//System.out.println("xxxopxxx: " + "xxx"+op+"xxx");
 	    	if(op .equals("sell")) {
@@ -191,26 +193,26 @@ public class Notary {
 	    		
 	    		
 	
-	    	}else
-	    	/*
-	    	if(op.equals("buy"))
-	    		this.buyGood(res[1]);*/
+	    	}
 	    	
 	    	if(op.equals("transfer")) {
+	    		
+	    		
 	    		//"transfer <buyerID> <goodID> <goodcounter>"
 	    		//below: first verifies counter number of seller and then confirms that buy signature is associated to a message
-	    		//System.out.println(res[2] + res[1]);
-	    		if(res[3].equals(counters.get(res[2]).toString()) && 
+	    		System.out.println(counters.get(res[2]) +" "+ res[3]);
+	    		if(Integer.parseInt(res[3]) == (counters.get(res[2]))/* && 
 	    				//"buy <userID> <goodID> <goodCounter>
-	    				this.verifySignature("intentionbuy"+" "+res[2]+" "+counters.get(res[2]).toString(), command.buyerSignature(), res[1])) {
-		    		String rs=  this.transferGood(user,res[1],res[2],command.getSig(),command.buyerSignature());//seller, buyer, goodID
-		    		if(rs!=NOK) {
+	    				this.verifySignature("intentionbuy"+" "+res[2]+" "+counters.get(res[2]).toString(), command.buyerSignature(), res[1])*/) {
+		    		System.out.println("puta q pariu");
+	    			String rs=  this.transferGood(user,res[1],res[2],command.getSig(),command.buyerSignature());//seller, buyer, goodID
+		    		if(!rs.equals(NOK)) {
+		    			System.out.println("oky doky");
 			    		X509Certificate cert = PKI.generateCertificate(rs, 7, "SHA1withRSA");
 			    		return new Message(this.idNotary, rs, null,null, null,cert);
 		    		}
 		    		
 	    		}
-	
 	
 	    	}
 	    	else
@@ -232,8 +234,12 @@ public class Notary {
 	 */
 	private String transferGood( String seller,String buyer , String goodID,byte[] sigSeller,byte[]sigBuyer) {
 		//for(String s: goods.keySet()) {System.out.println(s);}
+		System.out.println("goods owner "+ goods.get(goodID));
+
 		if(goods.get(goodID).equals(seller)) {
+			System.out.println("SELLER OK "+ seller);
 			if(states.get(goodID).equals(GoodState.ONSALE)) {
+				System.out.println("we in");
 				store.upDateFile(goodID, buyer);
 				goods.replace(goodID, buyer); System.out.println("replacing " + goodID + " " + buyer);
 				states.replace(goodID, GoodState.NOTONSALE);

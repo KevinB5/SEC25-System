@@ -302,8 +302,15 @@ public class User {
 		try {
 			//Random string of 20 lowercase characters
 			challenge = generateRandomString(20);
+			String s = lib.getStateOfGood(good,challenge);
+			System.out.println("PUTTING COUNTER AT " + s);
+
 			//update counter
-			counters.put(good,lib.getStateOfGood(good,challenge));
+			if(!counters.containsKey(good))
+				counters.put(good,s);
+			else
+				counters.replace(good,s);
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -314,8 +321,9 @@ public class User {
 		try {
 			//Random string of 20 lowercase characters
 			challenge = generateRandomString(20);
+			String s = lib.getStateOfGoodInvisible(good,challenge);
 			//update counter
-			counters.put(good,lib.getStateOfGoodInvisible(good,challenge));
+			counters.put(good,s);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -339,7 +347,9 @@ public class User {
 		}
 		String res = "";
 		try {
-			lib.buyGood(user, good,counter);
+			Message msg = lib.buyGood(user, good,counter);
+			res = msg.getText();
+			System.out.println("RESPONSE "+ res);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -409,7 +419,12 @@ public class User {
     		return null;
     	}
     	String op =  res[0];
+    	
+    	System.out.println("RECEIVED from "+ command.getID()+"message "+ op);
     	String error = "Not valid";
+
+    	/*
+    	
     	if(command.getID()=="notary") {
     		//if notary is sending second key we update
     		if(command.getText()=="key2") {
@@ -417,35 +432,33 @@ public class User {
     			notarypublickey=(PublicKey) command.getObj();
     		}else
     		if(this.verifySignatureNotary(msg.getBytes(), command.getSig()));
-    	}else
+    	}*/
     	if(!this.verifySignature(msg.getBytes(), command.getSig(), command.getID()))
     		return new Message(idUser, error, sign(error));
     	
-    	if(op.equals("intentionbuy")) {//buy buyerID goodID
+    	if(op.equals("intentionbuy")) {//buy goodID counter
     		String ret = "no such good";
     		System.out.println("trying to buy "+ res[1]);
     		if(goods.containsKey(res[1])) {
-    			ret=lib.transferGood(this.idUser, command.getID(), res[1],counters.get(res[1]), command.getSig());
-	    		if(ret.equals("OK"))
+    			System.out.println("yeeet");
+    			String rep=lib.transferGood(this.idUser, command.getID(), res[1],res[2], command.getSig());
+	    		System.out.println(rep);
+    			if(ret.equals("OK"))
 	    			goods.remove(res[1], goods.get(res[1]));
-	    			lib.sendMessage(command.getID(),new Message(idUser, ret, sign(ret)));
 	    		this.printgoods();
+	    		return new Message(idUser, rep, sign(rep));//construtor que poe os restantes parametros a null automáticamente
 	    		}
     		return new Message(idUser, ret, sign(ret));//construtor que poe os restantes parametros a null automáticamente
     	}
 
     	else {
-    		String errOp = "no valid operation " + command ;
-    		return new Message(idUser, errOp,sign(errOp) );
-    		}
+        	String errOp = "no valid operation " + command.getText();
+        	return new Message(idUser, errOp,sign(errOp) );
+    	}
+
+    		
 	}
 	
-	private boolean verifySignatureNotary(byte[] bytes, byte[] sig) throws Exception {
-		Cipher cipher = Cipher.getInstance("RSA");  
-	    cipher.init(Cipher.DECRYPT_MODE, notarypublickey);
-	    return (bytes==cipher.doFinal(sig));
-	}
-
 	private PrivateKey getKey(String password) {//userID, password
 		
 	    KeyStore.ProtectionParameter protParam =
