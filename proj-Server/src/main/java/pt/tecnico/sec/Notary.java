@@ -204,7 +204,6 @@ public class Notary {
 	    		if(Integer.parseInt(res[3]) == (counters.get(res[2]))/* && 
 	    				//"buy <userID> <goodID> <goodCounter>
 	    				this.verifySignature("intentionbuy"+" "+res[2]+" "+counters.get(res[2]).toString(), command.buyerSignature(), res[1])*/) {
-		    		System.out.println("puta q pariu");
 	    			String rs=  this.transferGood(user,res[1],res[2],command.getSig(),command.buyerSignature());//seller, buyer, goodID
 		    		if(!rs.equals(NOK)) {
 		    			System.out.println("oky doky");
