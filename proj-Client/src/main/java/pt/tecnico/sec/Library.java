@@ -18,8 +18,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class Library {
-	
-	private Socket clientSocket;
+	private Socket servConnect;
 	private ServerSocket serverSocket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
@@ -33,8 +32,8 @@ public class Library {
     private static final String BUY = "buy";
     private static final String TRANSFER = "transfer";
 	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\ports.txt";
-	private HashMap <String, ObjectOutputStream> writters = new HashMap<String, ObjectOutputStream>();
-	private HashMap <String, ObjectInputStream> readers = new HashMap<String, ObjectInputStream>();
+	private HashMap <String, Socket> sockets = new HashMap<String, Socket>();
+	//private HashMap <String, ObjectInputStream> readers = new HashMap<String, ObjectInputStream>();
 	private static final String exceptMessage = "Must sign message first";
 
     private static int PORT;
@@ -128,7 +127,6 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	
 	public String transferGood(String userID, String buyer,String goodID, String counter, byte[] buyerSig) throws InvalidKeyException, Exception {
 		String msg=TRANSFER +" "+ buyer+" "+ goodID +" "+ counter; 
-		System.out.println("sending "+msg);
 		Message result=  send( new Message(idUser, msg, user.sign(msg),buyerSig, null, null));
 	
 		return result.getText();
@@ -140,10 +138,10 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	public void connectServer(String Sip, int Sport) {
 		try {
 
-			clientSocket = new Socket(Sip, Sport);
+			this.servConnect = new Socket(Sip, Sport);
 			System.out.println("connected to server at port: "+ Sport);
-            out = new ObjectOutputStream(clientSocket.getOutputStream()); 
-            in = new ObjectInputStream(clientSocket.getInputStream());
+            out = new ObjectOutputStream(servConnect.getOutputStream()); 
+            in = new ObjectInputStream(servConnect.getInputStream());
 			System.out.println("all good");
 
 		} catch (BindException e) {
@@ -159,12 +157,9 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		try {
 			System.out.println("connecting to "+userID+"...");
 
-			clientSocket = new Socket(Uip, Uport);
+			Socket clientSocket = new Socket(Uip, Uport);
 			System.out.println("connected to server at port: "+ Uport);
-			outU = new ObjectOutputStream(clientSocket.getOutputStream());
-			inU= new ObjectInputStream(clientSocket.getInputStream());
-			writters.put(userID, outU);
-			readers.put(userID, inU);
+			this.sockets.put(userID, clientSocket);
 			
 		}catch(IOException ie) {
 			System.out.println(userID + " is not connected");
@@ -217,9 +212,11 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		 ObjectInputStream reader=null;
 		 Message resp= null;
 		 try {
+			 System.out.println("Sending message to "+ uID);
 		 	
-		 		printer= this.writters.get(uID);
-		 		reader = this.readers.get(uID);
+			 Socket clientSocket = sockets.get(uID);
+				outU = new ObjectOutputStream(clientSocket.getOutputStream());
+				inU= new ObjectInputStream(clientSocket.getInputStream());
 		 		
 		 		outU.writeObject(msg);
 		 		//outU.reset();
@@ -260,7 +257,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	        try {
 				in.close();
 		        out.close();
-		        clientSocket.close();
+		        servConnect.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -268,11 +265,13 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 
 	    }
 	 
-	 public void stopConnectUser() {
+	 public void stopConnectUsers() {
 	        try {
+	        	for(Socket clientSocket : sockets.values()) {
 				inU.close();
 		        outU.close();
 		        clientSocket.close();
+	        	}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

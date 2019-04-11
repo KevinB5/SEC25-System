@@ -246,7 +246,8 @@ public class Notary {
 				counters.replace(goodID,counters.get(goodID)+1);
 				writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
 				//enviar certificado
-				return goodID+" "+seller+" "+ buyer+" "+counters.get(goodID)+ " "+sigSeller + " "+sigBuyer;	
+				//return goodID+" "+seller+" "+ buyer+" "+counters.get(goodID)+ 	" "+sigSeller + " "+sigBuyer;
+				return OK;
 			}
 			else
 				return NOK;

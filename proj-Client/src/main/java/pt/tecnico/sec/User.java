@@ -349,13 +349,13 @@ public class User {
 		try {
 			Message msg = lib.buyGood(user, good,counter);
 			res = msg.getText();
-			System.out.println("RESPONSE "+ res);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		if(res.equals(OK)) {
+			System.out.println("yeeeyeee");
 			goods.put(good, GoodState.NOTONSALE);
 			printgoods();
 		}
@@ -371,15 +371,16 @@ public class User {
 		String res= "";
 		try {
 			res = lib.transferGood(idUser, buyer, good, counter, buyersigs.get(buyer));
+			
+			if(res.equals(OK)) {
+				System.out.println(res);
+				sellGood(good);
+				goods.remove(good);
+				printgoods();
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
-		if(res.equals(OK)) {
-			sellGood(good);
-			goods.remove(good);
-			printgoods();
 		}
 		
 	}
@@ -443,7 +444,7 @@ public class User {
     			System.out.println("yeeet");
     			String rep=lib.transferGood(this.idUser, command.getID(), res[1],res[2], command.getSig());
 	    		System.out.println(rep);
-    			if(ret.equals("OK"))
+    			if(rep.equals("OK"))
 	    			goods.remove(res[1], goods.get(res[1]));
 	    		this.printgoods();
 	    		return new Message(idUser, rep, sign(rep));//construtor que poe os restantes parametros a null automáticamente
