@@ -399,14 +399,14 @@ public class User {
 	}
 	
 	
-	public String execute(Message command) throws Exception {
+	public Message execute(Message command) throws Exception {
 		//"correct syntax: buy <sellerID> <goodID>"
 
 		String msg = command.getText();
     	String [] res = msg.split(" ");
     	if(res.length<2) {
     		System.out.println("Operation not valid: missing arguments");
-    		return "";
+    		return null;
     	}
     	String op =  res[0];
     	String error = "Not valid";
@@ -419,7 +419,7 @@ public class User {
     		if(this.verifySignatureNotary(msg.getBytes(), command.getSig()));
     	}else
     	if(!this.verifySignature(msg.getBytes(), command.getSig(), command.getID()))
-    		return error;
+    		return new Message(idUser, error, sign(error));
     	
     	if(op.equals("intentionbuy")) {//buy buyerID goodID
     		String ret = "no such good";
@@ -428,14 +428,16 @@ public class User {
     			ret=lib.transferGood(this.idUser, command.getID(), res[1],counters.get(res[1]), command.getSig());
 	    		if(ret.equals("OK"))
 	    			goods.remove(res[1], goods.get(res[1]));
-	    			lib.sendMessage(command.getID(),new Message(idUser, ret, sign(ret), null, null, null));
+	    			lib.sendMessage(command.getID(),new Message(idUser, ret, sign(ret)));
 	    		this.printgoods();
 	    		}
-    		return ret;
+    		return new Message(idUser, ret, sign(ret));//construtor que poe os restantes parametros a null automáticamente
     	}
 
-    	else
-    		return "no valid operation " + command ;
+    	else {
+    		String errOp = "no valid operation " + command ;
+    		return new Message(idUser, errOp,sign(errOp) );
+    		}
 	}
 	
 	private boolean verifySignatureNotary(byte[] bytes, byte[] sig) throws Exception {

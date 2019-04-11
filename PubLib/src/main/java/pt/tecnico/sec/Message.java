@@ -3,6 +3,8 @@ package pt.tecnico.sec;
 import java.io.Serializable;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 //must implement Serializable in order to be sent
 public class Message implements Serializable{
@@ -13,18 +15,36 @@ public class Message implements Serializable{
 	
 private final String text;
 private final byte[] signature;
-private final Object objects;
+private final PublicKey key;
 private final String id;
 private final byte[] buyerSignature;
 private final X509Certificate cert;
 
- public Message(String id, String text, byte[] signature, byte[] buyerSignature, Object key, X509Certificate cert) {
+ public Message(String id, String text, byte[] signature, byte[] buyerSignature, PublicKey key, X509Certificate cert) {
      this.text = text;
      this.signature = signature;
-     this.objects = key;
+     this.key = key;
      this.id=id;
      this.buyerSignature=buyerSignature;
      this.cert = cert;
+ }
+ 
+ public Message(String id, String text, byte[] signature, HashMap<String,Object> secParameters ) {
+     this.text = text;
+     this.signature = signature;
+     this.id=id;
+     this.buyerSignature = (byte[]) secParameters.get("signature");
+     this.cert = (X509Certificate) secParameters.get("certificate");
+     this.key = (PublicKey) secParameters.get("key");
+ }
+ 
+ public Message(String id, String text, byte[] signature) {
+     this.text = text;
+     this.signature = signature;
+     this.id=id;
+     this.buyerSignature = null;
+     this.cert = null;
+     this.key = null;
  }
  
  public String getID() {
@@ -44,7 +64,7 @@ private final X509Certificate cert;
 	 return buyerSignature;
  }
  
- public Object getObj() {
-	 return objects;
+ public PublicKey getObj() {
+	 return key;
  }
 }

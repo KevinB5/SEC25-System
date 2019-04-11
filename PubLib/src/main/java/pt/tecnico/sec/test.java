@@ -12,7 +12,7 @@ public class test {
 		X509Certificate cert = null;
 		
 		try {
-			cert = PKI.generateCertificate("user1" , PKI.createKeys("user1"), 7, "SHA1withRSA");
+			cert = PKI.generateCertificate("user1" , 7, "SHA1withRSA");
 		} catch (GeneralSecurityException e) {
 			// TODO Auto-generated catch block
 			

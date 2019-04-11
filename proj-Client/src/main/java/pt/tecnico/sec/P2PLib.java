@@ -86,7 +86,7 @@ public class P2PLib implements Runnable{
 		            
 			        Message cmd = (Message) in.readObject();
 			       
-						String res = user.execute(cmd);
+						Message res = user.execute(cmd);
 						out.writeObject(res);
             	}
 			} catch (Exception e) {

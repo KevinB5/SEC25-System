@@ -212,8 +212,8 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	*/
 	
 	 public Message sendMessage(String uID, Message msg) throws Exception {
-		 ObjectOutputStream printer;
-		 ObjectInputStream reader;
+		 ObjectOutputStream printer= null;
+		 ObjectInputStream reader=null;
 		 Message resp= null;
 		 try {
 		 	
@@ -228,7 +228,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		 		//resp = (Message) inU.readObject();
 				//return execRequest(resp);
 				//this.stopConnectServer();
-		 		Object temp = inU.readObject();
+		 		Message temp = (Message) inU.readObject();
 		 		if (temp.getClass().equals(String.class))
 		 			System.out.println("STRING");
 		 			//TODO: Falta fazer com que leia String
@@ -236,14 +236,15 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		 			resp = (Message) temp;
 		 		}
 		 		
-				System.out.println("inU.readObject() " + inU.readObject());
+				//System.out.println("inU.readObject() " + inU.readObject());
 				return resp;
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}catch(NullPointerException ne) {
-				System.out.println("Must connect to user first");
+				System.out.println(ne.getMessage());
+				
 			
 			}catch(Exception e) {
 				e.printStackTrace();
