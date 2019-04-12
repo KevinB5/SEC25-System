@@ -202,7 +202,7 @@ public class User {
 					lines += " "+line;	
 					if(line.charAt(0)==('#')) {
 						allUsers.add(line.replace("#",""));
-						System.out.println("USER: "+line.replace("#",""));
+//						System.out.println("USER: "+line.replace("#",""));
 					}
 				}
 			
@@ -303,7 +303,7 @@ public class User {
 			//Random string of 20 lowercase characters
 			challenge = generateRandomString(20);
 			String s = lib.getStateOfGood(good,challenge);
-			System.out.println("PUTTING COUNTER AT " + s);
+//			System.out.println("PUTTING COUNTER AT " + s);
 
 			//update counter
 			if(!counters.containsKey(good))
@@ -355,7 +355,7 @@ public class User {
 		}
 		
 		if(res.equals(OK)) {
-			System.out.println("yeeeyeee");
+//			System.out.println("yeeeyeee");
 			goods.put(good, GoodState.NOTONSALE);
 			printgoods();
 		}
@@ -373,7 +373,7 @@ public class User {
 			res = lib.transferGood(idUser, buyer, good, counter, buyersigs.get(buyer));
 			
 			if(res.equals(OK)) {
-				System.out.println(res);
+//				System.out.println(res);
 				sellGood(good);
 				goods.remove(good);
 				printgoods();
@@ -441,9 +441,8 @@ public class User {
     		String ret = "no such good";
     		System.out.println("trying to buy "+ res[1]);
     		if(goods.containsKey(res[1])) {
-    			System.out.println("yeeet");
     			String rep=lib.transferGood(this.idUser, command.getID(), res[1],res[2], command.getSig());
-	    		System.out.println(rep);
+//	    		System.out.println(rep);
     			if(rep.equals("OK"))
 	    			goods.remove(res[1], goods.get(res[1]));
 	    		this.printgoods();
@@ -506,7 +505,7 @@ public class User {
 			pubKey = keyPair.getPublic();
 			//KEYS.put(userID,pubKey);
 			
-			System.out.println("saving Public key for "+ userID);
+//			System.out.println("saving Public key for "+ userID);
 			
 			
 			char[] password = word.toCharArray();

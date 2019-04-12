@@ -40,7 +40,7 @@ public final class LibraryServer  implements Runnable {
 			        Message msg = (Message) in.readObject();
 			        
 			        String cmd = msg.getText();
-			        System.out.println(cmd);
+//			        System.out.println(cmd);
 			        String[] spl = cmd.split(" ");
 			        
 			       /*

@@ -167,7 +167,7 @@ public class Notary {
 			 * */
 	    	
 	    	String op =  res[0]; //the first word is the operation required
-	    	System.out.println(op);
+//	    	System.out.println(op);
 	    	//System.out.println("res: "+res);
 	    	//System.out.println("xxxopxxx: " + "xxx"+op+"xxx");
 	    	if(op .equals("sell")) {
@@ -200,7 +200,7 @@ public class Notary {
 	    		
 	    		//"transfer <buyerID> <goodID> <goodcounter>"
 	    		//below: first verifies counter number of seller and then confirms that buy signature is associated to a message
-	    		System.out.println(counters.get(res[2]) +" "+ res[3]);
+//	    		System.out.println(counters.get(res[2]) +" "+ res[3]);
 	    		if(Integer.parseInt(res[3]) == (counters.get(res[2]))/* && 
 	    				//"buy <userID> <goodID> <goodCounter>
 	    				this.verifySignature("intentionbuy"+" "+res[2]+" "+counters.get(res[2]).toString(), command.buyerSignature(), res[1])*/) {
@@ -240,11 +240,12 @@ public class Notary {
 		System.out.println("goods owner "+ goods.get(goodID));
 
 		if(goods.get(goodID).equals(seller)) {
-			System.out.println("SELLER OK "+ seller);
+//			System.out.println("SELLER OK "+ seller);
 			if(states.get(goodID).equals(GoodState.ONSALE)) {
-				System.out.println("we in");
+//				System.out.println("we in");
 				store.upDateFile(goodID, buyer);
-				goods.replace(goodID, buyer); System.out.println("replacing " + goodID + " " + buyer);
+				goods.replace(goodID, buyer); 
+//				System.out.println("replacing " + goodID + " " + buyer);
 				states.replace(goodID, GoodState.NOTONSALE);
 				printGoods();
 				counters.replace(goodID,counters.get(goodID)+1);
@@ -296,12 +297,12 @@ public class Notary {
 			scnr = new Scanner(systemFile);
 			while(scnr.hasNextLine()) {
 				String line = scnr.nextLine();
-				System.out.println(line);
+//				System.out.println(line);
 				if(!line.startsWith("#")) {
 					log.add(line);		
 				}
 			}
-			System.out.println("Log " + log);
+//			System.out.println("Log " + log);
 		}catch(Exception e) {
 			System.out.println("Error in reading state file: " + e.getMessage());
 		}finally {

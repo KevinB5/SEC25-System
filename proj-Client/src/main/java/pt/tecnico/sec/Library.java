@@ -142,7 +142,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			System.out.println("connected to server at port: "+ Sport);
             out = new ObjectOutputStream(servConnect.getOutputStream()); 
             in = new ObjectInputStream(servConnect.getInputStream());
-			System.out.println("all good");
+//			System.out.println("all good");
 
 		} catch (BindException e) {
 			// TODO Auto-generated catch block
@@ -155,10 +155,10 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	
 	public void connectUser( String Uip,String userID, int Uport) {
 		try {
-			System.out.println("connecting to "+userID+"...");
+//			System.out.println("connecting to "+userID+"...");
 
 			Socket clientSocket = new Socket(Uip, Uport);
-			System.out.println("connected to server at port: "+ Uport);
+//			System.out.println("connected to server at port: "+ Uport);
 			this.sockets.put(userID, clientSocket);
 			
 		}catch(IOException ie) {
@@ -212,7 +212,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		 ObjectInputStream reader=null;
 		 Message resp= null;
 		 try {
-			 System.out.println("Sending message to "+ uID);
+//			 System.out.println("Sending message to "+ uID);
 		 	
 			 Socket clientSocket = sockets.get(uID);
 				outU = new ObjectOutputStream(clientSocket.getOutputStream());
@@ -228,9 +228,10 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				//this.stopConnectServer();
 		 		Message temp = (Message) inU.readObject();
 		 		if (temp.getClass().equals(String.class))
-		 			System.out.println("STRING");
+		 			;
+//		 			System.out.println("STRING");
 		 			//TODO: Falta fazer com que leia String
-		 		else {
+		 		else{
 		 			resp = (Message) temp;
 		 		}
 		 		
@@ -241,7 +242,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}catch(NullPointerException ne) {
-				System.out.println(ne.getMessage());
+//				System.out.println(ne.getMessage());
 				
 			
 			}catch(Exception e) {
