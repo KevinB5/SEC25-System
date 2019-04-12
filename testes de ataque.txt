@@ -11,9 +11,14 @@ Replay Attack:
 	*loop*	$ buy user1 good1
 	
 Fake Sell:
-
-Spoofing?
-
-Sniffing?
-
-DoS ?
+	(server starts)
+	(cliente: user1)
+		$ 1 (login)
+		$ sell good1
+		$ state good1
+	(cliente: user2)
+		$ connect
+		$ state good1
+		$ buy user1 good1
+	(cliente: user1)
+		$ sell good1
