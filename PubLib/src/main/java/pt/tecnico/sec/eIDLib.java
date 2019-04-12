@@ -27,6 +27,8 @@ import sun.security.x509.X509CertImpl;
 import sun.security.x509.X509CertInfo;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -49,9 +51,14 @@ import java.util.Date;
 
 public class eIDLib{
 	
-	private Signature sig;
+	private static Signature sig;
+	private static X509Certificate cert;
 	
  
+	public static X509Certificate getCert() {
+		return cert;
+	}
+
 	// Falta buscar as chaves RSA e assinar os objectos propriamente
 	public eIDLib() {
 		try {
@@ -69,7 +76,9 @@ public class eIDLib{
 	        System.loadLibrary("pteidlibj");
 	        pteid.Init(""); // Initializes the eID Lib
 	        pteid.SetSODChecking(false); // Don't check the integrity of the ID, address and photo (!)
-			sig = Signature.getInstance(getCertFromByteArray(getCertificateInBytes(0)).getSigAlgName());
+	        cert = getCertFromByteArray(getCertificateInBytes(0));
+			sig = Signature.getInstance(cert.getSigAlgName());
+			System.out.println(cert.getSigAlgName());
 			
 		} catch (NoSuchAlgorithmException | CertificateException e) {
 			e.printStackTrace();
@@ -86,8 +95,18 @@ public class eIDLib{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (PteidException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			CertificateFactory cf;
+			try {
+				cf = CertificateFactory.getInstance("X.509");
+				cert = (X509Certificate)cf.generateCertificate(new FileInputStream(System.getProperty("user.dir")+"/test.cert"));
+				sig = Signature.getInstance(cert.getSigAlgName());
+				System.out.println("2 "+cert);
+			} catch (CertificateException | FileNotFoundException | NoSuchAlgorithmException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+    		System.out.println(cert);
+//			e.printStackTrace();
 		}
 		
 	}
@@ -257,10 +276,11 @@ public class eIDLib{
          // initialize the signature method
          System.out.println("            //initialize the signature method");
          CK_MECHANISM mechanism = new CK_MECHANISM();
-         mechanism.mechanism = PKCS11Constants.CKM_SHA1_RSA_PKCS;
+         mechanism.mechanism = PKCS11Constants.CKM_SHA256_RSA_PKCS;
          mechanism.pParameter = null;
          pkcs11.C_SignInit(p11_session, mechanism, signatureKey);
 	        
+         System.out.println("ASSINANDO: "+ data.getBytes(Charset.forName("UTF-8")));
          signature = pkcs11.C_Sign(p11_session, data.getBytes(Charset.forName("UTF-8")));
          
          //Assinatura para usar 
@@ -306,7 +326,16 @@ public class eIDLib{
             
             //pteid.Exit(pteid.PTEID_EXIT_LEAVE_CARD); // OBRIGATORIO Termina a eID Lib
         } catch (PteidException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+        	try {
+        		CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        		cert = (X509Certificate)cf.generateCertificate(new FileInputStream(System.getProperty("user.dir")+"/test.cert"));
+        		sig = Signature.getInstance(cert.getSigAlgName());
+        		System.out.println(cert.getSigAlgName());
+        		System.out.println(cert);
+        	}catch(Exception ex) {
+        		ex.printStackTrace();
+        	}
         }
         return certificate_bytes;
     }
@@ -322,6 +351,7 @@ public class eIDLib{
 		//Verificar assinature
          try {
 			sig.update(data.getBytes(Charset.forName("UTF-8")));
+			System.out.println(data.getBytes(Charset.forName("UTF-8")));
          
 	         if(sig.verify(signature)) {
 	        	 return true;
