@@ -24,3 +24,31 @@ $state <goodID>
 (caso o good esteja disponível)
 $connect
 $buy <sellerID> <goodID>  (para que seja possível comprar, o seller tem que executar "$connect" antes)
+  
+ 
+# Testes de ataque
+
+Replay Attack:
+	(server starts)
+	(cliente: user1)
+		$ 1 (login)
+		$ sell good1
+		$ state good1
+	(cliente: user2)
+		$ connect
+		$ state good1
+	
+	*loop*	$ buy user1 good1
+	
+Fake Sell:
+	(server starts)
+	(cliente: user1)
+		$ 1 (login)
+		$ sell good1
+		$ state good1
+	(cliente: user2)
+		$ connect
+		$ state good1
+		$ buy user1 good1
+	(cliente: user1)
+		$ sell good1
