@@ -206,8 +206,12 @@ public class Notary {
 	    				this.verifySignature("intentionbuy"+" "+res[2]+" "+counters.get(res[2]).toString(), command.buyerSignature(), res[1])*/) {
 	    			String rs=  this.transferGood(user,res[1],res[2],command.getSig(),command.buyerSignature());//seller, buyer, goodID
 		    		if(!rs.equals(NOK)) {
-		    			System.out.println("oky doky");
+		    			//eIDLib eid = new eIDLib();
+		    			System.out.println("okay");
 			    		X509Certificate cert = null;
+			    		//cert = eid.getCert();
+		    			//cert= null;
+			    		//eid.sign(cert,rs);
 			    		return new Message(this.idNotary, rs, null,null, null,cert);
 		    		}
 		    		
@@ -246,8 +250,7 @@ public class Notary {
 				counters.replace(goodID,counters.get(goodID)+1);
 				writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
 				//enviar certificado
-				//return goodID+" "+seller+" "+ buyer+" "+counters.get(goodID)+ 	" "+sigSeller + " "+sigBuyer;
-				return OK;
+				return goodID+" "+seller+" "+ buyer+" "+counters.get(goodID)+ 	" "+sigSeller + " "+sigBuyer;
 			}
 			else
 				return NOK;
