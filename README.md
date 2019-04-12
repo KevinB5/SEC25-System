@@ -1,25 +1,26 @@
 ﻿# SEC25-System
 
+$ -> comando no terminal
+
 compilar e correr :
+$cd ..\SEC25-System\
+$mvn install
 
-mvn clean compile exec:java
-(em cada módulo)
+correr cada módulo (Server e Clientes, abrir linha de comandos para cada):
+$cd ..\SEC25-System\proj-Server\
+$mvn clean compile exec:java
 
-correr servidor primeiro
+(abrir número de clientes que pretender, dos quatro possíveis)
+$cd ..\SEC25-System\proj-Cliente\
+$mvn clean compile exec:java
+$<userID> (por exemplo "1")
 
-testar:
-correr clientes(cada um num terminal diferente)
+(se pretender vender um objecto)
+$sell <goodID>
 
- 1-inserir id(numero) 
- 2-connect
- 
-comandos para as operacoes:
-(Terminal)
+(se pretender comprar um objecto)
+$state <goodID>
 
-state + <goodID>
-
-sell + <goodID>
-
-buy + <sellerID> + <goodID> 
- 
- 
+(caso o good esteja disponível)
+$connect
+$buy <sellerID> <goodID>  (para que seja possível comprar, o seller tem que executar "$connect" antes)
