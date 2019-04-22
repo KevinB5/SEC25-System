@@ -52,3 +52,8 @@ Fake Sell:
 		$ buy user1 good1
 	(cliente: user1)
 		$ sell good1
+
+______________________________________________________________________________
+
+#TODO:
+- ClientApp apenas tem o main, library tem vários métodos onde está a criar mensagens e a enviar (User podia criar essas tais mensagens e pedir ao ClientApp para enviar a partir de um método "send"), além de ClientApp poder fazer connectUsers diretamente em vez de existir uma cadeia de métodos entre as 3 classes
