@@ -51,10 +51,8 @@ public class Notary {
 		return this.idNotary;
 	}
 	
-	private enum GoodState {
-		ONSALE,NOTONSALE
-	}
 	
+	//TODO: PASSAR ISTO PARA PubLib
 	 private boolean verifySignature(String data, byte[] signature, String uID) throws Exception {
 		
 		Signature sig = Signature.getInstance("SHA1withRSA");
@@ -247,7 +245,7 @@ public class Notary {
 				goods.replace(goodID, buyer); 
 //				System.out.println("replacing " + goodID + " " + buyer);
 				states.replace(goodID, GoodState.NOTONSALE);
-				printGoods();
+				System.out.println(goods);
 				counters.replace(goodID,counters.get(goodID)+1);
 				writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
 				//enviar certificado
@@ -259,9 +257,6 @@ public class Notary {
 		return NOK;
 	}
 	
-	public void printGoods() {
-		System.out.println(goods);
-	}
 	
 	private void writeLog(String goodId, String seller, String buyer,String counter , byte[] sigSeller,byte[] sigBuyer) {
 		BufferedWriter bw = null;
