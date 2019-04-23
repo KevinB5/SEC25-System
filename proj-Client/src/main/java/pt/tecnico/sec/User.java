@@ -51,7 +51,7 @@ public class User {
 	private HashMap<String,GoodState> goods = new HashMap<String,GoodState>();
 	private HashMap<String,String> counters = new HashMap<String,String>();
 	private HashMap<String,String> usrPorts = new HashMap<String,String>();
-	private HashMap<String,byte[]> buyersigs = new HashMap<String,byte[]>();
+//	private HashMap<String,byte[]> buyersigs = new HashMap<String,byte[]>();
 	private ArrayList<String> allUsers = new ArrayList<String>();
 	private Library lib;
 	private static final String OK ="OK";
@@ -59,6 +59,11 @@ public class User {
 	private String ip;
 	private static String line = System.getProperty("file.separator");
 	private static final String path2 = originPath()+ line + "ports.txt";
+	
+	private static final String SELL = "sell";
+    private static final String STATE = "state";
+    private static final String BUY = "buy";
+    private static final String TRANSFER = "transfer";
 
 	private static ServerSocket serverSocket=null;
     private static int PORT;
@@ -259,7 +264,7 @@ public class User {
 	private void intentionToSell(String good) {
 		String res="";
 		try {
-			res = lib.intentionToSell(idUser, good, counters.get(good));
+			res = intentionToSell(idUser, good, counters.get(good));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -284,7 +289,7 @@ public class User {
 		try {
 			//Random string of 20 lowercase characters
 			challenge = generateRandomString(20);
-			String s = lib.getStateOfGood(good,challenge);
+			String s = getStateOfGood(good,challenge);
 //			System.out.println("PUTTING COUNTER AT " + s);
 
 			//update counter
@@ -303,7 +308,7 @@ public class User {
 		try {
 			//Random string of 20 lowercase characters
 			challenge = generateRandomString(20);
-			String s = lib.getStateOfGoodInvisible(good,challenge);
+			String s = getStateOfGoodInvisible(good,challenge);
 			//update counter
 			counters.put(good,s);
 		} catch (Exception e) {
@@ -329,7 +334,7 @@ public class User {
 		}
 		String res = "";
 		try {
-			Message msg = lib.buyGood(user, good,counter);
+			Message msg = buyGood(user, good,counter);
 			res = msg.getText();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -348,15 +353,18 @@ public class User {
 	 * 
 	 * @param good
 	 */
-	private void transferGood(String buyer, String good) {
+	private String transferGood(String buyer, String good, byte[] buyerSig) {
 		String counter=counters.get(good);
 		String res= "";
 		try {
-			res = lib.transferGood(idUser, buyer, good, counter, buyersigs.get(buyer));
+			String msg=TRANSFER +" "+ buyer+" "+ good +" "+ counter; 
+			Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),buyerSig, null, null));
+		
+			res= result.getText();
 			
 			if(res.equals(OK)) {
 //				System.out.println(res);
-				sellGood(good);
+				//TODO: Mandar resposta ao Buyer
 				goods.remove(good);
 				printgoods();
 			}
@@ -364,19 +372,41 @@ public class User {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return res;
 		
 	}
+//	
+//	private void sellGood(String goodID) {
+//		System.out.println("selling "+ goodID);
+//	}
 	
-	private void sellGood(String goodID) {
-		System.out.println("selling "+ goodID);
-	}
-	
-	/**
-	 * Transferir a informacao da compra
-	 */
-	private void transferBuyInfo() {
+	public String intentionToSell(String userID, String goodID, String counter) throws InvalidKeyException, Exception {
+		String msg =SELL +  " " +goodID + " "+ counter;
 		
+		Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
+		
+		return result.getText();
 	}
+
+	
+	public String getStateOfGood(String goodID, String challenge) throws InvalidKeyException, Exception {
+		String msg= STATE + " " + goodID + " "+challenge;
+		Message result= lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
+		String[] split = result.getText().split(" ");
+		if(split[split.length-1].equals(challenge)) {
+			//Get message from Notary excluding challenge and counter
+			String text="";
+			int i;
+			for(i=0;i<split.length-2;i++) {
+				text+=split[i]+" ";
+			}
+			System.out.println("STATE from notary: " +result.getText());
+		}else
+		System.out.println("STATE from notary: notary failed challenge");
+		//returns counter
+		return split[split.length-2];
+	}
+
 	
 	private String generateRandomString(Integer n) {
 		//n: size of string
@@ -417,20 +447,22 @@ public class User {
     		if(this.verifySignatureNotary(msg.getBytes(), command.getSig()));
     	}*/
     	if(!PKI.verifySignature(msg, command.getSig(), command.getID()))
-    		return new Message(idUser, error, sign(error));
+    		return new Message(idUser, error, PKI.sign(error,idUser,PASS));
     	
     	if(op.equals("intentionbuy")) {//buy goodID counter
     		String ret = "no such good";
     		System.out.println("trying to buy "+ res[1]);
     		if(goods.containsKey(res[1])) {
-    			String rep=lib.transferGood(this.idUser, command.getID(), res[1],res[2], command.getSig());
+    			String rep = transferGood(command.getID(), res[1], command.getSig());
 //	    		System.out.println(rep);
-    			if(rep.equals("OK"))
-	    			goods.remove(res[1], goods.get(res[1]));
+    			if(rep.equals("OK")) {
+    				System.out.println(rep);
+    			}
+	    			
 	    		this.printgoods();
-	    		return new Message(idUser, rep, sign(rep));//construtor que poe os restantes parametros a null automáticamente
+	    		return new Message(idUser, rep, PKI.sign(rep,idUser,PASS));//construtor que poe os restantes parametros a null automáticamente
 	    		}
-    		return new Message(idUser, ret, sign(ret));//construtor que poe os restantes parametros a null automáticamente
+    		return new Message(idUser, ret, PKI.sign(ret,idUser,PASS));//construtor que poe os restantes parametros a null automáticamente
     	}
 
     	else {
@@ -441,12 +473,37 @@ public class User {
     		
 	}
 	
-	static byte[] sign(String data) throws InvalidKeyException, Exception{
-		return PKI.sign(data, idUser, PASS);
+	public Message buyGood(String userID, String goodID, String counter) throws Exception {//buyerID, goodID
+		String msg = "intentionbuy " +goodID +" "+ counter;
+		//manda 
+		Message res= lib.sendMessage(userID,new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
+		return res;
+		//return sendMessage(userID,new Message(idUser, msg,user.sign(msg),null, null, null));
+		//sendMessage(0,msg);
+		
 	}
 
-	   
 
+
+	public String getStateOfGoodInvisible(String goodID, String challenge) throws InvalidKeyException, Exception {
+		String msg= STATE + " " + goodID + " "+challenge;
+		Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
+		String[] split = result.getText().split(" ");
+		if(split[split.length-1].equals(challenge)) {
+		return split[split.length-2];}
+		else
+			return "";
+	}
+	
+	
+	/*
+	public String transferGood(String buyer,String goodID, String counter, byte[] buyerSig) throws InvalidKeyException, Exception {
+		String msg=TRANSFER +" "+ buyer+" "+ goodID +" "+ counter; 
+		Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),buyerSig, null, null));
+	
+		return result.getText();
+	}
+*/
 }
 
 

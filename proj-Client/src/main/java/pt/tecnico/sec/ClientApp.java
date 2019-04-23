@@ -1,19 +1,29 @@
 package pt.tecnico.sec;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 
-/**
- * Hello world!
- *
- */
+
+
 public class ClientApp 
 {
+	private HashMap <String, Socket> sockets = new HashMap<String, Socket>();
+	
 	private static User user;
 	private static User user2;
+	//Streams for Users
+	private ObjectOutputStream outU;
+	private ObjectInputStream inU;
+	//Streams for Notary
+	private ObjectOutputStream out;
+	private ObjectInputStream in;
+	private Socket servConnect;
 
 	
 	private static final String IP = "127.0.0.1";
@@ -95,6 +105,49 @@ public class ClientApp
 
         }
 
-        
+
+
+
+
+
+   
+    
+    
+    
+    
+    
+    
+
+	
+	
+	public void disconnectServer() {
+        try {
+			in.close();
+	        out.close();
+	        servConnect.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+    }
+ 
+ public void disconnectUsers() {
+        try {
+        	for(Socket clientSocket : sockets.values()) {
+			inU.close();
+	        outU.close();
+	        clientSocket.close();
+        	}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+    }
+	
+
+ 
+ 
     }
         
