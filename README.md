@@ -80,8 +80,9 @@ ______________________________________________________________________________
 - Notary utiliza chave publica do user para verificar a autenticidade
 - Notary responde enviando uma mensagem em que assina a mensagem com a suas keys criadas a partir do cartao do cidadao ou chaves falsas caso nao exista cartão
 
+- User confirma autenticidade do notario e dos outros users
+
 	#Falta:
 - Criar e verificar assinaturas
 - 2º fase
-- User confirma autenticidade do notario e dos outros users
 
