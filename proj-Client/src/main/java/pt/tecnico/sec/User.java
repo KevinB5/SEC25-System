@@ -46,7 +46,7 @@ import sun.security.x509.X509CertInfo;
 
 
 public class User {
-	private String idUser ;
+	private static String idUser ;
 	
 	private HashMap<String,GoodState> goods = new HashMap<String,GoodState>();
 	private HashMap<String,String> counters = new HashMap<String,String>();
@@ -150,24 +150,6 @@ public class User {
 		for(String id : usrPorts.keySet()) {
 			lib.connectUser(ip, id, Integer.parseInt(usrPorts.get(id)));
 		}		
-	}
-	
-	byte[] sign(String data) throws InvalidKeyException, Exception{
-		Signature rsa = Signature.getInstance("SHA1withRSA"); 
-		rsa.initSign(this.getKey(PASS));
-		rsa.update(data.getBytes());
-		//System.out.println("Signing " + data);
-		return rsa.sign();
-	}
-	
-	 boolean verifySignature(byte[] data, byte[] signature, String uID) throws Exception {
-		Signature sig = Signature.getInstance("SHA1withRSA");
-		PKI.getInstance();
-		//System.out.println(lib.getKey(uID));
-		sig.initVerify(PKI.getKey(uID));
-		sig.update(data);
-		
-		return sig.verify(signature);
 	}
 	
 	
@@ -434,7 +416,7 @@ public class User {
     		}else
     		if(this.verifySignatureNotary(msg.getBytes(), command.getSig()));
     	}*/
-    	if(!this.verifySignature(msg.getBytes(), command.getSig(), command.getID()))
+    	if(!PKI.verifySignature(msg, command.getSig(), command.getID()))
     		return new Message(idUser, error, sign(error));
     	
     	if(op.equals("intentionbuy")) {//buy goodID counter
@@ -453,31 +435,14 @@ public class User {
 
     	else {
         	String errOp = "no valid operation " + command.getText();
-        	return new Message(idUser, errOp,sign(errOp) );
+        	return new Message(idUser, errOp,PKI.sign(errOp,idUser,PASS) );
     	}
 
     		
 	}
 	
-	private PrivateKey getKey(String password) {//userID, password
-		
-	    KeyStore.ProtectionParameter protParam =
-	            new KeyStore.PasswordProtection(password.toCharArray());
-		
-	    KeyStore.PrivateKeyEntry pkEntry;
-	    PrivateKey myPrivateKey = null ;
-		try {
-			/*pkEntry = (KeyStore.PrivateKeyEntry)
-			        KEYSTORE.getEntry(id , protParam);*/
-			
-					myPrivateKey = (PrivateKey) KEYSTORE.getKey(this.idUser, password.toCharArray());
-
-		} catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
-			e.printStackTrace();
-		}
-		System.out.println("handing out private key ");
-	        return myPrivateKey;
-		
+	static byte[] sign(String data) throws InvalidKeyException, Exception{
+		return PKI.sign(data, idUser, PASS);
 	}
 
 	private X509Certificate createKeys(String userID, String word) {

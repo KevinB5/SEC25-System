@@ -16,6 +16,7 @@ import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Scanner;
 
 
@@ -32,7 +33,7 @@ public class Notary {
 	private final ArrayList<String> log = new ArrayList<String>();
 	private Storage store;
 	private PKI keyManager;
-	
+	private String PASS;
 	
 	
 	public Notary() {
@@ -43,25 +44,23 @@ public class Notary {
 			states.put(goodID, GoodState.NOTONSALE);
 			counters.put(goodID, 0);
 		}
+//		
+//		PKI.getInstance();
+//		PKI.createKeys(idNotary);
+		Random random = new Random();	
+		
+		int rnd = random.nextInt();
+		PASS = idNotary + rnd;
+		
+		X509Certificate cert = this.createKeys(idNotary, PASS);
 		PKI.getInstance();
-		PKI.createKeys(idNotary);
+		PKI.setKey(idNotary, cert);
 	}
 	
 	String getID() {
 		return this.idNotary;
 	}
 	
-	
-	//TODO: PASSAR ISTO PARA PubLib
-	 private boolean verifySignature(String data, byte[] signature, String uID) throws Exception {
-		
-		Signature sig = Signature.getInstance("SHA1withRSA");
-		PKI.getInstance();
-		sig.initVerify(PKI.getKey(uID));
-		sig.update(data.getBytes());
-		
-		return sig.verify(signature);
-	}
 	
 	/**
 	 * Ativar o servidor
@@ -145,7 +144,7 @@ public class Notary {
     	
     	String user = command.getID();
     	//System.out.println("signature verification: "+this.verifySignature(command.getText(), command.getSig(), command.getID()));
-		if(this.verifySignature(command.getText(), command.getSig(), command.getID())) {
+		if(PKI.verifySignature(command.getText(), command.getSig(), command.getID())) {
 			
 			System.out.println("user's "+ user + " signature validated");
     	
@@ -304,5 +303,6 @@ public class Notary {
 			scnr.close();
 		}
 	}
+	
 	
 }

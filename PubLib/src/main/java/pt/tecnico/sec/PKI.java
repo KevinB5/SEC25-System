@@ -223,9 +223,44 @@ public byte[] decrypt(PublicKey publicKey, byte [] encrypted) throws Exception {
 }
 
 
+public static boolean verifySignature(String data, byte[] signature, String uID) throws Exception {
+	
+	Signature sig = Signature.getInstance("SHA256withRSA");
+	PKI.getInstance();
+	sig.initVerify(PKI.getKey(uID));
+	sig.update(data.getBytes());
+	
+	return sig.verify(signature);
+}
 
+static byte[] sign(String data, String idUser, String pass) throws InvalidKeyException, Exception{
+	Signature rsa = Signature.getInstance("SHA256withRSA"); 
+	rsa.initSign(getPrivateKey(idUser, pass));
+	rsa.update(data.getBytes());
+	//System.out.println("Signing " + data);
+	return rsa.sign();
+}
 
+private static PrivateKey getPrivateKey(String idUser, String password) {//userID, password
+	
+    KeyStore.ProtectionParameter protParam =
+            new KeyStore.PasswordProtection(password.toCharArray());
+	
+    KeyStore.PrivateKeyEntry pkEntry;
+    PrivateKey myPrivateKey = null ;
+	try {
+		/*pkEntry = (KeyStore.PrivateKeyEntry)
+		        KEYSTORE.getEntry(id , protParam);*/
+		
+				myPrivateKey = (PrivateKey) KEYSTORE.getKey(idUser, password.toCharArray());
 
+	} catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
+		e.printStackTrace();
+	}
+	System.out.println("handing out private key ");
+        return myPrivateKey;
+	
+}
 
 
 public static void createNotaryKeys(String notaryID) {
