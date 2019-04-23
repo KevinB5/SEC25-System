@@ -20,6 +20,16 @@ public class App
 	
     public static void main( String[] args ) throws GeneralSecurityException, IOException
     {
+    	System.out.println("What is the number of faulty processes?");
+        String nu;
+        nu= System.console().readLine();
+        int f = Integer.parseInt(nu);
+        int N = 2*f+1; //expression to calculate total number of processes needed - might not be this
+        
+        System.out.println("Are we using the Citizen Card? (Y/N)");
+        nu = System.console().readLine(); //nu will be Y or N which we use to obtain keys for notaries 
+        
+        
     	notary= new Notary();//atribuir aqui a porta
         try {
 			serverSocket = new ServerSocket(PORT);

@@ -30,8 +30,13 @@ public class ClientApp
     	
         System.out.println("Select the user ID number");
         String nu;
+        int nUsr=-1;//not a valid user number to begin with
         nu= System.console().readLine();
-        int nUsr = Integer.parseInt(nu);
+        try {
+        	nUsr = Integer.parseInt(nu);
+        }catch(NumberFormatException nef) {
+        	System.out.println("Number must be an integer");
+        }
 
 
         try {

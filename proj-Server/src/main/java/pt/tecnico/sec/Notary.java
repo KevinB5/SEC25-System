@@ -52,7 +52,7 @@ public class Notary {
 		int rnd = random.nextInt();
 		PASS = idNotary + rnd;
 		
-		X509Certificate cert = this.createKeys(idNotary, PASS);
+		X509Certificate cert = PKI.createKeys(idNotary,PASS);
 		PKI.getInstance();
 		PKI.setKey(idNotary, cert);
 	}
