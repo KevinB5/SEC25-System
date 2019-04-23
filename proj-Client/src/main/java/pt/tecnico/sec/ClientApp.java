@@ -19,8 +19,8 @@ public class ClientApp
 	private static final String IP = "127.0.0.1";
 	private static final int PORT= 8081;
 	private static final String ID ="user";
-	private static ServerSocket server;
-	private static Socket clientSocket;
+//	private static ServerSocket server;
+//	private static Socket clientSocket;
 
 	
 

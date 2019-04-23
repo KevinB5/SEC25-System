@@ -28,11 +28,11 @@ public class Notary {
 	private HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,state>
 	private HashMap<String, Integer> counters = new HashMap<String, Integer>(); // <goodID,counter>
-	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
+//	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
 	private final String pathLog= System.getProperty("user.dir")+"\\src\\main\\java\\pt\\tecnico\\state\\transfer.log";
 	private final ArrayList<String> log = new ArrayList<String>();
 	private Storage store;
-	private PKI keyManager;
+//	private PKI keyManager;
 	private String PASS;
 	
 	
@@ -52,8 +52,8 @@ public class Notary {
 		int rnd = random.nextInt();
 		PASS = idNotary + rnd;
 		
-		X509Certificate cert = PKI.createKeys(idNotary,PASS);
 		PKI.getInstance();
+		X509Certificate cert = PKI.createKeys(idNotary,PASS);
 		PKI.setKey(idNotary, cert);
 	}
 	
@@ -240,7 +240,7 @@ public class Notary {
 //			System.out.println("SELLER OK "+ seller);
 			if(states.get(goodID).equals(GoodState.ONSALE)) {
 //				System.out.println("we in");
-				store.upDateFile(goodID, buyer);
+				store.updateFile(goodID, buyer);
 				goods.replace(goodID, buyer); 
 //				System.out.println("replacing " + goodID + " " + buyer);
 				states.replace(goodID, GoodState.NOTONSALE);

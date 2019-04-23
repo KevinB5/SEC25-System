@@ -23,22 +23,9 @@ public class Storage {
 	private static String filename = line +"goods.txt";
 	private static String path = originPath() + filename;
 	private static HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
-	
-	
-	private static final String[] users = {"user1", "user2"};
-	
-	private InputStream text;
+		
 	private File systemFile;
-	
-	public Storage() {
-		//start();
-		//path = Storage.class.getResource("Storage.class").getPath();
-		text = (this.getClass().getClassLoader().getResourceAsStream("goods.txt"));
-		start();
-		//System.out.println(path.getParent());
-
-	}
-	
+		
 	public static String originPath() {
 		String origin = System.getProperty("user.dir");
 		int lastBar = 0;
@@ -49,7 +36,7 @@ public class Storage {
 		return origin.substring(0,lastBar);
 	}
 	
-	private void start() {
+	public Storage() {
 		//put user1
 		String res = "good";
 		/*
@@ -120,7 +107,7 @@ public class Storage {
 		return res;
 	}
 	
-	public void upDateFile(String goodID, String newOwner) {
+	public void updateFile(String goodID, String newOwner) {
 		try {
 
 

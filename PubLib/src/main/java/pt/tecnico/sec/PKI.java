@@ -31,25 +31,20 @@ import java.security.cert.*;
 
 public class PKI {
 
-	public static int KEYSIZE ;
+	public static int KEYSIZE=1024;
 	private static HashMap <String,PublicKey> KEYS = new HashMap <String,PublicKey>();// userID, Key
 	public static KeyStore KEYSTORE;
-	private static KeyPair notarykey; 
-	private String[] users = {"user1, user2"};
 	private static char[] pwdArray = "password".toCharArray();
     private static PKI single_instance = null;
-    private static ProtectionParameter protParam = new KeyStore.PasswordProtection(pwdArray);
+//    private static ProtectionParameter protParam = new KeyStore.PasswordProtection(pwdArray);
     private static String PATH;
 
 	
 	
 private PKI() {
-	KEYSIZE = 1024 ;
 	try {
 		//get instance do keystore
 		this.KEYSTORE = KeyStore.getInstance("JKS");
-
-		
 		
 		//KEYSTORE.load(null, pwdArray);
 		Storage st = new Storage();
@@ -108,7 +103,7 @@ public static void setKey(String uID, X509Certificate cert) {
 
 }
 
-public static PublicKey getKey(String uID) throws Exception {
+public static PublicKey getPublicKey(String uID) throws Exception {
 	
 	KeyStore keyStore= KeyStore.getInstance("JKS");
 	FileInputStream fos = new FileInputStream(PATH);
@@ -124,7 +119,7 @@ public static PublicKey getKey(String uID) throws Exception {
 	
 }
 
-public static PrivateKey getMyKey(String id) {//userID, password
+private static PrivateKey getPrivateKey(String id, String pass) {//userID, password
 	
 	
     KeyStore.PrivateKeyEntry pkEntry;
@@ -143,7 +138,7 @@ public static PrivateKey getMyKey(String id) {//userID, password
 	
 }
 
-
+/*
 public static KeyPair getKeyPair( String userID) {
 	  Key key = null;
 	  PublicKey publicKey = null;
@@ -158,7 +153,8 @@ public static KeyPair getKeyPair( String userID) {
 
 	  return new KeyPair(publicKey, (PrivateKey) key);
 	}
-
+*/
+/*
 public static KeyPair createKeysez(String userID) {
     KeyPairGenerator keyGen;
     KeyPair keyPair = null;
@@ -198,7 +194,7 @@ public static KeyPair createKeysez(String userID) {
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();*/
+			e.printStackTrace();
 		} catch (GeneralSecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -206,7 +202,8 @@ public static KeyPair createKeysez(String userID) {
 		return keyPair;
 }
 
-
+*/
+/*
 public static byte[] encrypt(PrivateKey privateKey, String message) throws Exception {
     Cipher cipher = Cipher.getInstance("RSA");  
     cipher.init(Cipher.ENCRYPT_MODE, privateKey);  
@@ -222,12 +219,13 @@ public byte[] decrypt(PublicKey publicKey, byte [] encrypted) throws Exception {
     return cipher.doFinal(encrypted);
 }
 
+*/
 
 public static boolean verifySignature(String data, byte[] signature, String uID) throws Exception {
 	
 	Signature sig = Signature.getInstance("SHA256withRSA");
 	PKI.getInstance();
-	sig.initVerify(PKI.getKey(uID));
+	sig.initVerify(PKI.getPublicKey(uID));
 	sig.update(data.getBytes());
 	
 	return sig.verify(signature);
@@ -241,6 +239,7 @@ static byte[] sign(String data, String idUser, String pass) throws InvalidKeyExc
 	return rsa.sign();
 }
 
+/*
 private static PrivateKey getPrivateKey(String idUser, String password) {//userID, password
 	
     KeyStore.ProtectionParameter protParam =
@@ -250,7 +249,7 @@ private static PrivateKey getPrivateKey(String idUser, String password) {//userI
     PrivateKey myPrivateKey = null ;
 	try {
 		/*pkEntry = (KeyStore.PrivateKeyEntry)
-		        KEYSTORE.getEntry(id , protParam);*/
+		        KEYSTORE.getEntry(id , protParam);
 		
 				myPrivateKey = (PrivateKey) KEYSTORE.getKey(idUser, password.toCharArray());
 
@@ -269,9 +268,11 @@ public static void createNotaryKeys(String notaryID, String password) {
 	
 }
 */
+
 public static boolean containsKeyofUser(String id) {
 	return KEYS.containsKey(id);
 }   
+
 
 public static X509Certificate createKeys(String userID, String word) {
     KeyPairGenerator keyGen;
