@@ -109,7 +109,7 @@ public class User {
 			
 			X509Certificate cert = this.createKeys(id, PASS);
 			PKI.getInstance();
-			PKI.setKey(idUser, cert);
+			PKI.setKey(idUser, cert);create
 			/*try {
 				lib.sendKey(pub);
 			} catch (InvalidKeyException e) {
