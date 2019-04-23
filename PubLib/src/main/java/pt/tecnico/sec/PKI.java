@@ -2,6 +2,7 @@ package pt.tecnico.sec;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -127,10 +128,13 @@ private static PrivateKey getPrivateKey(String id, String pass) {//userID, passw
 	try {
 		/*pkEntry = (KeyStore.PrivateKeyEntry)
 		        KEYSTORE.getEntry(id , protParam);*/
+				File keystorefile = new File(PATH);
+				InputStream keystoreStream = new FileInputStream(keystorefile);
+				KEYSTORE.load(keystoreStream,pwdArray);
 		
-				myPrivateKey = (PrivateKey) KEYSTORE.getKey(id, pwdArray);
+				myPrivateKey = (PrivateKey) KEYSTORE.getKey(id, pass.toCharArray());
 
-	} catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
+	} catch (CertificateException|NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | IOException e) {
 		e.printStackTrace();
 	}
 	//System.out.println("handing out private key ");
@@ -315,11 +319,12 @@ public static X509Certificate createKeys(String userID, String word) {
 		Certificate[] chain = {cert};
 		
 		  
-		
+		System.out.println("Saving private key");
 		KeyStore.PrivateKeyEntry skEntry = new KeyStore.PrivateKeyEntry((PrivateKey) keyPair.getPrivate(), chain);
 		KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(password);
-
+		
 		KEYSTORE.setEntry(userID,skEntry,protParam);
+		System.out.println("Private key safe and secure");
 	//KEYSTORE.setKeyEntry(userID,(PrivateKey) keyPair.getPrivate(), password, null);
 				
 		} catch (NoSuchAlgorithmException e) {
