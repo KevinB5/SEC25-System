@@ -36,20 +36,20 @@ public class App
 	        System.out.println("Server accepting connections on port: "+ PORT);
 	        while (true) {
 	        	Socket clientSocket = serverSocket.accept();
-	        	(new Thread(new LibraryServer2(clientSocket, notary))).start();
+	        	(new Thread(new ConnectClient(clientSocket, notary))).start();
 	        }
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
     }
   
-    public final static class LibraryServer2  implements Runnable {
+    public final static class ConnectClient  implements Runnable {
 
     	public static final int PORT_NUMBER = 8081;
     	private Notary notary;
     	private Socket clientSocket;
 
-        public LibraryServer2(Socket client, Notary notary) {
+        public ConnectClient(Socket client, Notary notary) {
         	this.notary = notary;
         	this.clientSocket = client;
            
