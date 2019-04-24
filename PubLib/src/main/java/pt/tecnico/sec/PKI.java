@@ -45,10 +45,10 @@ public class PKI {
 private PKI() {
 	try {
 		//get instance do keystore
-		this.KEYSTORE = KeyStore.getInstance("JKS");
+		KEYSTORE = KeyStore.getInstance("JKS");
 		
 		//KEYSTORE.load(null, pwdArray);
-		Storage st = new Storage();
+//		Storage st = new Storage();
 		PATH = Storage.originPath()+ "/KeyStoreFile.jks";
 
 		File keystorefile = new File(PATH);
@@ -109,7 +109,6 @@ public static PublicKey getPublicKey(String uID) throws Exception {
 	KeyStore keyStore= KeyStore.getInstance("JKS");
 	FileInputStream fos = new FileInputStream(PATH);
 
-
 	keyStore.load(fos, pwdArray);
 
 
@@ -159,23 +158,25 @@ public static KeyPair getKeyPair( String userID) {
 	}
 */
 /*
-public static KeyPair createKeysez(String userID) {
+public static void createKeyPair(String userID, String password) throws NoSuchAlgorithmException, CertificateException {
     KeyPairGenerator keyGen;
     KeyPair keyPair = null;
-	try {
-		keyGen = KeyPairGenerator.getInstance("RSA");
-		KEYSIZE=1024;
-		keyGen.initialize(KEYSIZE);
+	keyGen = KeyPairGenerator.getInstance("RSA");
+	KEYSIZE=1024;
+	keyGen.initialize(KEYSIZE);
 
-		keyPair = keyGen.generateKeyPair();
-					
-		PublicKey pubKey = keyPair.getPublic();
-		KEYS.put(userID,pubKey);
+	keyPair = keyGen.generateKeyPair();
+	
+	CertificateFactory cf = CertificateFactory.getInstance("X.509");
+	Certificate cert = cf.generateCertificate(new InputStream(keyPair.getPublic().getEncoded()));
+	PublicKey pubKey = keyPair.getPublic();
+	KEYS.put(userID,pubKey);
+	
+	System.out.println("saving Public key for "+ userID);
 		
-		System.out.println("saving Public key for "+ userID);
 		
 		
-		 
+}
 		/*X509Certificate cert = generateCertificate(userID, getKeyPair(userID), 0, "SHA1withRSA");
 		
 		Certificate[] chain = {cert};
@@ -205,8 +206,8 @@ public static KeyPair createKeysez(String userID) {
 		}
 		return keyPair;
 }
-
 */
+
 /*
 public static byte[] encrypt(PrivateKey privateKey, String message) throws Exception {
     Cipher cipher = Cipher.getInstance("RSA");  
@@ -235,11 +236,19 @@ public static boolean verifySignature(String data, byte[] signature, String uID)
 	return sig.verify(signature);
 }
 
-static byte[] sign(String data, String idUser, String pass) throws InvalidKeyException, Exception{
+public static byte[] sign(String data, String idUser, String pass) throws InvalidKeyException, Exception{
+	System.out.println("Signing message");
 	Signature rsa = Signature.getInstance("SHA256withRSA"); 
-	rsa.initSign(getPrivateKey(idUser, pass));
+//	PrivateKey privatekey;
+	
+	KeyStore.ProtectionParameter protParam =    new KeyStore.PasswordProtection(pass.toCharArray());
+	KeyStore.PrivateKeyEntry pkEntry = (KeyStore.PrivateKeyEntry) KEYSTORE.getEntry(idUser, protParam);
+	PrivateKey myPrivateKey = pkEntry.getPrivateKey();
+//  privatekey = (PrivateKey) KEYSTORE.getKey(idUser, pass.toCharArray());
+	rsa.initSign(myPrivateKey);
 	rsa.update(data.getBytes());
 	//System.out.println("Signing " + data);
+	System.out.println("Signed message");
 	return rsa.sign();
 }
 
@@ -277,11 +286,10 @@ public static boolean containsKeyofUser(String id) {
 	return KEYS.containsKey(id);
 }   
 
-
-public static X509Certificate createKeys(String userID, String word) {
+//creates and stores keys in KeyStore
+public static void createKeys(String userID, String pword) {
     KeyPairGenerator keyGen;
     KeyPair keyPair = null;
-    PublicKey pubKey = null;
     char [] pwdArray = "password".toCharArray();
     X509Certificate cert = null;
 	try {
@@ -300,25 +308,30 @@ public static X509Certificate createKeys(String userID, String word) {
 
 		keyPair = keyGen.generateKeyPair();
 					
-		pubKey = keyPair.getPublic();
+//		pubKey = keyPair.getPublic();
 		//KEYS.put(userID,pubKey);
 		
 //		System.out.println("saving Public key for "+ userID);
 		
-		
-		char[] password = word.toCharArray();
+
+		char[] password = pword.toCharArray();
 		 
 		cert = generateCertificate(userID, keyPair, 7, "SHA256withRSA");
+
 		
 		//guardar o certificado na keystore para poder obter a pubkey
+
+		setKey(userID, cert);
 		
-		
-		
-		
-		
+			
 		Certificate[] chain = {cert};
 		
-		  
+		//guardar a privatekey
+		KeyStore.PrivateKeyEntry privateKeyEntry = new KeyStore.PrivateKeyEntry(keyPair.getPrivate(),chain);
+//        KEYSTORE.setEntry("privateKey",privateKeyEntry, new KeyStore.PasswordProtection(password));
+		KEYSTORE.setKeyEntry(userID, keyPair.getPrivate(), password, chain);
+		
+		  /*
 		System.out.println("Saving private key");
 		KeyStore.PrivateKeyEntry skEntry = new KeyStore.PrivateKeyEntry((PrivateKey) keyPair.getPrivate(), chain);
 		KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(password);
@@ -326,7 +339,7 @@ public static X509Certificate createKeys(String userID, String word) {
 		KEYSTORE.setEntry(userID,skEntry,protParam);
 		System.out.println("Private key safe and secure");
 	//KEYSTORE.setKeyEntry(userID,(PrivateKey) keyPair.getPrivate(), password, null);
-				
+				*/
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		} catch (KeyStoreException e) {
@@ -343,7 +356,7 @@ public static X509Certificate createKeys(String userID, String word) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return cert;
+		return;
 }
 
 private static X509Certificate generateCertificate(String dn, KeyPair pair, int days, String algorithm)

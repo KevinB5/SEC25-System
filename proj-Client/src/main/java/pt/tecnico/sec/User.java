@@ -111,10 +111,9 @@ public class User {
 			
 			int rnd = random.nextInt();
 			PASS = idUser + rnd;
-			
-			X509Certificate cert = PKI.createKeys(id, PASS);
+
 			PKI.getInstance();
-			PKI.setKey(idUser, cert);
+			PKI.createKeys(id, PASS);
 			/*try {
 				lib.sendKey(pub);
 			} catch (InvalidKeyException e) {

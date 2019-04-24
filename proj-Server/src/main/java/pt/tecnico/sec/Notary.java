@@ -19,8 +19,11 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
-
 public class Notary {
+
+public enum GoodState {
+	ONSALE,NOTONSALE
+}
 	
 	private String idNotary = "notary" ;
 	private static final String OK ="OK";
@@ -53,8 +56,7 @@ public class Notary {
 		PASS = idNotary + rnd;
 		
 		PKI.getInstance();
-		X509Certificate cert = PKI.createKeys(idNotary,PASS);
-		PKI.setKey(idNotary, cert);
+		PKI.createKeys(idNotary,PASS);
 	}
 	
 	String getID() {
