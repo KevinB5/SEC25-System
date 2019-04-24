@@ -171,14 +171,13 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				//return execRequest(resp);
 				//this.stopConnectServer();
 		 		Message temp = (Message) inU.readObject();
-		 		if (temp.getClass().equals(String.class))
-		 			;
-//		 			System.out.println("STRING");
-		 			//TODO: Falta fazer com que leia String
-		 		else{
+		 		if (temp.getClass().equals(String.class)) {
+		 			System.out.println(temp);
+		 			return null;
+		 		}
+		 		else {
 		 			resp = (Message) temp;
 		 		}
-		 		
 				//System.out.println("inU.readObject() " + inU.readObject());
 				return resp;
 

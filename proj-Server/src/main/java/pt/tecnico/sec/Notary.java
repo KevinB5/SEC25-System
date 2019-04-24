@@ -133,27 +133,17 @@ public enum GoodState {
 	 */
 	
 	public Message execute(Message command) throws Exception {
-		//PrivateKey notarykey = PKI.getMyKey(idNotary);
-//		System.out.println("This is the notary key");
-//		System.out.println(notarykey);
 
-		//Message result = null;
+		Message result = null;
     	String [] res = command.getText().split(" "); //received message broken up by spaces
     	if(res.length<2)
     		throw new Exception("Operation not valid: missing arguments"); //message has to have at least 2 words
-    	//String data = "";
-
     	
     	String user = command.getID();
     	//System.out.println("signature verification: "+this.verifySignature(command.getText(), command.getSig(), command.getID()));
 		if(PKI.verifySignature(command.getText(), command.getSig(), command.getID())) {
 			
 			System.out.println("user's "+ user + " signature validated");
-    	
-	    //this.verifySignature(data, res[-1].getBytes(), user);
-	    	
-	    	//System.out.println(verifySignature(data, res[res.length-1].getBytes(), user));
-	    	
 			
 			/* Types of messages:
 			 * 
@@ -166,43 +156,29 @@ public enum GoodState {
 			 * */
 	    	
 	    	String op =  res[0]; //the first word is the operation required
-//	    	System.out.println(op);
-	    	//System.out.println("res: "+res);
-	    	//System.out.println("xxxopxxx: " + "xxx"+op+"xxx");
+	    	
 	    	if(op .equals("sell")) {
 	
 	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
 	    		//System.out.println("Returning "+rs);
 	    		return new Message(this.idNotary, rs, null,null, null,null);
-	    		}else
+	    		}
 	    	if(op.equals("state")) {
-	    		/*
-	    		 * Returns "ONSALE/NOTONSALE <goodcounter>"
-	    		 * 
-	    		 */
 	    		if(res.length!=3) {
 	    			String rs = "WARNING: State request must issue a challenge";
 	    			return new Message(this.idNotary, rs,null, null,null,null);
 	    		}
 	    		else {
-	    			String rs=  this.verifiyStateOfGood(res[1],res[2]); 
-	    			//System.out.println(rs);
+	    			String rs=  this.verifiyStateOfGood(res[1],res[2]);
 	    			return new Message(this.idNotary, rs, null,null, null,null);
 	    		}
-	    		
-	    		
-	
 	    	}
-	    	
 	    	if(op.equals("transfer")) {
 	    		
-	    		
+	    		System.out.println("transfering "+res[2]);
 	    		//"transfer <buyerID> <goodID> <goodcounter>"
-	    		//below: first verifies counter number of seller and then confirms that buy signature is associated to a message
-//	    		System.out.println(counters.get(res[2]) +" "+ res[3]);
-	    		if(Integer.parseInt(res[3]) == (counters.get(res[2]))/* && 
+	    		if(Integer.parseInt(res[3]) == (counters.get(res[2]))){
 	    				//"buy <userID> <goodID> <goodCounter>
-	    				this.verifySignature("intentionbuy"+" "+res[2]+" "+counters.get(res[2]).toString(), command.buyerSignature(), res[1])*/) {
 	    			String rs=  this.transferGood(user,res[1],res[2],command.getSig(),command.buyerSignature());//seller, buyer, goodID
 		    		if(!rs.equals(NOK)) {
 		    			//eIDLib eid = new eIDLib();
@@ -212,20 +188,14 @@ public enum GoodState {
 		    			//cert= null;
 			    		//eid.sign(cert,rs);
 			    		return new Message(this.idNotary, rs, null,null, null,cert);
-		    		}
-		    		
-	    		}
-	
-	    	}
-	    	else
-	    		return new Message(this.idNotary, "no valid operation1", null,null,null,null);
-	    	
-		}
-		else
-			return new Message(this.idNotary, "no valid operation2", null,null,null,null);
-		
-		return new Message(this.idNotary, "no valid operation3", null,null,null,null);
-    	
+		    		}else
+		    		return new Message(this.idNotary, "not valid transfer", null,null, null,null);
+	    		}else
+	    		return new Message(this.idNotary, "wrong counter", null,null, null,null);
+	    	}else
+	    		return new Message(this.idNotary, "not valid operation", null,null, null,null);
+		}else
+			return new Message(this.idNotary, "signature not valid", null,null, null,null);
 	}
 	/**
 	 * Transferir o good ao user

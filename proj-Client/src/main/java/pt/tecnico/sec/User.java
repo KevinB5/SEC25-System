@@ -89,6 +89,12 @@ public class User {
 	 * @throws Exception 
 	 */
 	
+
+public enum GoodState {
+	ONSALE,NOTONSALE
+}
+
+	
 	public User(String id, String ip, int Svport) throws Exception {
 		
 		idUser = id;
@@ -324,6 +330,7 @@ public class User {
 	 * @param  
 	 */
 	private void buyGood (String user, String good) {
+		this.getStateOfGoodInvisible(good);
 		String counter = counters.get(good);
 //		for(String c : counters.values())
 //			System.out.println(c);
@@ -333,18 +340,20 @@ public class User {
 		}
 		String res = "";
 		try {
-			Message msg = buyGood(user, good,counter);
-			res = msg.getText();
+			buyGood(user, good,counter);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		/*
 		if(res.equals(OK)) {
 //			System.out.println("yeeeyeee");
 			goods.put(good, GoodState.NOTONSALE);
 			printgoods();
 		}
+		*/
+		getStateOfGoodInvisible(good);
+		printgoods();
 	}
 	
 	/**
@@ -360,7 +369,7 @@ public class User {
 			Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),buyerSig, null, null));
 		
 			res= result.getText();
-			
+			System.out.println("answer from notary: "+res);
 			if(res.equals(OK)) {
 //				System.out.println(res);
 				//TODO: Mandar resposta ao Buyer
@@ -380,6 +389,7 @@ public class User {
 //	}
 	
 	public String intentionToSell(String userID, String goodID, String counter) throws InvalidKeyException, Exception {
+		this.getStateOfGoodInvisible(goodID);
 		String msg =SELL +  " " +goodID + " "+ counter;
 		
 		Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
