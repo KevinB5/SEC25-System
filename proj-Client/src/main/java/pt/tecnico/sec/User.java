@@ -330,30 +330,35 @@ public enum GoodState {
 	 * @param  
 	 */
 	private void buyGood (String user, String good) {
+		System.out.println("trying to buy "+good+ " from "+user);
 		this.getStateOfGoodInvisible(good);
 		String counter = counters.get(good);
+		Message res= null;
 //		for(String c : counters.values())
 //			System.out.println(c);
 		if(counter==null) {
 			System.out.println("Need to verify state first");
 			return;
 		}
-		String res = "";
 		try {
-			buyGood(user, good,counter);
+			String msg = "intentionbuy " +good +" "+ counter;
+			//manda 
+			System.out.println("Asking to buy "+good+ " from "+user);
+			res= lib.sendMessage(user,new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
+			System.out.println(res);
+//			buyGood(user, good,counter);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		/*
-		if(res.equals(OK)) {
-//			System.out.println("yeeeyeee");
+		
+		if(res.getText().equals(OK)) {
+			System.out.println("yeeeyeee");
 			goods.put(good, GoodState.NOTONSALE);
 			printgoods();
+		}else {
+			System.out.println("Not OK");
 		}
-		*/
-		getStateOfGoodInvisible(good);
-		printgoods();
 	}
 	
 	/**
@@ -455,13 +460,17 @@ public enum GoodState {
     		}else
     		if(this.verifySignatureNotary(msg.getBytes(), command.getSig()));
     	}*/
+
+		System.out.println("Verifying signature of received message");
     	if(!PKI.verifySignature(msg, command.getSig(), command.getID()))
     		return new Message(idUser, error, PKI.sign(error,idUser,PASS));
+
     	
     	if(op.equals("intentionbuy")) {//buy goodID counter
     		String ret = "no such good";
-    		System.out.println("trying to buy "+ res[1]);
+    		System.out.println(command.getID()+" wants to buy "+ res[1]);
     		if(goods.containsKey(res[1])) {
+    			System.out.println("Asking notary...");
     			String rep = transferGood(command.getID(), res[1], command.getSig());
 //	    		System.out.println(rep);
     			if(rep.equals("OK")) {
@@ -481,7 +490,7 @@ public enum GoodState {
 
     		
 	}
-	
+	/*
 	public Message buyGood(String userID, String goodID, String counter) throws Exception {//buyerID, goodID
 		String msg = "intentionbuy " +goodID +" "+ counter;
 		//manda 
@@ -492,7 +501,7 @@ public enum GoodState {
 		
 	}
 
-
+	*/
 
 	public String getStateOfGoodInvisible(String goodID, String challenge) throws InvalidKeyException, Exception {
 		String msg= STATE + " " + goodID + " "+challenge;

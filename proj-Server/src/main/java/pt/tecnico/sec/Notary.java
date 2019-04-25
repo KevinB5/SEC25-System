@@ -217,8 +217,8 @@ public enum GoodState {
 //				System.out.println("replacing " + goodID + " " + buyer);
 				states.replace(goodID, GoodState.NOTONSALE);
 				System.out.println(goods);
-				counters.replace(goodID,counters.get(goodID)+1);
 				writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
+				counters.replace(goodID,counters.get(goodID)+1);
 				//enviar certificado
 				return goodID+" "+seller+" "+ buyer+" "+counters.get(goodID)+ 	" "+sigSeller + " "+sigBuyer;
 			}

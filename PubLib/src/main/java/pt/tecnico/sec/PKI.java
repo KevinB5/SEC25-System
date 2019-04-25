@@ -237,7 +237,7 @@ public static boolean verifySignature(String data, byte[] signature, String uID)
 }
 
 public static byte[] sign(String data, String idUser, String pass) throws InvalidKeyException, Exception{
-	System.out.println("Signing message");
+//	System.out.println("Signing message");
 	Signature rsa = Signature.getInstance("SHA256withRSA"); 
 //	PrivateKey privatekey;
 	
@@ -248,7 +248,7 @@ public static byte[] sign(String data, String idUser, String pass) throws Invali
 	rsa.initSign(myPrivateKey);
 	rsa.update(data.getBytes());
 	//System.out.println("Signing " + data);
-	System.out.println("Signed message");
+//	System.out.println("Signed message");
 	return rsa.sign();
 }
 
