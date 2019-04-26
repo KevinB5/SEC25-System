@@ -27,7 +27,7 @@ public class P2PLib implements Runnable{
 		
 	}*/
 	
-	public P2PLib(User usr, int Port) {
+	public P2PLib(User usr, int Port) throws Exception {
 		this.user= usr;
 		try {
 			server = new ServerSocket(Port);
@@ -35,7 +35,9 @@ public class P2PLib implements Runnable{
 			
 		} catch (BindException e) {
 			// TODO Auto-generated catch block
-			System.out.println("port already in use");
+			System.out.println("port already in use, choose another");
+
+			throw new Exception("port occupied");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -57,7 +59,11 @@ public class P2PLib implements Runnable{
 
         } catch (IOException ex) {
             System.out.println("Unable to get streams from client");
-        } 
+        } catch(NullPointerException npe) {
+        	
+        	System.out.println("should choose another user");           
+
+        }
         
         
 	}

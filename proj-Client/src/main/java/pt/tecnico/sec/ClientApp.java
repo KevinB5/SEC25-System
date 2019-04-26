@@ -47,6 +47,25 @@ public class ClientApp
         }catch(NumberFormatException nef) {
         	System.out.println("Number must be an integer");
         }
+        try {
+        	new Thread(new P2PLib(user, Integer.parseInt(nu))).start();
+        }catch(Exception e) {
+        	System.out.println("user already exists choose another");
+        	nUsr =Integer.parseInt(System.console().readLine());
+        	
+        	try {
+				new Thread(new P2PLib(user, Integer.parseInt(nu))).start();
+			} catch (NumberFormatException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+        			
+        }
+
 
 
         try {
@@ -73,8 +92,6 @@ public class ClientApp
             
             
             
-            int cPort = user.gtPort();
-            new Thread(new P2PLib(user, cPort)).start();
 
 
 
