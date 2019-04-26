@@ -10,14 +10,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.security.InvalidKeyException;
-import java.security.PrivateKey;
-import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
+
+import java.security.*;
+
 
 public class Notary {
 
@@ -37,6 +37,8 @@ public enum GoodState {
 	private Storage store;
 //	private PKI keyManager;
 	private String PASS;
+	private PrivateKey privkey;
+	private KeyPair keypair = null;
 	
 	
 	public Notary() {
@@ -57,6 +59,23 @@ public enum GoodState {
 		
 		PKI.getInstance();
 		PKI.createKeys(idNotary,PASS);
+
+		try {
+			keypair = new KeyPair(PKI.getPublicKey(idNotary), (PrivateKey) PKI.getPrivateKey(idNotary, PASS));
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnrecoverableEntryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (KeyStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
 	}
 	
 	String getID() {
@@ -175,15 +194,18 @@ public enum GoodState {
 	    	}
 	    	if(op.equals("transfer")) {
 	    		
-	    		System.out.println("transfering "+res[2]);
+	    		System.out.println("transfering "+res[2]+"...");
 	    		//"transfer <buyerID> <goodID> <goodcounter>"
+	    		System.out.println("Counters:" + counters);
+	    		System.out.println("Counter from seller: "+Integer.parseInt(res[3]));
 	    		if(Integer.parseInt(res[3]) == (counters.get(res[2]))){
 	    				//"buy <userID> <goodID> <goodCounter>
 	    			String rs=  this.transferGood(user,res[1],res[2],command.getSig(),command.buyerSignature());//seller, buyer, goodID
 		    		if(!rs.equals(NOK)) {
 		    			//eIDLib eid = new eIDLib();
-		    			System.out.println("okay");
-			    		X509Certificate cert = null;
+		    			System.out.println("okay, writing cert");
+		    			int days = 7;
+						X509Certificate cert = PKI.generateCertificate(idNotary, rs, keypair, days, "SHA256withRSA");
 			    		//cert = eid.getCert();
 		    			//cert= null;
 			    		//eid.sign(cert,rs);
@@ -203,24 +225,27 @@ public enum GoodState {
 	 * @param goodID
 	 * @return Transaction(?
 	 *)
+	 * @throws Exception 
 	 */
-	private String transferGood( String seller,String buyer , String goodID,byte[] sigSeller,byte[]sigBuyer) {
+	private String transferGood( String seller,String buyer , String goodID,byte[] sigSeller,byte[]sigBuyer) throws Exception {
 		//for(String s: goods.keySet()) {System.out.println(s);}
-		System.out.println("goods owner "+ goods.get(goodID));
 
 		if(goods.get(goodID).equals(seller)) {
 //			System.out.println("SELLER OK "+ seller);
 			if(states.get(goodID).equals(GoodState.ONSALE)) {
+				if(PKI.verifySignature("intentionbuy "+goodID + " "+counters.get(goodID), sigBuyer, buyer)){
 //				System.out.println("we in");
-				store.updateFile(goodID, buyer);
-				goods.replace(goodID, buyer); 
+					store.updateFile(goodID, buyer);
+					goods.replace(goodID, buyer); 
 //				System.out.println("replacing " + goodID + " " + buyer);
-				states.replace(goodID, GoodState.NOTONSALE);
-				System.out.println(goods);
-				writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
-				counters.replace(goodID,counters.get(goodID)+1);
-				//enviar certificado
-				return goodID+" "+seller+" "+ buyer+" "+counters.get(goodID)+ 	" "+sigSeller + " "+sigBuyer;
+					states.replace(goodID, GoodState.NOTONSALE);
+					System.out.println(goods);
+					writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
+					counters.replace(goodID,counters.get(goodID)+1);
+					//enviar certificado
+					return goodID+" "+seller+" "+ buyer+" "+counters.get(goodID)+ 	" "+sigSeller + " "+sigBuyer;
+				}else
+					return NOK;
 			}
 			else
 				return NOK;
