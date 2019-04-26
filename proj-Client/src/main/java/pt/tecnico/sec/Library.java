@@ -159,6 +159,8 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 //			 System.out.println("Sending message to "+ uID);
 		 	
 			 Socket clientSocket = sockets.get(uID);
+			 if(clientSocket == null)
+				 throw new Exception("Must connect to user "+ uID+" first");
 				outU = new ObjectOutputStream(clientSocket.getOutputStream());
 				inU= new ObjectInputStream(clientSocket.getInputStream());
 		 		
@@ -185,7 +187,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}catch(NullPointerException ne) {
-//				System.out.println(ne.getMessage());
+				System.out.println(ne.getMessage());
 				
 			
 			}catch(Exception e) {

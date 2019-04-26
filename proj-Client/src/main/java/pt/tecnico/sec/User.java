@@ -350,20 +350,23 @@ public enum GoodState {
 			//manda 
 			System.out.println("Asking to buy "+good+ " from "+user);
 			res= lib.sendMessage(user,new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
-			System.out.println(res);
 //			buyGood(user, good,counter);
-		} catch (Exception e) {
+
+			
+			if(res.getText().equals(OK)) {
+				System.out.println("yeeeyeee");
+				goods.put(good, GoodState.NOTONSALE);
+				printgoods();
+			}else {
+				System.out.println("Not OK");
+			}
+		} catch (NullPointerException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e.getMessage());
+		} catch(Exception e) {
+			System.out.println(/*e.getLocalizedMessage()*/"Must connect to user first");
 		}
 		
-		if(res.getText().equals(OK)) {
-			System.out.println("yeeeyeee");
-			goods.put(good, GoodState.NOTONSALE);
-			printgoods();
-		}else {
-			System.out.println("Not OK");
-		}
 	}
 	
 	/**
@@ -401,17 +404,27 @@ public enum GoodState {
 	
 	public String intentionToSell(String userID, String goodID, String counter) throws InvalidKeyException, Exception {
 		this.getStateOfGoodInvisible(goodID);
+		String ret ="";
 		String msg =SELL +  " " +goodID + " "+ counter;
-		
+		try {
 		Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
-		
-		return result.getText();
+		ret =  result.getText();
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return ret;
 	}
 
 	
 	public String getStateOfGood(String goodID, String challenge) throws InvalidKeyException, Exception {
+		
 		String msg= STATE + " " + goodID + " "+challenge;
-		Message result= lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
+		Message result= null;
+		try {
+				result =lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
 		String[] split = result.getText().split(" ");
 		if(split[split.length-1].equals(challenge)) {
 			//Get message from Notary excluding challenge and counter
