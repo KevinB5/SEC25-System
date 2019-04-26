@@ -11,6 +11,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class P2PLib implements Runnable{
 	
@@ -35,9 +37,8 @@ public class P2PLib implements Runnable{
 			
 		} catch (BindException e) {
 			// TODO Auto-generated catch block
-			System.out.println("port already in use, choose another");
-
-			throw new Exception("port occupied");
+			System.out.println("port already in use");
+			throw new Exception();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -60,9 +61,7 @@ public class P2PLib implements Runnable{
         } catch (IOException ex) {
             System.out.println("Unable to get streams from client");
         } catch(NullPointerException npe) {
-        	
-        	System.out.println("should choose another user");           
-
+        	System.out.println(npe.getMessage());
         }
         
         
@@ -81,6 +80,8 @@ public class P2PLib implements Runnable{
         @Override
         public void run() {
             System.out.println("Got a client !");
+            ReadWriteLock lock = new ReentrantReadWriteLock();
+
             
             try {
             	while(true) {
@@ -89,11 +90,28 @@ public class P2PLib implements Runnable{
     	            in = new ObjectInputStream(clientSocket.getInputStream());
 		           /* out = new ObjectOutputStream(client.getOutputStream()); 
 		            in = new ObjectInputStream(client.getInputStream());*/
-		            
-			        Message cmd = (Message) in.readObject();
+			        Message cmd = null;
+
+	        		lock.readLock().lock();
+	        		try {
+	        			cmd= (Message) in.readObject();
+	        		}finally {
+	        			//liberta o trinco assim q termina
+	        			lock.readLock().unlock();
+	        		}
+			        		
 			       
-						Message res = user.execute(cmd);
-						out.writeObject(res);
+					Message res = user.execute(cmd);
+						
+    			    lock.writeLock().lock();
+				    try {
+							out.writeObject(res);
+				    } catch (Exception e) {
+							e.printStackTrace();
+				    }finally {
+							//liberta assim que terminar a escrita
+							lock.writeLock().unlock();
+					}
             	}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

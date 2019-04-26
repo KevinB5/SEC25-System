@@ -13,17 +13,17 @@ import java.util.HashMap;
 
 public class ClientApp 
 {
-	private HashMap <String, Socket> sockets = new HashMap<String, Socket>();
+	private static HashMap <String, Socket> sockets = new HashMap<String, Socket>();
 	
 	private static User user;
 	private static User user2;
 	//Streams for Users
-	private ObjectOutputStream outU;
-	private ObjectInputStream inU;
+	private static ObjectOutputStream outU;
+	private static ObjectInputStream inU;
 	//Streams for Notary
-	private ObjectOutputStream out;
-	private ObjectInputStream in;
-	private Socket servConnect;
+	private static ObjectOutputStream out;
+	private static ObjectInputStream in;
+	private static Socket servConnect;
 
 	
 	private static final String IP = "127.0.0.1";
@@ -37,6 +37,8 @@ public class ClientApp
     public static void main( String[] args ) throws BindException
     {
 
+        
+
     	
         System.out.println("Select the user ID number");
         String nu;
@@ -44,17 +46,34 @@ public class ClientApp
         nu= System.console().readLine();
         try {
         	nUsr = Integer.parseInt(nu);
+        	
+	        user = new User(ID + nUsr, IP, PORT);//recebe o ip e a porta 
+
         }catch(NumberFormatException nef) {
         	System.out.println("Number must be an integer");
+        }catch(Exception ioe) {
+        	System.out.println(ioe.getMessage());
         }
+        
         try {
-        	new Thread(new P2PLib(user, Integer.parseInt(nu))).start();
+        	new Thread(new P2PLib(user, user.gtPort())).start();
         }catch(Exception e) {
+        	//se o utilizador pedido ja existir
         	System.out.println("user already exists choose another");
-        	nUsr =Integer.parseInt(System.console().readLine());
         	
+        	//pede outro inteiro
+        	nUsr =Integer.parseInt(System.console().readLine());
+	        try {
+	        	//cria novo user
+				user = new User(ID + nUsr, IP, PORT);
+			} catch (Exception e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}//recebe o ip e a porta 
+
         	try {
-				new Thread(new P2PLib(user, Integer.parseInt(nu))).start();
+        		//tenta fazer a conexao again
+				new Thread(new P2PLib(user, user.gtPort())).start();
 			} catch (NumberFormatException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -68,13 +87,7 @@ public class ClientApp
 
 
 
-        try {
-	        user = new User(ID + nUsr, IP, PORT);//recebe o ip e a porta 
-        }catch(IOException ioe) {
-        	System.out.println(ioe.getMessage());
-        }catch (Exception login) {
-        	login.printStackTrace();
-        }
+
 	        	
         
             System.out.println( ID+nUsr +" initialized");
@@ -113,6 +126,10 @@ public class ClientApp
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}finally {
+				disconnectServer();
+				
+				
 			}
 
 		
@@ -137,7 +154,7 @@ public class ClientApp
 
 	
 	
-	public void disconnectServer() {
+	public static void disconnectServer() {
         try {
 			in.close();
 	        out.close();
@@ -149,7 +166,7 @@ public class ClientApp
 
     }
  
- public void disconnectUsers() {
+ public static void disconnectUsers() {
         try {
         	for(Socket clientSocket : sockets.values()) {
 			inU.close();

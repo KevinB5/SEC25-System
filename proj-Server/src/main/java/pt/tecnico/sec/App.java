@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.GeneralSecurityException;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
@@ -60,18 +62,38 @@ public class App
     		 ObjectInputStream in = null;
     	        ObjectOutputStream out = null;
     	        
+                ReadWriteLock lock = new ReentrantReadWriteLock();
+                
+                
+    	        
     	        try {
     	            out = new ObjectOutputStream(clientSocket.getOutputStream()); 
     	            in = new ObjectInputStream(clientSocket.getInputStream());
     	        	while (true) {
-    			        Message msg = (Message) in.readObject();
+    	        		Message msg =null;
+    	        		//tenta adquirir o trinco para leitura
+    	        		lock.readLock().lock();
+    	        		try {
+    	        			msg= (Message) in.readObject();
+    	        		}finally {
+    	        			//liberta o trinco assim q termina
+    	        			lock.readLock().unlock();
+    	        		}
     			        String cmd = msg.getText();
     			        String[] spl = cmd.split(" ");
+    			        
+						Message res = notary.execute(msg);
+
+    			        
+    			        //tenta adquirir o trinco para escrita
+    			        lock.writeLock().lock();
     				        try {
-    							Message res = notary.execute(msg);
     							out.writeObject(res);
     						} catch (Exception e) {
     							e.printStackTrace();
+    						}finally {
+    							//liberta assim que terminar a escrita
+    							lock.writeLock().unlock();
     						}
     			        }
 

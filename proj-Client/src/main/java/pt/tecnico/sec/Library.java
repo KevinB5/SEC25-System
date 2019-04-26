@@ -9,6 +9,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.BindException;
+import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.InvalidKeyException;
@@ -75,15 +76,17 @@ public class Library {
     
     public void connectUser( String Uip,String userID, int Uport) {
 		try {
-//			System.out.println("connecting to "+userID+"...");
+			System.out.println("connecting to "+userID+" in port " + Uport);
 
 			Socket clientSocket = new Socket(Uip, Uport);
 //			System.out.println("connected to server at port: "+ Uport);
 			this.sockets.put(userID, clientSocket);
 			
-		}catch(IOException ie) {
+		}catch(ConnectException cnn) {
 			System.out.println(userID + " is not connected");
-			//ie.printStackTrace();
+			System.out.println(cnn.getMessage());
+		}catch(IOException ie) {
+			ie.printStackTrace();
 		}
 	}
     
@@ -188,7 +191,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				e.printStackTrace();
 			}catch(NullPointerException ne) {
 				System.out.println(ne.getMessage());
-				
+			
 			
 			}catch(Exception e) {
 				e.printStackTrace();
