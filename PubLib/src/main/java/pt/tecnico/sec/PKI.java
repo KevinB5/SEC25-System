@@ -119,24 +119,28 @@ public static PublicKey getPublicKey(String uID) throws Exception {
 	
 }
 
-private static PrivateKey getPrivateKey(String id, String pass) {//userID, password
+public static PrivateKey getPrivateKey(String id, String pass) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException {//userID, password
 	
-	
-    KeyStore.PrivateKeyEntry pkEntry;
-    PrivateKey myPrivateKey = null ;
-	try {
-		/*pkEntry = (KeyStore.PrivateKeyEntry)
-		        KEYSTORE.getEntry(id , protParam);*/
-				File keystorefile = new File(PATH);
-				InputStream keystoreStream = new FileInputStream(keystorefile);
-				KEYSTORE.load(keystoreStream,pwdArray);
-		
-				myPrivateKey = (PrivateKey) KEYSTORE.getKey(id, pass.toCharArray());
-
-	} catch (CertificateException|NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | IOException e) {
-		e.printStackTrace();
-	}
+	KeyStore.ProtectionParameter protParam =    new KeyStore.PasswordProtection(pass.toCharArray());
+	KeyStore.PrivateKeyEntry pkEntry = (KeyStore.PrivateKeyEntry) KEYSTORE.getEntry(id, protParam);
+	PrivateKey myPrivateKey = pkEntry.getPrivateKey();
+//	
+//    KeyStore.PrivateKeyEntry pkEntry;
+//    PrivateKey myPrivateKey = null ;
+//	try {
+//		/*pkEntry = (KeyStore.PrivateKeyEntry)
+//		        KEYSTORE.getEntry(id , protParam);*/
+//				File keystorefile = new File(PATH);
+//				InputStream keystoreStream = new FileInputStream(keystorefile);
+//				KEYSTORE.load(keystoreStream,pwdArray);
+//		
+//				myPrivateKey = (PrivateKey) KEYSTORE.getKey(id, pass.toCharArray());
+//
+//	} catch (CertificateException|NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | IOException e) {
+//		e.printStackTrace();
+//	}
 	//System.out.println("handing out private key ");
+	
         return myPrivateKey;
 	
 }
@@ -316,7 +320,7 @@ public static void createKeys(String userID, String pword) {
 
 		char[] password = pword.toCharArray();
 		 
-		cert = generateCertificate(userID, keyPair, 7, "SHA256withRSA");
+		cert = generateCertificate(userID,"Keys", keyPair, 7, "SHA256withRSA");
 
 		
 		//guardar o certificado na keystore para poder obter a pubkey
@@ -359,7 +363,7 @@ public static void createKeys(String userID, String pword) {
 		return;
 }
 
-private static X509Certificate generateCertificate(String dn, KeyPair pair, int days, String algorithm)
+public static X509Certificate generateCertificate(String dn, String subject, KeyPair pair, int days, String algorithm)
 		  throws GeneralSecurityException, IOException
 		{
 		  PrivateKey privkey = pair.getPrivate();
@@ -369,10 +373,11 @@ private static X509Certificate generateCertificate(String dn, KeyPair pair, int 
 		  CertificateValidity interval = new CertificateValidity(from, to);
 		  BigInteger sn = new BigInteger(64, new SecureRandom());
 		  X500Name owner = new X500Name("CN="+dn);
+		  X500Name sj = new X500Name("CN="+subject);
 		 
 		  info.set(X509CertInfo.VALIDITY, interval);
 		  info.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(sn));
-		  info.set(X509CertInfo.SUBJECT, owner);
+		  info.set(X509CertInfo.SUBJECT, sj);
 		  info.set(X509CertInfo.ISSUER,owner);
 		  info.set(X509CertInfo.KEY, new CertificateX509Key(pair.getPublic()));
 		  info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));

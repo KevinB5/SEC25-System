@@ -45,6 +45,7 @@ import sun.security.x509.X509CertImpl;
 import sun.security.x509.X509CertInfo;
 
 
+
 public class User {
 	private static String idUser ;
 	
@@ -227,7 +228,11 @@ public enum GoodState {
     	String [] res = operation.split(" ");
 
     	String op =  res[0];
-
+    	
+    	if(op.equals("mygoods")) {
+    		printgoods();
+    	}
+    	
     	if(op.equals("sell")) {
     		if(res.length!=2) {
     			System.out.println("correct syntax: sell <goodID>");
@@ -367,6 +372,7 @@ public enum GoodState {
 	 * @param good
 	 */
 	private String transferGood(String buyer, String good, byte[] buyerSig) {
+		this.getStateOfGoodInvisible(good);//updates counter
 		String counter=counters.get(good);
 		String res= "";
 		try {
@@ -375,7 +381,7 @@ public enum GoodState {
 		
 			res= result.getText();
 			System.out.println("answer from notary: "+res);
-			if(res.equals(OK)) {
+			if(!res.equals(NOK)) {
 //				System.out.println(res);
 				//TODO: Mandar resposta ao Buyer
 				goods.remove(good);
