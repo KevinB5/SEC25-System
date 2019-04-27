@@ -10,11 +10,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Scanner;
+
 
 
 public class Storage {
@@ -179,8 +182,9 @@ public class Storage {
 	public void writeLog(String goodId, String seller, String buyer,String counter , byte[] sigSeller,byte[] sigBuyer) {
 		BufferedWriter bw = null;
 		FileWriter fw = null;
-
-		String data = goodId+";"+seller+";"+buyer+";"+counter+";"+sigSeller+";"+sigBuyer+System.lineSeparator();
+		String sigSell = new String(Base64.getEncoder().withoutPadding().encodeToString(sigSeller)).replace("\\","");
+		String sigBuy = new String(Base64.getEncoder().withoutPadding().encodeToString(sigBuyer)).replace("\\","");
+		String data = goodId+";"+seller+";"+buyer+";"+counter+";"+sigSell+";"+sigBuy+System.lineSeparator();
 		try {
 			File file = new File(this.pathLog+ this.logName);
 			if (!file.exists()) {
@@ -215,9 +219,9 @@ public class Storage {
 				String line = scnr.nextLine();
 				String[] content = line.split(";");
 				if(!line.startsWith("#") && content.length==6) {
-					System.out.println(content[5]);
-					System.out.println(content[5].getBytes());
-					if(PKI.verifySignature("intentionbuy "+content[1]+" "+content[0]+" "+content[3],content[5].getBytes(),content[2])) {
+					byte[] buySig = Base64.getDecoder().decode(content[5]); 
+					if(PKI.verifySignature("intentionbuy "+content[1]+" "+content[0]+" "+content[3],buySig,content[2])) {
+						System.out.println("last signature verified");
 						if (!tmpFile.exists()) {
 							tmpFile.createNewFile();
 						}
