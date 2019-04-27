@@ -14,12 +14,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
 public class Library {
-	private Socket servConnect;
+	private ArrayList<Socket> servConnects = new ArrayList<Socket>();
 	private ServerSocket serverSocket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
@@ -28,17 +29,18 @@ public class Library {
     private ObjectInputStream inU;
     private String ip;
     private final String idUser;   
-    private static final String SELL = "sell";
-    private static final String STATE = "state";
-    private static final String BUY = "buy";
-    private static final String TRANSFER = "transfer";
-	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\ports.txt";
+	//private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\ports.txt";
 	private HashMap <String, Socket> sockets = new HashMap<String, Socket>();
 	//private HashMap <String, ObjectInputStream> readers = new HashMap<String, ObjectInputStream>();
-	private static final String exceptMessage = "Must sign message first";
-
-    private static int PORT;
+	private static int PORT;
     private User user;
+    
+	//Byzantine
+	private int wts=0;
+	private int f;
+	private int n;
+	
+	
    // private PKI pki = new PKI(PKI.KEYSIZE);
     
     /*
@@ -60,11 +62,32 @@ public class Library {
     public void connectServer(String Sip, int Sport) {
 		try {
 
-			this.servConnect = new Socket(Sip, Sport);
+			Socket servConnect = new Socket(Sip, Sport);
 			System.out.println("connected to server at port: "+ Sport);
             out = new ObjectOutputStream(servConnect.getOutputStream()); 
             in = new ObjectInputStream(servConnect.getInputStream());
 //			System.out.println("all good");
+            servConnects.add(servConnect);
+
+            if(this.n==0) {
+	            Message fMessage=null;
+	            try {
+	            	fMessage = (Message)in.readObject();
+	    			this.f = Integer.parseInt(fMessage.getText());
+	    			this.n= 2*f+1;
+	    			System.out.println("THIS IS N: "+ n);
+	    		} catch (IOException e) {
+	    			// TODO Auto-generated catch block
+	    			e.printStackTrace();
+	    		} catch (ClassNotFoundException e) {
+	    			// TODO Auto-generated catch block
+	    			e.printStackTrace();
+	    		}
+	            
+	            for(int x = 1;x<this.n;x++) {
+	            	connectServer(Sip,Sport+x);
+	            }
+            }
 
 		} catch (BindException e) {
 			// TODO Auto-generated catch block

@@ -24,29 +24,21 @@ public class ClientApp
 	private static ObjectOutputStream out;
 	private static ObjectInputStream in;
 	private static Socket servConnect;
-
-	
 	private static final String IP = "127.0.0.1";
 	private static final int PORT= 8081;
 	private static final String ID ="user";
 //	private static ServerSocket server;
 //	private static Socket clientSocket;
-
 	
 
     public static void main( String[] args ) throws BindException
     {
-
-        
-
-    	
         System.out.println("Select the user ID number");
         String nu;
         int nUsr=-1;//not a valid user number to begin with
         nu= System.console().readLine();
         try {
         	nUsr = Integer.parseInt(nu);
-        	
 	        user = new User(ID + nUsr, IP, PORT);//recebe o ip e a porta 
 
         }catch(NumberFormatException nef) {
@@ -84,12 +76,7 @@ public class ClientApp
 
         			
         }
-
-
-
-
-	        	
-        
+       
             System.out.println( ID+nUsr +" initialized");
             /*
              * 
@@ -102,17 +89,10 @@ public class ClientApp
              * ... 
              *
              */
-            
-            
-            
-
-
 
 			try {
 	//			serverSocket = new ServerSocket(cPort);
 				//server = new ServerSocket(cPort);
-
-				
 				 while(true) {
 			        	
 			            String op = System.console().readLine();
@@ -128,30 +108,9 @@ public class ClientApp
 				e.printStackTrace();
 			}finally {
 				disconnectServer();
-				
-				
 			}
-
-		
         //cliente liga ao notario
-       
-
-
         }
-
-
-
-
-
-
-   
-    
-    
-    
-    
-    
-    
-
 	
 	
 	public static void disconnectServer() {
@@ -179,9 +138,7 @@ public class ClientApp
 		}
 
     }
-	
-
  
  
-    }
+}
         
