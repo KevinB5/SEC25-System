@@ -20,14 +20,21 @@ public class App
 	private static Notary notary;
 	private static ServerSocket serverSocket;
 	private static final int PORT = 8080;
+	private static final String IP = "127.0.0.1";
 	//Byzantine
 	private static int f;
-	private static int N;
+	private static int n=4;
 	private static int rid;
 	//keeps a list with the list of acks with the last ack, linked because it's a fifo
 	private static List<String> ackList = new ArrayList<>();
 	//keeps a list with the number reads with the last read value returned, linked because it's a fifo
 	private static List<String[]> readList = new ArrayList<>();
+	private static int nu;
+
+    private static ObjectOutputStream[] sout= new ObjectOutputStream[n];
+    private static ObjectInputStream[] sin=new ObjectInputStream[n];
+
+	private static ArrayList<Socket> servConnects = new ArrayList<Socket>();
 	// <ts,val> ???
     
 	
@@ -44,7 +51,6 @@ public class App
         System.out.println("Are we using the Citizen Card? (Y/N)");
         nu = System.console().readLine(); //nu will be Y or N which we use to obtain keys for notaries 
         */
-		int nu;
         System.out.println("Server ID");
         nu = Integer.parseInt(System.console().readLine());  
         
@@ -55,16 +61,43 @@ public class App
         try {
 			serverSocket = new ServerSocket(PORT+nu);
 	        System.out.println("Server accepting connections on port: "+ (PORT+nu));
+
+	        	String op = System.console().readLine();
+	        	if(op.equals("connect")) {
+	        		connectServers();
+	        }
+	        
 	        while (true) {
+	        	//TODO: Isto apenas recebe mensagens dos Clients?
 	        	Socket clientSocket = serverSocket.accept();
 	        	(new Thread(new ConnectClient(clientSocket, notary))).start();
 	        }
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+        
     }
   
-    public final static class ConnectClient  implements Runnable {
+	private static void connectServers() {
+		for(int x=1;x<=n;x++) {
+			if(x!=nu) {
+				try {
+					Thread.sleep(500);
+					
+					Socket servConnect = new Socket(IP, PORT+x);
+					System.out.println("connected to notary"+x+" at port: "+ (PORT+x));
+					sout[x] = new ObjectOutputStream(servConnect.getOutputStream()); 
+					sin[x] = new ObjectInputStream(servConnect.getInputStream());
+					servConnects.add(servConnect);
+				}catch (IOException | InterruptedException ex) {
+					ex.printStackTrace();
+				}
+				
+			}
+		}
+	}
+    
+	public final static class ConnectClient  implements Runnable {
 
     	public static final int PORT_NUMBER = 8081;
     	private Notary notary;
@@ -131,4 +164,6 @@ public class App
     	        }		
     	}
     }
+    
+    
 }
