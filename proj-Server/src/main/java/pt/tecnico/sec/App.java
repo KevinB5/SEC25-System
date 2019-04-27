@@ -17,9 +17,9 @@ import java.io.ObjectOutputStream;
  */
 public class App 
 {
-	static Notary notary ;
-	private static ArrayList<ServerSocket> serverSockets = new ArrayList<ServerSocket>();
-	private static final int PORT = 8081;
+	private static Notary notary;
+	private static ServerSocket serverSocket;
+	private static final int PORT = 8080;
 	//Byzantine
 	private static int f;
 	private static int N;
@@ -30,34 +30,38 @@ public class App
 	private static List<String[]> readList = new ArrayList<>();
 	// <ts,val> ???
     
+	
+	
 	public static void main( String[] args ) throws GeneralSecurityException, IOException
     {
+		/*
     	System.out.println("What is the number of faulty processes?");
         String nu;
         nu= System.console().readLine();
         f = Integer.parseInt(nu);
-        N = 3*f+1; //expression to calculate total number of processes needed - might not be this
+        N = 2*f+1; //expression to calculate total number of processes needed - might not be this
         
         System.out.println("Are we using the Citizen Card? (Y/N)");
         nu = System.console().readLine(); //nu will be Y or N which we use to obtain keys for notaries 
+        */
+		int nu;
+        System.out.println("Server ID");
+        nu = Integer.parseInt(System.console().readLine());  
         
         Storage store = new Storage();
         store.readLog();
         
-        for (int n=0;n<N;n++) {
-	    	notary = new Notary(n+1,store);//atribuir aqui a porta
-	        try {
-				ServerSocket serverSocket = new ServerSocket(PORT+n);
-		        System.out.println("Server accepting connections on port: "+ PORT);
-		        serverSockets.add(serverSocket);
-		        while (true) {
-		        	Socket clientSocket = serverSocket.accept();
-		        	(new Thread(new ConnectClient(clientSocket, notary))).start();
-		        }
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-        }
+    	notary= new Notary(nu,store);//atribuir aqui a porta
+        try {
+			serverSocket = new ServerSocket(PORT+nu);
+	        System.out.println("Server accepting connections on port: "+ (PORT+nu));
+	        while (true) {
+	        	Socket clientSocket = serverSocket.accept();
+	        	(new Thread(new ConnectClient(clientSocket, notary))).start();
+	        }
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
   
     public final static class ConnectClient  implements Runnable {
@@ -78,19 +82,12 @@ public class App
     	        ObjectOutputStream out = null;
     	        
                 ReadWriteLock lock = new ReentrantReadWriteLock();
+                
+                
+    	        
     	        try {
     	            out = new ObjectOutputStream(clientSocket.getOutputStream()); 
     	            in = new ObjectInputStream(clientSocket.getInputStream());
-    	            
-    	            lock.writeLock().lock();
-			        try {
-						out.writeObject(new Message("0",""+f,null,null,null,null));
-					} catch (Exception e) {
-						e.printStackTrace();
-					}finally {
-						//liberta assim que terminar a escrita
-						lock.writeLock().unlock();
-					}
     	        	while (true) {
     	        		Message msg =null;
     	        		//tenta adquirir o trinco para leitura

@@ -22,8 +22,10 @@ import java.util.Scanner;
 public class Library {
 	private ArrayList<Socket> servConnects = new ArrayList<Socket>();
 	private ServerSocket serverSocket;
-    private ObjectOutputStream out;
-    private ObjectInputStream in;
+
+	private int n=2;
+    private ObjectOutputStream[] out= new ObjectOutputStream[n];
+    private ObjectInputStream[] in=new ObjectInputStream[n];;
     
     private ObjectOutputStream outU;
     private ObjectInputStream inU;
@@ -38,7 +40,6 @@ public class Library {
 	//Byzantine
 	private int wts=0;
 	private int f;
-	private int n;
 	
 	
    // private PKI pki = new PKI(PKI.KEYSIZE);
@@ -60,41 +61,21 @@ public class Library {
     }
     
     public void connectServer(String Sip, int Sport) {
-		try {
-
-			Socket servConnect = new Socket(Sip, Sport);
-			System.out.println("connected to server at port: "+ Sport);
-            out = new ObjectOutputStream(servConnect.getOutputStream()); 
-            in = new ObjectInputStream(servConnect.getInputStream());
-//			System.out.println("all good");
-            servConnects.add(servConnect);
-
-            if(this.n==0) {
-	            Message fMessage=null;
-	            try {
-	            	fMessage = (Message)in.readObject();
-	    			this.f = Integer.parseInt(fMessage.getText());
-	    			this.n= 3*f+1;
-	    			System.out.println("THIS IS N: "+ n);
-	    		} catch (IOException e) {
-	    			// TODO Auto-generated catch block
-	    			e.printStackTrace();
-	    		} catch (ClassNotFoundException e) {
-	    			// TODO Auto-generated catch block
-	    			e.printStackTrace();
-	    		}
-	            
-	            for(int x = 1;x<this.n;x++) {
-	            	connectServer(Sip,Sport+x);
-	            }
-            }
-
-		} catch (BindException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}catch (IOException ex) {
-			ex.printStackTrace();
-		}
+    	for(int x=0;x<this.n;x++) {
+    		try {
+    			Thread.sleep(2000);
+    			Socket servConnect = new Socket(Sip, Sport+x);
+    			System.out.println("connected to server at port: "+ Sport);
+                out[x] = new ObjectOutputStream(servConnect.getOutputStream()); 
+                in[x] = new ObjectInputStream(servConnect.getInputStream());
+//    			System.out.println("all good");
+                servConnects.add(servConnect);
+              
+    		
+			}catch (IOException | InterruptedException ex) {
+				ex.printStackTrace();
+			}
+    	}
 	}
     
     public void connectUser( String Uip,String userID, int Uport) {
@@ -160,9 +141,10 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		if(intent.getSig().equals(null))
 			throw new Exception("Must sign message first");
 		Message res = null;
+		for(int x=0;x<this.n;x++) {
 		try {
-			out.writeObject(intent);
-			res = (Message)in.readObject();
+			out[x].writeObject(intent);
+			res = (Message)in[x].readObject();
 			if(!PKI.verifySignature(res.getText(),res.getSig(),res.getID())) {
 				throw new Exception("Invalid message signature");
 			}
@@ -172,6 +154,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
 		}
 		return res;	
 	}

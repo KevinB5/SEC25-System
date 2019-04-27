@@ -433,7 +433,7 @@ public enum GoodState {
 			for(i=0;i<split.length-2;i++) {
 				text+=split[i]+" ";
 			}
-			System.out.println("STATE from notary: " +result.getText());
+			System.out.println("STATE from"+result.getID()+": " +result.getText());
 		}else
 		System.out.println("STATE from notary: notary failed challenge");
 		//returns counter
