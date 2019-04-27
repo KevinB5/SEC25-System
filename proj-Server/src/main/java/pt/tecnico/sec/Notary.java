@@ -180,16 +180,16 @@ public enum GoodState {
 	
 	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
 	    		//System.out.println("Returning "+rs);
-	    		return new Message(this.idNotary, rs, null,null, null,null);
+	    		return new Message(this.idNotary, rs, PKI.sign(rs,idNotary,PASS),null, null,null);
 	    		}
 	    	if(op.equals("state")) {
 	    		if(res.length!=3) {
 	    			String rs = "WARNING: State request must issue a challenge";
-	    			return new Message(this.idNotary, rs,null, null,null,null);
+	    			return new Message(this.idNotary, rs,PKI.sign(rs,idNotary,PASS), null,null,null);
 	    		}
 	    		else {
 	    			String rs=  this.verifiyStateOfGood(res[1],res[2]);
-	    			return new Message(this.idNotary, rs, null,null, null,null);
+	    			return new Message(this.idNotary, rs, PKI.sign(rs,idNotary,PASS),null, null,null);
 	    		}
 	    	}
 	    	if(op.equals("transfer")) {
@@ -209,15 +209,15 @@ public enum GoodState {
 			    		//cert = eid.getCert();
 		    			//cert= null;
 			    		//eid.sign(cert,rs);
-			    		return new Message(this.idNotary, rs, null,null, null,cert);
+			    		return new Message(this.idNotary, rs, PKI.sign(rs,idNotary,PASS),null, null,cert);
 		    		}else
-		    		return new Message(this.idNotary, "not valid transfer", null,null, null,null);
+		    		return new Message(this.idNotary, "not valid transfer", PKI.sign("not valid transfer",idNotary,PASS),null, null,null);
 	    		}else
-	    		return new Message(this.idNotary, "wrong counter", null,null, null,null);
+	    		return new Message(this.idNotary, "wrong counter", PKI.sign("wrong counter",idNotary,PASS),null, null,null);
 	    	}else
-	    		return new Message(this.idNotary, "not valid operation", null,null, null,null);
+	    		return new Message(this.idNotary, "not valid operation", PKI.sign("not valid operation",idNotary,PASS),null, null,null);
 		}else
-			return new Message(this.idNotary, "signature not valid", null,null, null,null);
+			return new Message(this.idNotary, "signature not valid", PKI.sign("signature not valid",idNotary,PASS),null, null,null);
 	}
 	/**
 	 * Transferir o good ao user

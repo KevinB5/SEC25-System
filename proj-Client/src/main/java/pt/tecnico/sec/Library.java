@@ -163,8 +163,9 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		try {
 			out.writeObject(intent);
 			res = (Message)in.readObject();
-			System.out.println(res.getText());
-			
+			if(!PKI.verifySignature(res.getText(),res.getSig(),res.getID())) {
+				throw new Exception("Invalid message signature");
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
