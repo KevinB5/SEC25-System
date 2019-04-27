@@ -40,6 +40,7 @@ public class Storage {
 	}
 	
 	public Storage() {
+		PKI.getInstance();
 		//put user1
 		String res = "good";
 		/*
@@ -212,13 +213,16 @@ public class Storage {
 			scnr = new Scanner(systemFile);
 			while(scnr.hasNextLine()) {
 				String line = scnr.nextLine();
-				if(!line.startsWith("#") && line.split(" ").length==6) {
-					if (!tmpFile.exists()) {
-						tmpFile.createNewFile();
+				String[] content = line.split(";");
+				if(!line.startsWith("#") && content.length==6) {
+					if(PKI.verifySignature("intentionbuy "+content[1]+" "+content[0]+" "+content[3],content[5].getBytes(),content[2])) {
+						if (!tmpFile.exists()) {
+							tmpFile.createNewFile();
+						}
+						fw = new FileWriter(tmpFile.getAbsoluteFile(), true);
+						bw = new BufferedWriter(fw);
+						bw.write(line);	
 					}
-					fw = new FileWriter(tmpFile.getAbsoluteFile(), true);
-					bw = new BufferedWriter(fw);
-					bw.write(line);	
 				}
 			}
 		
