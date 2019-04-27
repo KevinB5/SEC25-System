@@ -215,6 +215,8 @@ public class Storage {
 				String line = scnr.nextLine();
 				String[] content = line.split(";");
 				if(!line.startsWith("#") && content.length==6) {
+					System.out.println(content[5]);
+					System.out.println(content[5].getBytes());
 					if(PKI.verifySignature("intentionbuy "+content[1]+" "+content[0]+" "+content[3],content[5].getBytes(),content[2])) {
 						if (!tmpFile.exists()) {
 							tmpFile.createNewFile();
