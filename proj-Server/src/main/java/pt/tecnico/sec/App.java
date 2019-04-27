@@ -36,14 +36,16 @@ public class App
         String nu;
         nu= System.console().readLine();
         f = Integer.parseInt(nu);
-        N = 2*f+1; //expression to calculate total number of processes needed - might not be this
+        N = 3*f+1; //expression to calculate total number of processes needed - might not be this
         
         System.out.println("Are we using the Citizen Card? (Y/N)");
         nu = System.console().readLine(); //nu will be Y or N which we use to obtain keys for notaries 
         
+        Storage store = new Storage();
+        store.readLog();
         
         for (int n=0;n<N;n++) {
-	    	notary = new Notary();//atribuir aqui a porta
+	    	notary = new Notary(n+1,store);//atribuir aqui a porta
 	        try {
 				ServerSocket serverSocket = new ServerSocket(PORT+n);
 		        System.out.println("Server accepting connections on port: "+ PORT);

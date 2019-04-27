@@ -1,6 +1,7 @@
 package pt.tecnico.sec;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -23,6 +24,8 @@ public class Storage {
 	private static String filename = line +"goods.txt";
 	private static String path = originPath() + filename;
 	private static HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
+	private final String pathLog= System.getProperty("user.dir")+"\\src\\main\\java\\pt\\tecnico\\state\\";
+	private final String logName = "transfer.txt";
 		
 	private File systemFile;
 		
@@ -172,5 +175,60 @@ public class Storage {
 		goods.replace(goodID, newOwner);
 	}
 
+	public void writeLog(String goodId, String seller, String buyer,String counter , byte[] sigSeller,byte[] sigBuyer) {
+		BufferedWriter bw = null;
+		FileWriter fw = null;
+
+		String data = goodId+";"+seller+";"+buyer+";"+counter+";"+sigSeller+";"+sigBuyer+System.lineSeparator();
+		try {
+			File file = new File(this.pathLog+ this.logName);
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			fw = new FileWriter(file.getAbsoluteFile(), true);
+			bw = new BufferedWriter(fw);
+			bw.write(data);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (bw != null)
+					bw.close();
+				if (fw != null)
+					fw.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+	}
 	
+	public void readLog() {
+		File systemFile = new File(pathLog+logName);
+		File tmpFile = new File(pathLog+"tmp.txt");
+		Scanner scnr = null;
+		BufferedWriter bw = null;
+		FileWriter fw = null;
+		try {
+			scnr = new Scanner(systemFile);
+			while(scnr.hasNextLine()) {
+				String line = scnr.nextLine();
+				if(!line.startsWith("#") && line.split(" ").length==6) {
+					if (!tmpFile.exists()) {
+						tmpFile.createNewFile();
+					}
+					fw = new FileWriter(tmpFile.getAbsoluteFile(), true);
+					bw = new BufferedWriter(fw);
+					bw.write(line);	
+				}
+			}
+		
+		tmpFile.renameTo(systemFile);
+		
+//			System.out.println("Log " + log);
+		}catch(Exception e) {
+			System.out.println("Error in reading state file: " + e.getMessage());
+		}finally {
+			scnr.close();
+		}
+	}
 }

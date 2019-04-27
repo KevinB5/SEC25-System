@@ -25,15 +25,13 @@ public enum GoodState {
 	ONSALE,NOTONSALE
 }
 	
-	private String idNotary = "notary" ;
+	private String idNotary  ;
 	private static final String OK ="OK";
 	private static final String NOK ="Not OK";
 	private HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,state>
 	private HashMap<String, Integer> counters = new HashMap<String, Integer>(); // <goodID,counter>
 //	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
-	private final String pathLog= System.getProperty("user.dir")+"\\src\\main\\java\\pt\\tecnico\\state\\transfer.log";
-	private final ArrayList<String> log = new ArrayList<String>();
 	private Storage store;
 //	private PKI keyManager;
 	private String PASS;
@@ -41,8 +39,9 @@ public enum GoodState {
 	private KeyPair keypair = null;
 	
 	
-	public Notary() {
-		store = new Storage();
+	public Notary(int id,Storage store) {
+		idNotary = "notary"+id;
+		this.store = store;
 		goods = store.getGoods();
 		System.out.println(goods);
 		for(String goodID: goods.keySet()) {
@@ -235,12 +234,12 @@ public enum GoodState {
 			if(states.get(goodID).equals(GoodState.ONSALE)) {
 				if(PKI.verifySignature("intentionbuy "+goodID + " "+counters.get(goodID), sigBuyer, buyer)){
 //				System.out.println("we in");
+					store.writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
 					store.updateFile(goodID, buyer);
 					goods.replace(goodID, buyer); 
 //				System.out.println("replacing " + goodID + " " + buyer);
 					states.replace(goodID, GoodState.NOTONSALE);
 					System.out.println(goods);
-					writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
 					counters.replace(goodID,counters.get(goodID)+1);
 					//enviar certificado
 					return goodID+" "+seller+" "+ buyer+" "+counters.get(goodID)+ 	" "+sigSeller + " "+sigBuyer;
@@ -253,53 +252,6 @@ public enum GoodState {
 		return NOK;
 	}
 	
-	
-	private void writeLog(String goodId, String seller, String buyer,String counter , byte[] sigSeller,byte[] sigBuyer) {
-		BufferedWriter bw = null;
-		FileWriter fw = null;
-
-		String data = goodId+";"+seller+";"+buyer+";"+counter+";"+sigSeller+";"+sigBuyer;
-		try {
-			File file = new File(this.pathLog);
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-			fw = new FileWriter(file.getAbsoluteFile(), true);
-			bw = new BufferedWriter(fw);
-			bw.write(data);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (bw != null)
-					bw.close();
-				if (fw != null)
-					fw.close();
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-	}
-	
-	private void readLog() {
-		File systemFile = new File(pathLog);
-		Scanner scnr = null;
-		try {
-			scnr = new Scanner(systemFile);
-			while(scnr.hasNextLine()) {
-				String line = scnr.nextLine();
-//				System.out.println(line);
-				if(!line.startsWith("#")) {
-					log.add(line);		
-				}
-			}
-//			System.out.println("Log " + log);
-		}catch(Exception e) {
-			System.out.println("Error in reading state file: " + e.getMessage());
-		}finally {
-			scnr.close();
-		}
-	}
 	
 	
 }

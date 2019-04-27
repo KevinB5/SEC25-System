@@ -74,7 +74,7 @@ public class Library {
 	            try {
 	            	fMessage = (Message)in.readObject();
 	    			this.f = Integer.parseInt(fMessage.getText());
-	    			this.n= 2*f+1;
+	    			this.n= 3*f+1;
 	    			System.out.println("THIS IS N: "+ n);
 	    		} catch (IOException e) {
 	    			// TODO Auto-generated catch block
