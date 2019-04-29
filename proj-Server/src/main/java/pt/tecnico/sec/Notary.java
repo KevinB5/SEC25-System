@@ -32,6 +32,7 @@ public enum GoodState {
 	private HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,state>
 	private HashMap<String, Integer> counters = new HashMap<String, Integer>(); // <goodID,counter>
+	private HashMap<String,Integer> timestamps = new HashMap<String, Integer>();
 //	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
 	private Storage store;
 //	private PKI keyManager;
@@ -179,6 +180,7 @@ public enum GoodState {
 	    	if(op .equals("sell")) {
 	    		if(res[2].equals(counters.get(res[1]).toString())) {
 	    			String ts = res[3];
+	    			timestamps.put(res[1],Integer.parseInt(res[3]));
 		    		String rs=this.verifySelling(user, res[1]);//userID, goodID
 		    		//System.out.println("Returning "+rs);
 		    		return new Message(this.idNotary, rs+" "+ts, PKI.sign(rs,idNotary,PASS),null, null,null);
@@ -192,7 +194,7 @@ public enum GoodState {
 	    		}
 	    		else {
 	    			String rs=  this.verifiyStateOfGood(res[1],res[2]);
-	    			return new Message(this.idNotary, rs, PKI.sign(rs,idNotary,PASS),null, null,null);
+	    			return new Message(this.idNotary, rs+ " "+ timestamps.get(res[1]), PKI.sign(rs,idNotary,PASS),null, null,null);
 	    		}
 	    	}
 	    	if(op.equals("transfer")) {

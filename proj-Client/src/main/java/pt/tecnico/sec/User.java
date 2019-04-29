@@ -405,6 +405,7 @@ public enum GoodState {
 	
 	public String intentionToSell(String userID, String goodID, String counter) throws InvalidKeyException, Exception {
 		this.getStateOfGoodInvisible(goodID);
+		wts++;
 		String ret ="";
 		String msg =SELL +  " " +goodID + " "+ counter+" "+wts;
 		try {
@@ -421,13 +422,13 @@ public enum GoodState {
 		rid++;
 		
 		String msg= STATE + " " + goodID + " "+challenge + " "+ rid;
-		Message result= null;
+		String result= null;
 		try {
 				result =lib.read( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),rid);
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
 		}
-		String[] split = result.getText().split(" ");
+		String[] split = result.split(" ");
 		if(split[split.length-1].equals(challenge)) {
 			//Get message from Notary excluding challenge and counter
 			String text="";
@@ -435,7 +436,7 @@ public enum GoodState {
 			for(i=0;i<split.length-2;i++) {
 				text+=split[i]+" ";
 			}
-			System.out.println("STATE from"+result.getID()+": " +result.getText());
+			System.out.println("STATE from notary:" +result);
 		}else
 		System.out.println("STATE from notary: notary failed challenge");
 		//returns counter

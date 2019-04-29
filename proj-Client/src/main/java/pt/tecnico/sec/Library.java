@@ -40,7 +40,8 @@ public class Library {
     
 	//Byzantine
 	private boolean[] acklist= new boolean[n];	
-	private HashMap<String,Integer> readlist = new HashMap<String,Integer>();
+	private Pair[] statelist = new Pair[n];
+	private Pair[] counterlist = new Pair[n];
 	
    // private PKI pki = new PKI(PKI.KEYSIZE);
     
@@ -59,6 +60,12 @@ public class Library {
     	this.user = user;
     	
     }
+    
+    class Pair {
+    	  final String value;
+    	  final int timestamp;
+    	  Pair(String x, int y) {this.value=x;this.timestamp=y;}
+    	}
     
     public void connectServer(String Sip, int Sport) {
     	for(int x=0;x<this.n;x++) {
@@ -172,7 +179,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 					&& res.getText().equals("ACK") 
 					&& ts.equals(wts)) {
 				this.acklist[x]=true;
-				if(Acks()> (n+f)/2) {
+				if(acks()> (n+f)/2) {
 					return "OK";
 				}
 			}
@@ -188,19 +195,21 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	}
 	
 	public String read(Message intent, int rid) throws Exception {
-		clearReadlist();
+		clearReadLists();
 		Message res = null;
 		for(int x=0;x<this.n;x++) {
 		try {
 			out[x].writeObject(intent);
 			res = (Message)in[x].readObject();
-			String r=res.getText().split(" ")[3];
+			String[] split =res.getText().split(" ");
+			String r = split[3];
 			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
-					&& res.getText().equals("ACK") 
-					&& r.equals(rid)) {
-				this.readlist.put(state, timestamp);
-				if(this.readlist.size() > (n+f)/2) {
-					return "OK";
+					&& Integer.parseInt(r)==rid) {
+				int ts = Integer.parseInt(split[-1]);
+				this.statelist[x]=new Pair(split[0], ts);
+				this.counterlist[x]=new Pair(split[1], ts);
+				if(this.reads() > (n+f)/2) {
+					return maximumValue(statelist)+" "+maximumValue(counterlist);
 				}
 			}
 		} catch (IOException e) {
@@ -213,12 +222,18 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		}
 		return "NOT OK";	
 	}
-		
 	
-	private void clearReadlist() {
-		readlist.clear();
+	
+	private String maximumValue(Pair[] array) {
+		int max = 0;
+		String maxval=null;
+		for(int x=0 ; x < this.n ; x++) {
+			if(array[x].timestamp>=max) {
+				maxval=array[x].value;
+			}
+		}
+		return maxval;		
 	}
-	
 	
 	private void clearAcklist() {
 		for(int x=0 ; x < this.n ; x++) {
@@ -227,8 +242,25 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	}
 	
 	
+	private void clearReadLists() {
+		for(int x=0 ; x < this.n ; x++) {
+			this.statelist[x] = null;
+			this.counterlist[x]=null;
+		}
+	}
 	
-	private int Acks() {
+	private int reads() {
+		int k=0;
+		for(int x=0 ; x < this.n ; x++) {
+			if(this.counterlist[x]!=null) {
+			k++;	
+			}
+		}
+		return k;
+	}
+	
+	
+	private int acks() {
 		int k=0;
 		for(int x=0 ; x < this.n ; x++) {
 			if(this.acklist[x] = true) {
@@ -287,37 +319,4 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	    }
 	
 	
-	
-	/*
-	
-	public Message sendMessage(String uID, Message msg) throws Exception {
-		Message res = null;
-		try {
-			outU.writeObject(msg);
-			res = (Message)inU.readObject();
-			System.out.println(res.getText());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return res;
-		
-	}
-	*/
-	
-	    
-	 
-/*
-	
-	public String sellGood(String userID, String buyerID, String goodID,byte[] buyerSig) throws InvalidKeyException, Exception {//buyerID, goodID
-		System.out.println("Confirming transfer with notary");
-
-		String res = this.transferGood(userID, buyerID, goodID, buyerSig);
-		
-		return res;
-	}
-*/
 }
