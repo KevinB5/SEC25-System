@@ -36,30 +36,45 @@ public class App
 
 	private static ArrayList<Socket> servConnects = new ArrayList<Socket>();
 	// <ts,val> ???
+	private static ArrayList<Notary> servers = new ArrayList<Notary>();
     
 	
 	
 	public static void main( String[] args ) throws GeneralSecurityException, IOException
     {
-		/*
+		
     	System.out.println("What is the number of faulty processes?");
         String nu;
         nu= System.console().readLine();
         f = Integer.parseInt(nu);
-        N = 2*f+1; //expression to calculate total number of processes needed - might not be this
-        
+        int N = 3*f+1; //expression to calculate total number of processes needed - might not be this
+        /*
         System.out.println("Are we using the Citizen Card? (Y/N)");
         nu = System.console().readLine(); //nu will be Y or N which we use to obtain keys for notaries 
-        */
+        
         System.out.println("Server ID");
         nu = Integer.parseInt(System.console().readLine());  
-        
+        */
         Storage store = new Storage();
         store.readLog();
         
-    	notary= new Notary(nu,store);//atribuir aqui a porta
+    	//notary= new Notary(nu,store);//atribuir aqui a porta
+        while(N!=0) {
+        	notary= new Notary(N,store);//atribuir aqui a porta
+        	servers.add(notary);
+        	N--;
+        }
+        
+        for(Notary n : servers) {
+        	int id = Integer.parseInt(n.getID().substring(0, 1));
+	    	new Thread(new Connector(id, notary)).start();
+
+        }
+        
+        
+    	/*
         try {
-			serverSocket = new ServerSocket(PORT+nu);
+			serverSocket = new ServerSocket(PORT);
 	        System.out.println("Server accepting connections on port: "+ (PORT+nu));
 
 	        	String op = System.console().readLine();
@@ -70,7 +85,6 @@ public class App
 	        while (true) {
 	        	//TODO: Isto apenas recebe mensagens dos Clients?
 	        	Socket clientSocket = serverSocket.accept();
-	        	(new Thread(new ConnectClient(clientSocket, notary))).start();
 	        }
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -78,6 +92,7 @@ public class App
         
     }
   
+
 	private static void connectServers() {
 		for(int x=1;x<=n;x++) {
 			if(x!=nu) {
@@ -94,20 +109,55 @@ public class App
 				}
 				
 			}
-		}
+		}*/
 	}
     
-	public final static class ConnectClient  implements Runnable {
+	public final static class Connector implements Runnable {
 
     	public static final int PORT_NUMBER = 8081;
     	private Notary notary;
-    	private Socket clientSocket;
+    	private ServerSocket serverSocket;
+		private Socket clientSocket;
 
-        public ConnectClient(Socket client, Notary notary) {
-        	this.notary = notary;
-        	this.clientSocket = client;
+
+        public Connector(int port, Notary notary) {
+        	System.out.println("Starting server in port "+ port);
+			try {
+				serverSocket = new ServerSocket(PORT_NUMBER +port);
+	        	this.notary = notary;
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+        	//this.serverSocket = serv;
            
         }
+        
+    	@Override
+    	public void run() {
+    		while(true) {
+    			try {
+					clientSocket = serverSocket.accept();
+	    			new Thread(new ClientReceiver(clientSocket, notary)).run();
+
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		}
+    	}
+    	
+	}
+	
+	private static class ClientReceiver implements Runnable {
+		private Socket clientSocket;
+		private Notary notary;
+		ClientReceiver(Socket client, Notary notary){
+			clientSocket = client;
+			this.notary = notary;
+		}
 
     	@Override
     	public void run() {

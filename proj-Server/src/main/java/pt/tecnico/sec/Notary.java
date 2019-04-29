@@ -40,7 +40,7 @@ public enum GoodState {
 	
 	
 	public Notary(int id,Storage store) {
-		idNotary = "notary"+id;
+		idNotary = id +"notary";
 		this.store = store;
 		goods = store.getGoods();
 		System.out.println(goods);
