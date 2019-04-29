@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.Socket;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,13 +36,14 @@ public enum GoodState {
 	private Storage store;
 //	private PKI keyManager;
 	private String PASS;
-	private PrivateKey privkey;
+	private SLibrary lib;
 	private KeyPair keypair = null;
 	
 	
 	public Notary(int id,Storage store) {
-		idNotary = id +"notary";
+		idNotary = "notary"+ id;
 		this.store = store;
+		this.lib=new SLibrary(this);
 		goods = store.getGoods();
 		System.out.println(goods);
 		for(String goodID: goods.keySet()) {
@@ -79,6 +81,26 @@ public enum GoodState {
 	
 	String getID() {
 		return this.idNotary;
+	}
+	
+	void setServers(HashMap<String,Socket> serv) {
+		System.out.println("YEET");
+
+	}
+	
+    public void connect(String userID, int Uport) {
+    	lib.connect(userID, Uport);
+    }
+	
+	void senMessage(String uID){
+		System.out.println("SENDING");
+		Message msg = new Message(this.idNotary, "OI "+ uID, null);
+		try {
+			lib.sendMessage(uID, msg);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	

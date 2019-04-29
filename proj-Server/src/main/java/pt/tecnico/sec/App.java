@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -20,6 +21,7 @@ public class App
 	private static Notary notary;
 	private static ServerSocket serverSocket;
 	private static final int PORT = 8080;
+
 	//Byzantine
 	private static int f;
 	private static int N;
@@ -30,7 +32,10 @@ public class App
 	//keeps a list with the number reads with the last read value returned, linked because it's a fifo
 	private static List<String[]> readList = new ArrayList<>();
 	// <ts,val> ???
-	private static ArrayList<Notary> servers = new ArrayList<Notary>();
+	private static HashMap<Integer, Notary> servers = new HashMap<Integer, Notary>();
+	private static HashMap<String, Integer> servPorts = new HashMap<String ,Integer>();//
+
+
     
 	
 	
@@ -51,37 +56,59 @@ public class App
         */
         Storage store = new Storage();
         store.readLog();
+        
         J=N;
     	//notary= new Notary(nu,store);//atribuir aqui a porta
         while(J!=0) {
         	notary= new Notary(J,store);//atribuir aqui a porta
-        	servers.add(notary);
+        	servers.put(J, notary);
         	J--;
         }
-        
-        for(Notary n : servers) {
-        	int id = Integer.parseInt(n.getID().substring(0, 1));
-	    	new Thread(new Connector(id, notary)).start();
+
+        //para cada notario 
+        for(Notary n : servers.values()) {
+        	int id = Integer.parseInt(n.getID().substring(6));
+        	servPorts.put(n.getID(), PORT+id);
+        	//lança as threads que vao tratar dos sockets
+	    	new Thread(new Connector(PORT+id, notary)).start();
 
         }
         
+        //depois de todos os notarios serem lançados connectam se uns aos outros
+        for(Notary n : servers.values()) {
+        	System.out.println("Notary "+ n.getID() +" connecting to others");
+	    	for(String Sid: servPorts.keySet()) {
+	    		n.connect(Sid, servPorts.get(Sid));
+	    	}
+        }
+
         
+              
 	}
     
 	public final static class Connector implements Runnable {
 
 
-    	public static final int PORT_NUMBER = 8081;
+    	public static final int PORT_NUMBER = 8000;
     	private Notary notary;
     	private ServerSocket serverSocket;
 		private Socket clientSocket;
+		private int port;
+
+		
 
 
         public Connector(int port, Notary notary) {
         	System.out.println("Starting server in port "+ port);
+        	this.notary = notary;
+	    	//notary.setServers(servSockt);
+
+
 			try {
-				serverSocket = new ServerSocket(PORT_NUMBER +port);
-	        	this.notary = notary;
+	    		System.out.println("OK");
+
+				serverSocket = new ServerSocket(port);
+		    	
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -94,10 +121,14 @@ public class App
         
     	@Override
     	public void run() {
+
     		while(true) {
     			try {
 					clientSocket = serverSocket.accept();
-	    			new Thread(new ClientReceiver(clientSocket, notary)).start();
+
+					
+	    			new Thread(new ClientReceiver(clientSocket, notary,port)).start();
+	    	
 
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -111,7 +142,7 @@ public class App
 	private static class ClientReceiver implements Runnable {
 		private Socket clientSocket;
 		private Notary notary;
-		ClientReceiver(Socket client, Notary notary){
+		ClientReceiver(Socket client, Notary notary, int port){
 			clientSocket = client;
 			this.notary = notary;
 		}
