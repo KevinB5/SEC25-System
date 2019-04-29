@@ -176,10 +176,12 @@ public enum GoodState {
 	    	String op =  res[0]; //the first word is the operation required
 	    	
 	    	if(op .equals("sell")) {
-	
-	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
-	    		//System.out.println("Returning "+rs);
-	    		return new Message(this.idNotary, rs, PKI.sign(rs,idNotary,PASS),null, null,null);
+	    		if(res[2].equals(counters.get(res[1]).toString())) {
+		    		String rs=this.verifySelling(user, res[1]);//userID, goodID
+		    		//System.out.println("Returning "+rs);
+		    		return new Message(this.idNotary, rs, PKI.sign(rs,idNotary,PASS),null, null,null);
+	    			}else
+	    		return new Message(this.idNotary, "wrong counter", PKI.sign("wrong counter",idNotary,PASS),null, null,null);
 	    		}
 	    	if(op.equals("state")) {
 	    		if(res.length!=3) {
