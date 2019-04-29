@@ -20,21 +20,14 @@ public class App
 	private static Notary notary;
 	private static ServerSocket serverSocket;
 	private static final int PORT = 8080;
-	private static final String IP = "127.0.0.1";
 	//Byzantine
 	private static int f;
-	private static int n=4;
+	private static int N;
 	private static int rid;
 	//keeps a list with the list of acks with the last ack, linked because it's a fifo
 	private static List<String> ackList = new ArrayList<>();
 	//keeps a list with the number reads with the last read value returned, linked because it's a fifo
 	private static List<String[]> readList = new ArrayList<>();
-	private static int nu;
-
-    private static ObjectOutputStream[] sout= new ObjectOutputStream[n];
-    private static ObjectInputStream[] sin=new ObjectInputStream[n];
-
-	private static ArrayList<Socket> servConnects = new ArrayList<Socket>();
 	// <ts,val> ???
 	private static ArrayList<Notary> servers = new ArrayList<Notary>();
     
@@ -51,7 +44,7 @@ public class App
         /*
         System.out.println("Are we using the Citizen Card? (Y/N)");
         nu = System.console().readLine(); //nu will be Y or N which we use to obtain keys for notaries 
-        
+
         System.out.println("Server ID");
         nu = Integer.parseInt(System.console().readLine());  
         */
@@ -76,22 +69,15 @@ public class App
         try {
 			serverSocket = new ServerSocket(PORT);
 	        System.out.println("Server accepting connections on port: "+ (PORT+nu));
-
-	        	String op = System.console().readLine();
-	        	if(op.equals("connect")) {
-	        		connectServers();
-	        }
-	        
 	        while (true) {
-	        	//TODO: Isto apenas recebe mensagens dos Clients?
 	        	Socket clientSocket = serverSocket.accept();
 	        }
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-        
     }
   
+<<<<<<< HEAD
 
 	private static void connectServers() {
 		for(int x=1;x<=n;x++) {
@@ -113,6 +99,7 @@ public class App
 	}
     
 	public final static class Connector implements Runnable {
+
 
     	public static final int PORT_NUMBER = 8081;
     	private Notary notary;
@@ -214,6 +201,4 @@ public class App
     	        }		
     	}
     }
-    
-    
 }

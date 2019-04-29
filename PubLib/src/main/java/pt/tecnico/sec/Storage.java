@@ -182,9 +182,8 @@ public class Storage {
 	public void writeLog(String goodId, String seller, String buyer,String counter , byte[] sigSeller,byte[] sigBuyer) {
 		BufferedWriter bw = null;
 		FileWriter fw = null;
-		String sigSell = new String(Base64.getEncoder().withoutPadding().encodeToString(sigSeller)).replace("\\","");
-		String sigBuy = new String(Base64.getEncoder().withoutPadding().encodeToString(sigBuyer)).replace("\\","");
-		String data = goodId+";"+seller+";"+buyer+";"+counter+";"+sigSell+";"+sigBuy+System.lineSeparator();
+
+		String data = goodId+";"+seller+";"+buyer+";"+counter+";"+sigSeller+";"+sigBuyer+";$"+System.lineSeparator();
 		try {
 			File file = new File(this.pathLog+ this.logName);
 			if (!file.exists()) {
@@ -218,10 +217,8 @@ public class Storage {
 			while(scnr.hasNextLine()) {
 				String line = scnr.nextLine();
 				String[] content = line.split(";");
-				if(!line.startsWith("#") && content.length==6) {
-					byte[] buySig = Base64.getDecoder().decode(content[5]); 
-					if(PKI.verifySignature("intentionbuy "+content[1]+" "+content[0]+" "+content[3],buySig,content[2])) {
-						System.out.println("last signature verified");
+				if(!line.startsWith("#") && content.length==7) {
+					if(content[content.length-1].equals("$")) {
 						if (!tmpFile.exists()) {
 							tmpFile.createNewFile();
 						}

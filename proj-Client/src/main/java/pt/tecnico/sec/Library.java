@@ -25,7 +25,7 @@ public class Library {
 
 	private int n=2;
     private ObjectOutputStream[] out= new ObjectOutputStream[n];
-    private ObjectInputStream[] in=new ObjectInputStream[n];
+    private ObjectInputStream[] in=new ObjectInputStream[n];;
     
     private ObjectOutputStream outU;
     private ObjectInputStream inU;
@@ -63,7 +63,7 @@ public class Library {
     public void connectServer(String Sip, int Sport) {
     	for(int x=0;x<this.n;x++) {
     		try {
-    			Thread.sleep(500);
+    			Thread.sleep(2000);
     			Socket servConnect = new Socket(Sip, Sport+x);
     			System.out.println("connected to server at port: "+ Sport);
                 out[x] = new ObjectOutputStream(servConnect.getOutputStream()); 
