@@ -180,7 +180,7 @@ public class Storage {
 		BufferedWriter bw = null;
 		FileWriter fw = null;
 
-		String data = goodId+";"+seller+";"+buyer+";"+counter+";"+sigSeller+";"+sigBuyer+System.lineSeparator();
+		String data = goodId+";"+seller+";"+buyer+";"+counter+";"+sigSeller+";"+sigBuyer+";$"+System.lineSeparator();
 		try {
 			File file = new File(this.pathLog+ this.logName);
 			if (!file.exists()) {
@@ -214,10 +214,10 @@ public class Storage {
 			while(scnr.hasNextLine()) {
 				String line = scnr.nextLine();
 				String[] content = line.split(";");
-				if(!line.startsWith("#") && content.length==6) {
+				if(!line.startsWith("#") && content.length==7) {
 					System.out.println(content[5]);
 					System.out.println(content[5].getBytes());
-					if(PKI.verifySignature("intentionbuy "+content[1]+" "+content[0]+" "+content[3],content[5].getBytes(),content[2])) {
+					if(content[content.length-1].equals("$")) {
 						if (!tmpFile.exists()) {
 							tmpFile.createNewFile();
 						}
