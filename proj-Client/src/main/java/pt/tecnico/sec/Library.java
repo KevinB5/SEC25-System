@@ -23,7 +23,8 @@ public class Library {
 	private ArrayList<Socket> servConnects = new ArrayList<Socket>();
 	private ServerSocket serverSocket;
 
-	private int n=2;
+	private int n;
+	private int f;
     private ObjectOutputStream[] out= new ObjectOutputStream[n];
     private ObjectInputStream[] in=new ObjectInputStream[n];
     
@@ -38,9 +39,8 @@ public class Library {
     private User user;
     
 	//Byzantine
-	private int wts=0;
-	private int f;
-	
+	private boolean[] acklist= new boolean[n];	
+	private HashMap<String,Integer> readlist = new HashMap<String,Integer>();
 	
    // private PKI pki = new PKI(PKI.KEYSIZE);
     
@@ -159,6 +159,84 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		return res;	
 	}
     
+	
+	public String write(Message intent, int wts) throws Exception {
+		clearAcklist();
+		Message res = null;
+		for(int x=0;x<this.n;x++) {
+		try {
+			out[x].writeObject(intent);
+			res = (Message)in[x].readObject();
+			String ts=res.getText().split(" ")[1];
+			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
+					&& res.getText().equals("ACK") 
+					&& ts.equals(wts)) {
+				this.acklist[x]=true;
+				if(Acks()> (n+f)/2) {
+					return "OK";
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		}
+		return "NOT OK";	
+	}
+	
+	public String read(Message intent, int rid) throws Exception {
+		clearReadlist();
+		Message res = null;
+		for(int x=0;x<this.n;x++) {
+		try {
+			out[x].writeObject(intent);
+			res = (Message)in[x].readObject();
+			String r=res.getText().split(" ")[3];
+			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
+					&& res.getText().equals("ACK") 
+					&& r.equals(rid)) {
+				this.readlist.put(state, timestamp);
+				if(this.readlist.size() > (n+f)/2) {
+					return "OK";
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		}
+		return "NOT OK";	
+	}
+		
+	
+	private void clearReadlist() {
+		readlist.clear();
+	}
+	
+	
+	private void clearAcklist() {
+		for(int x=0 ; x < this.n ; x++) {
+			this.acklist[x] = false;
+		}
+	}
+	
+	
+	
+	private int Acks() {
+		int k=0;
+		for(int x=0 ; x < this.n ; x++) {
+			if(this.acklist[x] = true) {
+				k++;
+			}
+		}
+		return k;
+	}
 	
 
 	public Message sendMessage(String uID, Message msg) throws Exception {

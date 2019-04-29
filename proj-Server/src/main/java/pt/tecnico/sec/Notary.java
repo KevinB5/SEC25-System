@@ -28,6 +28,7 @@ public enum GoodState {
 	private String idNotary  ;
 	private static final String OK ="OK";
 	private static final String NOK ="Not OK";
+	private static final String ACK = "ACK";
 	private HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,state>
 	private HashMap<String, Integer> counters = new HashMap<String, Integer>(); // <goodID,counter>
@@ -103,7 +104,7 @@ public enum GoodState {
 			counters.replace(goodID,novo );
 			System.out.println(counters.get(goodID));
 			
-			return OK;
+			return ACK;
 		}
 		return NOK;
 	}
@@ -177,9 +178,10 @@ public enum GoodState {
 	    	
 	    	if(op .equals("sell")) {
 	    		if(res[2].equals(counters.get(res[1]).toString())) {
+	    			String ts = res[3];
 		    		String rs=this.verifySelling(user, res[1]);//userID, goodID
 		    		//System.out.println("Returning "+rs);
-		    		return new Message(this.idNotary, rs, PKI.sign(rs,idNotary,PASS),null, null,null);
+		    		return new Message(this.idNotary, rs+" "+ts, PKI.sign(rs,idNotary,PASS),null, null,null);
 	    			}else
 	    		return new Message(this.idNotary, "wrong counter", PKI.sign("wrong counter",idNotary,PASS),null, null,null);
 	    		}

@@ -74,7 +74,8 @@ public class User {
 	public PublicKey notarypublickey;
 	private String challenge;
 
-
+	private int wts=0;
+	private int rid=0;
 
 
 	
@@ -405,10 +406,10 @@ public enum GoodState {
 	public String intentionToSell(String userID, String goodID, String counter) throws InvalidKeyException, Exception {
 		this.getStateOfGoodInvisible(goodID);
 		String ret ="";
-		String msg =SELL +  " " +goodID + " "+ counter;
+		String msg =SELL +  " " +goodID + " "+ counter+" "+wts;
 		try {
-		Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
-		ret =  result.getText();
+		ret =  lib.write( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),wts);
+//		ret =  result.getText();
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -417,11 +418,12 @@ public enum GoodState {
 
 	
 	public String getStateOfGood(String goodID, String challenge) throws InvalidKeyException, Exception {
+		rid++;
 		
-		String msg= STATE + " " + goodID + " "+challenge;
+		String msg= STATE + " " + goodID + " "+challenge + " "+ rid;
 		Message result= null;
 		try {
-				result =lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
+				result =lib.read( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),rid);
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -523,7 +525,8 @@ public enum GoodState {
 	*/
 
 	public String getStateOfGoodInvisible(String goodID, String challenge) throws InvalidKeyException, Exception {
-		String msg= STATE + " " + goodID + " "+challenge;
+		rid++;
+		String msg= STATE + " " + goodID + " "+challenge+ " "+ rid;
 		Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
 		String[] split = result.getText().split(" ");
 		if(split[split.length-1].equals(challenge)) {
