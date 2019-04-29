@@ -23,8 +23,9 @@ public class App
 	//Byzantine
 	private static int f;
 	private static int N;
+	private static int J;
 	private static int rid;
-	//keeps a list with the list of acks with the last ack, linked because it's a fifo
+	//keeps a lisst with the list of acks with the last ack, linked because it's a fifo
 	private static List<String> ackList = new ArrayList<>();
 	//keeps a list with the number reads with the last read value returned, linked because it's a fifo
 	private static List<String[]> readList = new ArrayList<>();
@@ -40,7 +41,7 @@ public class App
         String nu;
         nu= System.console().readLine();
         f = Integer.parseInt(nu);
-        int N = 3*f+1; //expression to calculate total number of processes needed - might not be this
+        N = 3*f+1; //expression to calculate total number of processes needed - might not be this
         /*
         System.out.println("Are we using the Citizen Card? (Y/N)");
         nu = System.console().readLine(); //nu will be Y or N which we use to obtain keys for notaries 
@@ -50,12 +51,12 @@ public class App
         */
         Storage store = new Storage();
         store.readLog();
-        
+        J=N;
     	//notary= new Notary(nu,store);//atribuir aqui a porta
-        while(N!=0) {
-        	notary= new Notary(N,store);//atribuir aqui a porta
+        while(J!=0) {
+        	notary= new Notary(J,store);//atribuir aqui a porta
         	servers.add(notary);
-        	N--;
+        	J--;
         }
         
         for(Notary n : servers) {
@@ -65,37 +66,6 @@ public class App
         }
         
         
-    	/*
-        try {
-			serverSocket = new ServerSocket(PORT);
-	        System.out.println("Server accepting connections on port: "+ (PORT+nu));
-	        while (true) {
-	        	Socket clientSocket = serverSocket.accept();
-	        }
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    }
-  
-<<<<<<< HEAD
-
-	private static void connectServers() {
-		for(int x=1;x<=n;x++) {
-			if(x!=nu) {
-				try {
-					Thread.sleep(500);
-					
-					Socket servConnect = new Socket(IP, PORT+x);
-					System.out.println("connected to notary"+x+" at port: "+ (PORT+x));
-					sout[x] = new ObjectOutputStream(servConnect.getOutputStream()); 
-					sin[x] = new ObjectInputStream(servConnect.getInputStream());
-					servConnects.add(servConnect);
-				}catch (IOException | InterruptedException ex) {
-					ex.printStackTrace();
-				}
-				
-			}
-		}*/
 	}
     
 	public final static class Connector implements Runnable {
@@ -127,7 +97,7 @@ public class App
     		while(true) {
     			try {
 					clientSocket = serverSocket.accept();
-	    			new Thread(new ClientReceiver(clientSocket, notary)).run();
+	    			new Thread(new ClientReceiver(clientSocket, notary)).start();
 
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -164,6 +134,7 @@ public class App
     	        		lock.readLock().lock();
     	        		try {
     	        			msg= (Message) in.readObject();
+    	        			System.out.println("got a message! ");
     	        		}finally {
     	        			//liberta o trinco assim q termina
     	        			lock.readLock().unlock();
