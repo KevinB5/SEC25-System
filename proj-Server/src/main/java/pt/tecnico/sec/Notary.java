@@ -222,7 +222,7 @@ public enum GoodState {
 	    		}
 	    		else {
 	    			String rs=  this.verifiyStateOfGood(res[1],res[2]);
-	    			return new Message(this.idNotary, rs+ " "+ timestamps.get(res[1]), PKI.sign(rs,idNotary,PASS),null, null,null);
+	    			return new Message(this.idNotary, rs+ " "+ timestamps.get(res[1])+ " "+ res[3] , PKI.sign(rs,idNotary,PASS),null, null,null);
 	    		}
 	    	}
 	    	if(op.equals("transfer")) {

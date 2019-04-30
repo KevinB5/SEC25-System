@@ -424,21 +424,13 @@ public enum GoodState {
 		String msg= STATE + " " + goodID + " "+challenge + " "+ rid;
 		String result= null;
 		try {
-				result =lib.read( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),rid);
+				result =lib.read( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),rid,challenge);
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
 		}
 		String[] split = result.split(" ");
-		if(split[split.length-1].equals(challenge)) {
-			//Get message from Notary excluding challenge and counter
-			String text="";
-			int i;
-			for(i=0;i<split.length-2;i++) {
-				text+=split[i]+" ";
-			}
-			System.out.println("STATE from notary:" +result);
-		}else
-		System.out.println("STATE from notary: notary failed challenge");
+		System.out.println("STATE from notary:" +goodID+" "+result);
+		
 		//returns counter
 		return split[split.length-2];
 	}

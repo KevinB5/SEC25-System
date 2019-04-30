@@ -196,7 +196,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		return "NOT OK";	
 	}
 	
-	public String read(Message intent, int rid) throws Exception {
+	public String read(Message intent, int rid, String challenge) throws Exception {
 		clearReadLists();
 		int reads=0;
 		Message res = null;
@@ -205,12 +205,13 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			out[x].writeObject(intent);
 			res = (Message)in[x].readObject();
 			String[] split =res.getText().split(" ");
-			String r = split[3];
+			String r = split[5];
 			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
-					&& Integer.parseInt(r)==rid) {
-				int ts = Integer.parseInt(split[-1]);
-				this.statelist[x]=new Pair(split[0], ts);
-				this.counterlist[x]=new Pair(split[1], ts);
+					&& Integer.parseInt(r)==rid
+					&& split[3].equals(challenge)) {
+				int ts = Integer.parseInt(split[4]);
+				this.statelist[x]=new Pair(split[1], ts);
+				this.counterlist[x]=new Pair(split[2], ts);
 				reads++;
 				if(reads > (n+f)/2) {
 					return maximumValue(statelist)+" "+maximumValue(counterlist);
