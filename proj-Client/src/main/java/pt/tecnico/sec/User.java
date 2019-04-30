@@ -74,7 +74,8 @@ public class User {
 	public PublicKey notarypublickey;
 	private String challenge;
 
-
+	private int wts=0;
+	private int rid=0;
 
 
 	
@@ -404,11 +405,12 @@ public enum GoodState {
 	
 	public String intentionToSell(String userID, String goodID, String counter) throws InvalidKeyException, Exception {
 		this.getStateOfGoodInvisible(goodID);
+		wts++;
 		String ret ="";
-		String msg =SELL +  " " +goodID + " "+ counter;
+		String msg =SELL +  " " +goodID + " "+ counter+" "+wts;
 		try {
-		Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
-		ret =  result.getText();
+		ret =  lib.write( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),wts);
+//		ret =  result.getText();
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -417,15 +419,16 @@ public enum GoodState {
 
 	
 	public String getStateOfGood(String goodID, String challenge) throws InvalidKeyException, Exception {
+		rid++;
 		
-		String msg= STATE + " " + goodID + " "+challenge;
-		Message result= null;
+		String msg= STATE + " " + goodID + " "+challenge + " "+ rid;
+		String result= null;
 		try {
-				result =lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
+				result =lib.read( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),rid);
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
 		}
-		String[] split = result.getText().split(" ");
+		String[] split = result.split(" ");
 		if(split[split.length-1].equals(challenge)) {
 			//Get message from Notary excluding challenge and counter
 			String text="";
@@ -433,7 +436,7 @@ public enum GoodState {
 			for(i=0;i<split.length-2;i++) {
 				text+=split[i]+" ";
 			}
-			System.out.println("STATE from"+result.getID()+": " +result.getText());
+			System.out.println("STATE from notary:" +result);
 		}else
 		System.out.println("STATE from notary: notary failed challenge");
 		//returns counter
@@ -523,7 +526,8 @@ public enum GoodState {
 	*/
 
 	public String getStateOfGoodInvisible(String goodID, String challenge) throws InvalidKeyException, Exception {
-		String msg= STATE + " " + goodID + " "+challenge;
+		rid++;
+		String msg= STATE + " " + goodID + " "+challenge+ " "+ rid;
 		Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
 		String[] split = result.getText().split(" ");
 		if(split[split.length-1].equals(challenge)) {

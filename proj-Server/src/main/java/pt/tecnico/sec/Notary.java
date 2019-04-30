@@ -29,14 +29,18 @@ public enum GoodState {
 	private String idNotary  ;
 	private static final String OK ="OK";
 	private static final String NOK ="Not OK";
+	private static final String ACK = "ACK";
 	private HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,state>
 	private HashMap<String, Integer> counters = new HashMap<String, Integer>(); // <goodID,counter>
+	private HashMap<String,Integer> timestamps = new HashMap<String, Integer>();
+	private HashMap<String,byte[]> signatures = new HashMap<String, byte[]>(); //<goodID,signature>
 //	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
 	private Storage store;
 //	private PKI keyManager;
 	private String PASS;
 	private SLibrary lib;
+
 	private KeyPair keypair = null;
 	
 	
@@ -125,7 +129,7 @@ public enum GoodState {
 			counters.replace(goodID,novo );
 			System.out.println(counters.get(goodID));
 			
-			return OK;
+			return ACK;
 		}
 		return NOK;
 	}
@@ -198,10 +202,18 @@ public enum GoodState {
 	    	String op =  res[0]; //the first word is the operation required
 	    	
 	    	if(op .equals("sell")) {
-	
-	    		String rs=this.verifySelling(user, res[1]);//userID, goodID
-	    		//System.out.println("Returning "+rs);
-	    		return new Message(this.idNotary, rs, PKI.sign(rs,idNotary,PASS),null, null,null);
+	    		if(res[2].equals(counters.get(res[1]).toString())) {
+	    			String ts = res[3];
+		    		String rs=this.verifySelling(user, res[1]);//userID, goodID
+		    		
+		    		if(rs.equals("ACK")) {
+		    			timestamps.put(res[1],Integer.parseInt(res[3]));
+		    			signatures.put(res[1],command.getSig());
+		    		}
+		    		//System.out.println("Returning "+rs);
+		    		return new Message(this.idNotary, rs+" "+ts, PKI.sign(rs,idNotary,PASS),null, null,null);
+	    			}else
+	    		return new Message(this.idNotary, "wrong counter", PKI.sign("wrong counter",idNotary,PASS),null, null,null);
 	    		}
 	    	if(op.equals("state")) {
 	    		if(res.length!=3) {
@@ -210,7 +222,7 @@ public enum GoodState {
 	    		}
 	    		else {
 	    			String rs=  this.verifiyStateOfGood(res[1],res[2]);
-	    			return new Message(this.idNotary, rs, PKI.sign(rs,idNotary,PASS),null, null,null);
+	    			return new Message(this.idNotary, rs+ " "+ timestamps.get(res[1]), PKI.sign(rs,idNotary,PASS),null, null,null);
 	    		}
 	    	}
 	    	if(op.equals("transfer")) {
