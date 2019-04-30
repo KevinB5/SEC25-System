@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -31,6 +32,7 @@ public class Storage {
 	private final String logName = "transfer.txt";
 		
 	private File systemFile;
+	private FileOutputStream out ;
 		
 	public static String originPath() {
 		String origin = System.getProperty("user.dir");
@@ -69,6 +71,12 @@ public class Storage {
 			e.printStackTrace();
 		}*/
 		systemFile = new File(path);
+		try {
+			out = new FileOutputStream("ServerPorts.txt");
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		
 		Scanner scnr = null;
@@ -101,6 +109,17 @@ public class Storage {
 	
 	public HashMap<String, String> getGoods() {
 		return goods;//goodID, userID
+	}
+	
+	public void writeServ(ArrayList<Integer>ports) {
+		for(Integer port : ports) {
+			try {
+				out.write(port);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	

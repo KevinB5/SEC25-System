@@ -20,7 +20,7 @@ public class App
 {
 	private static Notary notary;
 	private static ServerSocket serverSocket;
-	private static final int PORT = 8080;
+	private static final int PORT = 8000;
 
 	//Byzantine
 	private static int f;
@@ -73,6 +73,8 @@ public class App
 	    	new Thread(new Connector(PORT+id, notary)).start();
 
         }
+        
+        store.writeServ(new ArrayList<>(servers.keySet()));
         
         //depois de todos os notarios serem lançados connectam se uns aos outros
         for(Notary n : servers.values()) {
