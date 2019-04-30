@@ -169,17 +169,19 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	
 	public String write(Message intent, int wts) throws Exception {
 		clearAcklist();
+		int acks=0;
 		Message res = null;
 		for(int x=0;x<this.n;x++) {
 		try {
 			out[x].writeObject(intent);
 			res = (Message)in[x].readObject();
-			String ts=res.getText().split(" ")[1];
+			int ts=Integer.parseInt(res.getText().split(" ")[1]);
 			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
-					&& res.getText().equals("ACK") 
-					&& ts.equals(wts)) {
+					&& res.getText().split(" ")[0].equals("ACK") 
+					&& ts==wts) {
 				this.acklist[x]=true;
-				if(acks()> (n+f)/2) {
+				acks++;
+				if(acks> (n+f)/2) {
 					return "OK";
 				}
 			}
@@ -196,6 +198,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	
 	public String read(Message intent, int rid) throws Exception {
 		clearReadLists();
+		int reads=0;
 		Message res = null;
 		for(int x=0;x<this.n;x++) {
 		try {
@@ -208,7 +211,8 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				int ts = Integer.parseInt(split[-1]);
 				this.statelist[x]=new Pair(split[0], ts);
 				this.counterlist[x]=new Pair(split[1], ts);
-				if(this.reads() > (n+f)/2) {
+				reads++;
+				if(reads > (n+f)/2) {
 					return maximumValue(statelist)+" "+maximumValue(counterlist);
 				}
 			}
@@ -243,31 +247,8 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	
 	
 	private void clearReadLists() {
-		for(int x=0 ; x < this.n ; x++) {
-			this.statelist[x] = null;
-			this.counterlist[x]=null;
-		}
-	}
-	
-	private int reads() {
-		int k=0;
-		for(int x=0 ; x < this.n ; x++) {
-			if(this.counterlist[x]!=null) {
-			k++;	
-			}
-		}
-		return k;
-	}
-	
-	
-	private int acks() {
-		int k=0;
-		for(int x=0 ; x < this.n ; x++) {
-			if(this.acklist[x] = true) {
-				k++;
-			}
-		}
-		return k;
+		this.statelist = new Pair[n];
+		this.counterlist = new Pair[n];
 	}
 	
 
