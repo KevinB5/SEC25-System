@@ -110,7 +110,7 @@ public enum GoodState {
 			HashMap<String, Integer> h = store.readServs();
 			for(String ui : h.keySet()) 
 				System.out.println(ui);
-			//lib = new Library(this, ip,h);
+			lib = new Library(this, ip,h);
 
 			
 			ArrayList<String> res =store.getGoods(id);
@@ -438,6 +438,7 @@ public enum GoodState {
 		String result= null;
 		try {
 				result =lib.read( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),rid,challenge);
+				//System.out.println(result);
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
 		}

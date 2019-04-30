@@ -219,17 +219,21 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		Message res = null;
 		ObjectOutputStream ouSt;
 		ObjectInputStream inSt;
+		System.out.println("READING "+intent.getText());
 		for(String serv : out.keySet()) {
 		try {
 			ouSt = out.get(serv);
+			System.out.println("CARAMBA"+ouSt);
 			inSt = in.get(serv);
 			ouSt.writeObject(intent);
 			res = (Message)inSt.readObject();
 			String[] split =res.getText().split(" ");
 			String r = split[5];
+			System.out.println("TEXTO: " + res.getText());
 			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
 					&& Integer.parseInt(r)==rid
 					&& split[3].equals(challenge)) {
+				System.out.println("EEEEEEEEEEEEEEEEEE");
 				int ts = Integer.parseInt(split[4]);
 				statelist.put(serv,new Pair(split[1], ts));
 				this.counterlist.put(serv,new Pair(split[2], ts));
