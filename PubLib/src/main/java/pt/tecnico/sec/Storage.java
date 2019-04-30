@@ -26,12 +26,17 @@ public class Storage {
 	//private static String path = "../../"
 	private static String line = System.getProperty("file.separator");
 	private static String filename = line +"goods.txt";
+	private static String Sfilename = line +"servPorts.txt";
 	private static String path = originPath() + filename;
+	private static String path2 = originPath() + Sfilename;
+
 	private static HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	private final String pathLog= System.getProperty("user.dir")+"\\src\\main\\java\\pt\\tecnico\\state\\";
 	private final String logName = "transfer.txt";
 		
+	private HashMap<String,Integer> servs= new HashMap<String,Integer>() ;
 	private File systemFile;
+	private File servFile;
 	private FileOutputStream out ;
 		
 	public static String originPath() {
@@ -71,12 +76,7 @@ public class Storage {
 			e.printStackTrace();
 		}*/
 		systemFile = new File(path);
-		try {
-			out = new FileOutputStream("ServerPorts.txt");
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+
 
 		
 		Scanner scnr = null;
@@ -107,19 +107,80 @@ public class Storage {
 	
 	}
 	
+	public void writePorts() {
+		BufferedWriter bw = null;
+		FileWriter fw = null;
+		String data ="";
+		
+
+		for(String server : servs.keySet()) {
+			data = "#" + server + " " +servs.get(server) + " ";
+			try {
+				servFile = new File(path2);
+				if (!servFile.exists()) {
+					servFile.createNewFile();
+				}
+				fw = new FileWriter(servFile.getAbsoluteFile(), true);
+				bw = new BufferedWriter(fw);
+				bw.write(data);
+				bw.write(System.getProperty("line.separator"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					if (bw != null)
+						bw.close();
+					if (fw != null)
+						fw.close();
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	public HashMap<String, String> getGoods() {
 		return goods;//goodID, userID
 	}
 	
-	public void writeServ(ArrayList<Integer>ports) {
-		for(Integer port : ports) {
-			try {
-				out.write(port);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+	public void writeServ(HashMap<String, Integer>ports) {
+		this.servs = ports;
+		this.writePorts();
+		
+	}
+	
+	public HashMap<String, Integer>readServs(){
+		
+		servFile = new File(path2);
+		
+		Scanner scnr = null;
+		PrintWriter pwriter = null;
+		try {
+			//System.out.println(systemFile.isFile());
+				
+			String notary = "";
+			//File text = new File(path);
+		    //pwriter = new PrintWriter(new FileWriter(systemFile));
+
+			scnr = new Scanner(servFile);
+			while(scnr.hasNextLine()) {
+				String line = scnr.nextLine();
+				String[] fg = line.split(" ");
+				if(fg.length >1) {
+
+					System.out.println("putting "+fg[0].substring(1) +" "+ Integer.parseInt(fg[1]));
+					servs.put(fg[0].substring(1), Integer.parseInt(fg[1]));
+				}
+				//pwriter.println(line);
 			}
+		}catch(Exception e) {
+			e.printStackTrace();
+			//System.out.println("Error in reading state file: " + e.getMessage());
+		}finally {
+			scnr.close();
 		}
+
+		return servs;
 	}
 	
 	

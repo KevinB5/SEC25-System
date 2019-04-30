@@ -15,7 +15,7 @@ public class ClientApp
 {
 	private static HashMap <String, Socket> sockets = new HashMap<String, Socket>();
 	
-	private static User user;
+	private static User user = null;
 	private static User user2;
 	//Streams for Users
 	private static ObjectOutputStream outU;
@@ -39,25 +39,22 @@ public class ClientApp
         nu= System.console().readLine();
         try {
         	nUsr = Integer.parseInt(nu);
-	        user = new User(ID + nUsr, IP, PORT);//recebe o ip e a porta 
+	        user = new User(ID + nUsr, IP);//recebe o ip e a porta 
+        	new Thread(new P2PLib(user, user.gtPort())).start();
+
 
         }catch(NumberFormatException nef) {
         	System.out.println("Number must be an integer");
-        }catch(Exception ioe) {
-        	System.out.println(ioe.getMessage());
-        }
-        
-        try {
-        	new Thread(new P2PLib(user, user.gtPort())).start();
+ 
         }catch(Exception e) {
-        	//se o utilizador pedido ja existir
+        	e.printStackTrace();
         	System.out.println("user already exists choose another");
         	
         	//pede outro inteiro
         	nUsr =Integer.parseInt(System.console().readLine());
 	        try {
 	        	//cria novo user
-				user = new User(ID + nUsr, IP, PORT);
+				user = new User(ID + nUsr, IP);
 			} catch (Exception e2) {
 				// TODO Auto-generated catch block
 				e2.printStackTrace();

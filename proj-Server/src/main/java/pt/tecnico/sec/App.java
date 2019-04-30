@@ -68,13 +68,13 @@ public class App
         //para cada notario 
         for(Notary n : servers.values()) {
         	int id = Integer.parseInt(n.getID().substring(6));
+        	System.out.println("writting " + n.getID() +" "+ PORT+id);
         	servPorts.put(n.getID(), PORT+id);
         	//lança as threads que vao tratar dos sockets
 	    	new Thread(new Connector(PORT+id, notary)).start();
 
         }
-        
-        store.writeServ(new ArrayList<>(servers.keySet()));
+        store.writeServ(servPorts);
         
         //depois de todos os notarios serem lançados connectam se uns aos outros
         for(Notary n : servers.values()) {

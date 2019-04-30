@@ -97,7 +97,7 @@ public enum GoodState {
 }
 
 	
-	public User(String id, String ip, int Svport) throws Exception {
+	public User(String id, String ip) throws Exception {
 		
 		idUser = id;
 		this.ip=ip;
@@ -106,8 +106,12 @@ public enum GoodState {
 		
 		if(allUsers.contains(idUser)) {
 		
-			lib = new Library(this, ip, Svport);
 			Storage store = new Storage();
+			HashMap<String, Integer> h = store.readServs();
+			for(String ui : h.keySet()) 
+				System.out.println(ui);
+			//lib = new Library(this, ip,h);
+
 			
 			ArrayList<String> res =store.getGoods(id);
 			for(String good : store.getGoods(id)) {
