@@ -247,7 +247,16 @@ public enum GoodState {
     		if(res.length!=2) {
     			System.out.println("correct syntax: state <goodID>");
     		}else {
-        		this.getStateOfGood(res[1]);
+        		challenge = generateRandomString(20);
+        		String good =res[1];
+    			String[] s = getStateOfGood(good,challenge);
+    			if(s==null) {
+    				System.out.println("communication failed");
+    			}else
+    			if(!counters.containsKey(good))
+                    counters.put(good,s[1]);
+                else
+                    counters.replace(good,s[1]);
     		}
     	
     	if(op.equals("buy"))
@@ -295,7 +304,7 @@ public enum GoodState {
 	 * @param good
 	 * @return estado do good
 	 */
-	
+	/*
 	private void getStateOfGood(String good) {
 		try {
 			//Random string of 20 lowercase characters
@@ -314,7 +323,7 @@ public enum GoodState {
 			e.printStackTrace();
 		}
 	}
-	
+	*/
 	private void getStateOfGoodInvisible(String good) {
 		try {
 			//Random string of 20 lowercase characters
@@ -418,7 +427,7 @@ public enum GoodState {
 	}
 
 	
-	public String getStateOfGood(String goodID, String challenge) throws InvalidKeyException, Exception {
+	public String[] getStateOfGood(String goodID, String challenge) throws InvalidKeyException, Exception {
 		rid++;
 		
 		String msg= STATE + " " + goodID + " "+challenge + " "+ rid;
@@ -428,11 +437,13 @@ public enum GoodState {
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
 		}
+		if(!result.equals("NOT OK")) {
 		String[] split = result.split(" ");
 		System.out.println("STATE from notary:" +goodID+" "+result);
-		
-		//returns counter
-		return split[split.length-2];
+		//returns [state,counter]
+		return split;
+		}else
+			return null;
 	}
 
 	
