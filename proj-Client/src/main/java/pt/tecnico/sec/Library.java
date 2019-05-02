@@ -24,7 +24,7 @@ public class Library {
 	private ServerSocket serverSocket;
 
 	private int n;
-	private int f;
+	private int f=1;
     private HashMap<String,ObjectOutputStream> out = new HashMap<String,ObjectOutputStream>();
     private HashMap<String,ObjectInputStream> in = new HashMap<String,ObjectInputStream>();
     
@@ -72,7 +72,7 @@ public class Library {
 		for(int port : servPorts.values()) {
 			try {
 				
-				Thread.sleep(2000);
+				Thread.sleep(500);
 				Socket servConnect = new Socket(ip, port);
 				System.out.println("connected to server at port: "+ port);
 				String sId="";
@@ -83,6 +83,7 @@ public class Library {
 					
 	            out.put(sId, new ObjectOutputStream(servConnect.getOutputStream())); 
 	            in.put(sId, new ObjectInputStream(servConnect.getInputStream()));
+	            n++;
 	//    			System.out.println("all good");
 	            servConnects.add(servConnect);
 	          
@@ -220,6 +221,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		ObjectOutputStream ouSt;
 		ObjectInputStream inSt;
 		System.out.println("sending: "+intent.getText());
+		System.out.println(out.keySet());
 		for(String serv : out.keySet()) {
 		try {
 			ouSt = out.get(serv);
@@ -228,23 +230,22 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			res = (Message)inSt.readObject();
 			String[] split =res.getText().split(" ");
 			String r = split[5];
-			System.out.println(serv+": " + res.getText());
-			System.out.println("correct message from " +serv+":");
-			System.out.println((PKI.verifySignature(res.getText(),res.getSig(),res.getID())
-					&& Integer.parseInt(r)==rid
-					&& split[3].equals(challenge)));
+			System.out.println("message ID, serv: "+res.getID()+", " + serv);
+//			System.out.println("correct message from " +res.getID()+":");
+//			System.out.println((PKI.verifySignature(res.getText(),res.getSig(),serv)
+//					&& Integer.parseInt(r)==rid
+//					&& split[3].equals(challenge)));
 //			System.out.println("correct signature: "+PKI.verifySignature(res.getText(),res.getSig(),serv));
 //			System.out.println("correct rid: "+ (Integer.parseInt(r)==rid));
 //			System.out.println("correct challenge: "+split[3].equals(challenge));
 			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
 					&& Integer.parseInt(r)==rid
 					&& split[3].equals(challenge)) {
-				System.out.println("recording message from "+res.getID());
+//				System.out.println("recording message from "+res.getID());
 				int ts = Integer.parseInt(split[4]);
 				statelist.put(serv,new Pair(split[1], ts));
 				this.counterlist.put(serv,new Pair(split[2], ts));
 				reads++;
-				System.out.println("reads: "+reads);
 				if(reads > (n+f)/2) {
 					return maximumValue(statelist)+" "+maximumValue(counterlist);
 				}
