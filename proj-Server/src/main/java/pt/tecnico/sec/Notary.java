@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
+import javax.xml.stream.events.NotationDeclaration;
+
 import java.security.*;
 
 
@@ -53,6 +55,7 @@ public enum GoodState {
 		for(String goodID: goods.keySet()) {
 			states.put(goodID, GoodState.NOTONSALE);
 			counters.put(goodID, 0);
+			timestamps.put(goodID, 0);
 		}
 //		
 //		PKI.getInstance();
@@ -216,13 +219,17 @@ public enum GoodState {
 	    		return new Message(this.idNotary, "wrong counter", PKI.sign("wrong counter",idNotary,PASS),null, null,null);
 	    		}
 	    	if(op.equals("state")) {
-	    		if(res.length!=3) {
-	    			String rs = "WARNING: State request must issue a challenge";
+	    		System.out.println(idNotary +": received getState request");
+	    		if(res.length!=4) {
+	    			System.out.println(idNotary+ ": request is wrong");
+	    			String rs = "WARNING: State request must issue a challenge and rid";
 	    			return new Message(this.idNotary, rs,PKI.sign(rs,idNotary,PASS), null,null,null);
 	    		}
 	    		else {
+	    			System.out.println(idNotary+ ": sending state");
 	    			String rs=  this.verifiyStateOfGood(res[1],res[2]);
-	    			return new Message(this.idNotary, rs+ " "+ timestamps.get(res[1])+ " "+ res[3] , PKI.sign(rs,idNotary,PASS),null, null,null);
+	    			String mess = rs+ " "+ timestamps.get(res[1])+ " "+ res[3];
+	    			return new Message(this.idNotary, mess , PKI.sign(mess,idNotary,PASS),null, null,null);
 	    		}
 	    	}
 	    	if(op.equals("transfer")) {
@@ -285,7 +292,6 @@ public enum GoodState {
 		}
 		return NOK;
 	}
-	
 	
 	
 }

@@ -219,25 +219,32 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		Message res = null;
 		ObjectOutputStream ouSt;
 		ObjectInputStream inSt;
-		System.out.println("READING "+intent.getText());
+		System.out.println("sending: "+intent.getText());
 		for(String serv : out.keySet()) {
 		try {
 			ouSt = out.get(serv);
-			System.out.println("CARAMBA"+ouSt);
 			inSt = in.get(serv);
 			ouSt.writeObject(intent);
 			res = (Message)inSt.readObject();
 			String[] split =res.getText().split(" ");
 			String r = split[5];
-			System.out.println("TEXTO: " + res.getText());
+			System.out.println(serv+": " + res.getText());
+			System.out.println("correct message from " +serv+":");
+			System.out.println((PKI.verifySignature(res.getText(),res.getSig(),res.getID())
+					&& Integer.parseInt(r)==rid
+					&& split[3].equals(challenge)));
+//			System.out.println("correct signature: "+PKI.verifySignature(res.getText(),res.getSig(),serv));
+//			System.out.println("correct rid: "+ (Integer.parseInt(r)==rid));
+//			System.out.println("correct challenge: "+split[3].equals(challenge));
 			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
 					&& Integer.parseInt(r)==rid
 					&& split[3].equals(challenge)) {
-				System.out.println("EEEEEEEEEEEEEEEEEE");
+				System.out.println("recording message from "+res.getID());
 				int ts = Integer.parseInt(split[4]);
 				statelist.put(serv,new Pair(split[1], ts));
 				this.counterlist.put(serv,new Pair(split[2], ts));
 				reads++;
+				System.out.println("reads: "+reads);
 				if(reads > (n+f)/2) {
 					return maximumValue(statelist)+" "+maximumValue(counterlist);
 				}
