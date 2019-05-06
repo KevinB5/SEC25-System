@@ -15,15 +15,17 @@ public class Message implements Serializable{
 	
 private final String text;
 private final byte[] signature;
-private final PublicKey key;
+private PublicKey key;
+private byte[] writeSignature;
 private final String id;
 private final byte[] buyerSignature;
 private final X509Certificate cert;
 
- public Message(String id, String text, byte[] signature, byte[] buyerSignature, PublicKey key, X509Certificate cert) {
+ public Message(String id, String text, byte[] signature, byte[] buyerSignature, byte[] writeSignature, X509Certificate cert) {
      this.text = text;
      this.signature = signature;
-     this.key = key;
+//     this.key = key;
+     this.writeSignature=writeSignature;
      this.id=id;
      this.buyerSignature=buyerSignature;
      this.cert = cert;
