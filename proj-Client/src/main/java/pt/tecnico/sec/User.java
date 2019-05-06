@@ -258,9 +258,9 @@ public enum GoodState {
     				System.out.println("communication failed");
     			}else
     			if(!counters.containsKey(good))
-                    counters.put(good,s[1]);
+                    counters.put(good,s[2]);
                 else
-                    counters.replace(good,s[1]);
+                    counters.replace(good,s[2]);
     		}
     	
     	if(op.equals("buy"))

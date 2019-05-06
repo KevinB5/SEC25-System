@@ -69,4 +69,7 @@ private final X509Certificate cert;
  public PublicKey getObj() {
 	 return key;
  }
+ public byte[] getWriteSignature() {
+	 return writeSignature;
+ }
 }
