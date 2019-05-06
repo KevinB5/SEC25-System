@@ -52,8 +52,18 @@ private PKI() {
 		PATH = Storage.originPath()+ "/KeyStoreFile.jks";
 
 		File keystorefile = new File(PATH);
-		InputStream keystoreStream = new FileInputStream(keystorefile);
-		KEYSTORE.load(keystoreStream, pwdArray);
+		
+			if(keystorefile.createNewFile()) {
+				KEYSTORE.load(null, pwdArray);
+			System.out.println("creating new ks");	
+			}
+			else {
+				System.out.println("fetching ks");	
+
+				InputStream keystoreStream = new FileInputStream(keystorefile);
+				KEYSTORE.load(keystoreStream, pwdArray);
+			}
+
 		
 		//System.out.println(PATH);
 		try(FileOutputStream fos = new FileOutputStream(PATH) ){
@@ -91,10 +101,10 @@ public static void setKey(String uID, X509Certificate cert) {
 		InputStream keystoreStream = new FileInputStream(keystorefile);
 		KEYSTORE.load(keystoreStream, pwdArray);
 
-		KEYSTORE.setCertificateEntry(uID, cert);
-		   FileOutputStream output = new FileOutputStream(PATH);
-		    KEYSTORE.store(output, pwdArray);
-		    output.close();
+		KEYSTORE.setCertificateEntry(uID+"c", cert);
+		FileOutputStream output = new FileOutputStream(PATH);
+		KEYSTORE.store(output, pwdArray);
+		output.close();
 		    //System.out.println("xxx" +PATH);
 	} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
 		// TODO Auto-generated catch block
@@ -106,20 +116,23 @@ public static void setKey(String uID, X509Certificate cert) {
 
 public static PublicKey getPublicKey(String uID) throws Exception {
 	
-	KeyStore keyStore= KeyStore.getInstance("JKS");
-	FileInputStream fos = new FileInputStream(PATH);
+	File keystorefile = new File(PATH);
+	InputStream keystoreStream = new FileInputStream(keystorefile);
 
-	keyStore.load(fos, pwdArray);
+	KEYSTORE.load(keystoreStream, pwdArray);
 
 
 //System.out.println(KEYSTORE.containsAlias(uID));
 //System.out.println(KEYSTORE.aliases());
 	
-	return keyStore.getCertificate(uID).getPublicKey();
+	return KEYSTORE.getCertificate(uID+"c").getPublicKey();
 	
 }
 
 public static PrivateKey getPrivateKey(String id, String pass) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException {//userID, password
+	
+//  PrivateKey myPrivateKey = null ;
+System.out.println("getting key for "+ id);
 	
 	KeyStore.ProtectionParameter protParam =    new KeyStore.PasswordProtection(pass.toCharArray());
 	KeyStore.PrivateKeyEntry pkEntry = (KeyStore.PrivateKeyEntry) KEYSTORE.getEntry(id, protParam);
@@ -139,7 +152,7 @@ public static PrivateKey getPrivateKey(String id, String pass) throws NoSuchAlgo
 //	} catch (CertificateException|NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException | IOException e) {
 //		e.printStackTrace();
 //	}
-	//System.out.println("handing out private key ");
+	//System.out.println("handing out private key ");*/
 	
         return myPrivateKey;
 	
@@ -297,7 +310,7 @@ public static void createKeys(String userID, String pword) {
     char [] pwdArray = "password".toCharArray();
     X509Certificate cert = null;
 	try {
-		
+		/*
 		KEYSTORE = KeyStore.getInstance(KeyStore.getDefaultType());
 		
 		
@@ -306,6 +319,10 @@ public static void createKeys(String userID, String pword) {
 		try(FileOutputStream fos = new FileOutputStream("newKeyStoreFileName.jks")) {
 		    KEYSTORE.store(fos, pwdArray);
 		}
+		*/
+		File keystorefile = new File(PATH);
+		InputStream keystoreStream = new FileInputStream(keystorefile);
+		KEYSTORE.load(keystoreStream, pwdArray);
 		
 		keyGen = KeyPairGenerator.getInstance("RSA");
 		keyGen.initialize(1024);
@@ -334,7 +351,10 @@ public static void createKeys(String userID, String pword) {
 		KeyStore.PrivateKeyEntry privateKeyEntry = new KeyStore.PrivateKeyEntry(keyPair.getPrivate(),chain);
 //        KEYSTORE.setEntry("privateKey",privateKeyEntry, new KeyStore.PasswordProtection(password));
 		KEYSTORE.setKeyEntry(userID, keyPair.getPrivate(), password, chain);
-		
+		FileOutputStream output = new FileOutputStream(PATH);
+
+		KEYSTORE.store(output, pwdArray);
+
 		  /*
 		System.out.println("Saving private key");
 		KeyStore.PrivateKeyEntry skEntry = new KeyStore.PrivateKeyEntry((PrivateKey) keyPair.getPrivate(), chain);
