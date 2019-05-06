@@ -258,7 +258,9 @@ public enum GoodState {
     				System.out.println("communication failed");
     			}else
     			if(!counters.containsKey(good))
-                    counters.put(good,s[2]);
+                    counters.put(good,s[1]);
+
+    				
                 else
                     counters.replace(good,s[2]);
     		}
@@ -444,7 +446,8 @@ public enum GoodState {
 		}
 		if(!result.equals("NOT OK")) {
 		String[] split = result.split(" ");
-		System.out.println("STATE from notary:" +goodID+" "+result);
+		System.out.println(result);
+		//System.out.println("STATE from notary:" +goodID+" "+result);
 		//returns [state,counter]
 		return split;
 		}else

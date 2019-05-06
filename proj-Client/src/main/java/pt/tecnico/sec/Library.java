@@ -12,26 +12,19 @@ import java.net.BindException;
 import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import javax.xml.bind.DatatypeConverter;
-
 public class Library {
-	private ArrayList<Socket> servConnects = new ArrayList<Socket>();
 	private ServerSocket serverSocket;
 
 	private int n;
 	private int f=1;
-    private HashMap<String,ObjectOutputStream> out = new HashMap<String,ObjectOutputStream>();
-    private HashMap<String,ObjectInputStream> in = new HashMap<String,ObjectInputStream>();
+    private HashMap<String,Socket> servers = new HashMap<String,Socket>();
     
     private ObjectOutputStream outU;
     private ObjectInputStream inU;
@@ -43,13 +36,10 @@ public class Library {
 	private static int PORT;
     private User user;
     
-    private final String hashLimit = "0000";
 	//Byzantine
-	private HashMap<String,Boolean> acklist= new HashMap<String,Boolean>();
-	private HashMap<String,Recorded> readlist = new HashMap<String,Recorded>();
-//	private HashMap<String,Pair> statelist = new HashMap<String,Pair>();
-//	private HashMap<String,Pair> counterlist = new HashMap<String,Pair>();
-//	private HashMap<String,byte[]> signaturelist = new HashMap<>
+	private HashMap<String,Boolean> acklist= new HashMap<String,Boolean>();	
+	private HashMap<String,Pair> statelist = new HashMap<String,Pair>();
+	private HashMap<String,Pair> counterlist = new HashMap<String,Pair>();
 	
    // private PKI pki = new PKI(PKI.KEYSIZE);
     
@@ -70,32 +60,31 @@ public class Library {
     	
     }
     
-    class Recorded {
-    	  String state;
-    	  String counter;
-    	  byte[] signature;
-    	  int timestamp;
-    	  Recorded(String x,String y,byte[] s, int t) {this.state=x;this.counter=y;this.signature=s;this.timestamp=t;}
+    class Pair {
+    	  final String value;
+    	  final int timestamp;
+    	  Pair(String x, int y) {this.value=x;this.timestamp=y;}
     	}
     
 	public void connectServer(String ip, HashMap<String, Integer>servPorts) {
+		Socket servConnect = null;
 		for(int port : servPorts.values()) {
 			try {
 				
 				Thread.sleep(500);
-				Socket servConnect = new Socket(ip, port);
+				servConnect = new Socket(ip, port);
 				System.out.println("connected to server at port: "+ port);
 				String sId="";
 				for(String id : servPorts.keySet()) {
 					if(servPorts.get(id).equals(port))
 						sId = id;
+					System.out.println(servPorts.get(id));
 				}
 					
-	            out.put(sId, new ObjectOutputStream(servConnect.getOutputStream())); 
-	            in.put(sId, new ObjectInputStream(servConnect.getInputStream()));
+	            servers.put(sId, servConnect); 
 	            n++;
 	//    			System.out.println("all good");
-	            servConnects.add(servConnect);
+	            //servConnects.add(servConnect);
 	          
 			
 			}catch (IOException | InterruptedException ex) {
@@ -170,10 +159,10 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		Message res = null;
 		ObjectOutputStream ouSt;
 		ObjectInputStream inSt;
-		for(String serv : out.keySet()) {
+		for(String serv : servers.keySet()) {
 			try {
-				ouSt = out.get(serv);
-				inSt = in.get(serv);
+				ouSt = new ObjectOutputStream(servers.get(serv).getOutputStream());
+				inSt = new ObjectInputStream( servers.get(serv).getInputStream());
 				ouSt.writeObject(intent);
 				res = (Message)inSt.readObject();
 				if(!PKI.verifySignature(res.getText(),res.getSig(),res.getID())) {
@@ -197,10 +186,10 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		Message res = null;
 		ObjectOutputStream ouSt;
 		ObjectInputStream inSt;
-		for(String serv : out.keySet()) {
+		for(String serv : servers.keySet()) {
 		try {
-			ouSt = out.get(serv);
-			inSt = in.get(serv);
+			ouSt = new ObjectOutputStream(servers.get(serv).getOutputStream());
+			inSt = new ObjectInputStream( servers.get(serv).getInputStream());
 			ouSt.writeObject(intent);
 			res = (Message)inSt.readObject();
 			int ts=Integer.parseInt(res.getText().split(" ")[1]);
@@ -225,45 +214,41 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	}
 	
 	public String read(Message intent, int rid, String challenge) throws Exception {
-		clearReadList();
+		clearReadLists();
 		int reads=0;
-		Message res,writeback = null;
-		ObjectOutputStream ouSt;
-		ObjectInputStream inSt;
+		Message res = null;
+		ObjectOutputStream ouSt = null;
+		ObjectInputStream inSt= null;
 		System.out.println("sending: "+intent.getText());
-		System.out.println(out.keySet());
-		for(String serv : out.keySet()) {
-		try {
-			ouSt = out.get(serv);
-			inSt = in.get(serv);
-			ouSt.writeObject(intent);
-			res = (Message)inSt.readObject();
-			String[] split =res.getText().split(" ");
-			String r = split[5];
-			System.out.println("message ID, serv: "+res.getID()+", " + serv);
-//			System.out.println("correct message from " +res.getID()+":");
-//			System.out.println((PKI.verifySignature(res.getText(),res.getSig(),serv)
-//					&& Integer.parseInt(r)==rid
-//					&& split[3].equals(challenge)));
-//			System.out.println("correct signature: "+PKI.verifySignature(res.getText(),res.getSig(),serv));
-//			System.out.println("correct rid: "+ (Integer.parseInt(r)==rid));
-//			System.out.println("correct challenge: "+split[3].equals(challenge));
-			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
-					&& Integer.parseInt(r)==rid
-					&& split[3].equals(challenge)) {
-				System.out.println("recording message from "+res.getID());
-				System.out.println(res.getText());
-				int ts = Integer.parseInt(split[4]);
-//				statelist.put(serv,new Pair(split[1], ts));
-//				this.counterlist.put(serv,new Pair(split[2], ts));
-				//Recorded(state,counter,sig,timestamp)
-				readlist.put(serv,new Recorded(split[1],split[2],res.getWriteSignature(),ts));
-				reads++;
-				if(reads > (n+f)/2) {
-//					TODO: WriteBack here:
-//					writeback = new Message(split[0],"sell "+split[2]);
-					return split[0]+" "+maximumValue(readlist);
-				}
+		//System.out.println(out.keySet());
+		for(String serv : servers.keySet()) {
+			try {
+								ouSt = new ObjectOutputStream(servers.get(serv).getOutputStream());
+				inSt = new ObjectInputStream( servers.get(serv).getInputStream());
+				ouSt.writeObject(intent);
+				res = (Message)inSt.readObject();
+				String[] split =res.getText().split(" ");
+				String r = split[5];
+				System.out.println("message ID, serv: "+res.getID()+", " + serv);
+	//			System.out.println("correct message from " +res.getID()+":");
+	//			System.out.println((PKI.verifySignature(res.getText(),res.getSig(),serv)
+	//					&& Integer.parseInt(r)==rid
+	//					&& split[3].equals(challenge)));
+	//			System.out.println("correct signature: "+PKI.verifySignature(res.getText(),res.getSig(),serv));
+	//			System.out.println("correct rid: "+ (Integer.parseInt(r)==rid));
+	//			System.out.println("correct challenge: "+split[3].equals(challenge));
+				if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
+						&& Integer.parseInt(r)==rid
+						&& split[3].equals(challenge)) {
+	//				System.out.println("recording message from "+res.getID());
+					int ts = Integer.parseInt(split[4]);
+					statelist.put(serv,new Pair(split[1], ts));
+					this.counterlist.put(serv,new Pair(split[2], ts));
+					reads++;
+					if(reads > (n+f)/2) {
+						System.out.println("done reading");
+						return maximumValue(statelist)+" "+maximumValue(counterlist);
+					}
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -277,20 +262,15 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	}
 	
 	
-	private String maximumValue(HashMap<String, Recorded> statelist2) {
+	private String maximumValue(HashMap<String, Pair> statelist2) {
 		int max = 0;
-		String maxstate=null;
-		String maxcounter=null;
-		byte[] maxsig;
-		//TODO: maxsig not being returned!
+		String maxval=null;
 		for(String serv : statelist2.keySet()) {
 			if(statelist2.get(serv).timestamp>=max) {
-				maxstate=statelist2.get(serv).state;
-				maxcounter=statelist2.get(serv).counter;
-				maxsig=statelist2.get(serv).signature;
+				maxval=statelist2.get(serv).value;
 			}
 		}
-		return maxstate +" " +maxcounter;		
+		return maxval;		
 	}
 	
 	private void clearAcklist() {
@@ -300,8 +280,10 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	}
 	
 	
-	private void clearReadList() {
-		readlist = new HashMap<String,Recorded>();
+	private void clearReadLists() {
+		
+		statelist = new HashMap<String,Pair>();
+		counterlist = new HashMap<String,Pair>();
 	}
 	
 
@@ -352,24 +334,6 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 
 	    }
 	
-	public String hash(String content) {
-		MessageDigest digest;
-		byte[] hash = null;
-		String hashString= null;
-		int i=0;
-		do {
-			hashString = content+i;
-			try {
-				digest = MessageDigest.getInstance("SHA-256");
-				hash = digest.digest(hashString.getBytes(StandardCharsets.UTF_8));
-				hashString = DatatypeConverter.printHexBinary(hash);
-				hashString = hashString.substring(0,4);
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-			}
-			i++;
-		}
-		while(!hashString.equals(hashLimit)); 
-		return ""+i;
-	}
+	
 }
+

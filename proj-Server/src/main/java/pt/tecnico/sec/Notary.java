@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
-import javax.xml.bind.DatatypeConverter;
+//import javax.xml.bind.DatatypeConverter;
 import javax.xml.stream.events.NotationDeclaration;
 
 import java.security.*;
@@ -296,7 +296,7 @@ public enum GoodState {
 		return NOK;
 	}
 	
-	
+/*	
 	public boolean verifyHash(String content,String hashValue) {
 		content = content+hashValue;
 		MessageDigest digest;
@@ -312,5 +312,5 @@ public enum GoodState {
 		if(content.equals(hashLimit))
 			return true;
 		return false;
-	}
+	}*/
 }
