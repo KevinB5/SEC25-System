@@ -11,12 +11,14 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.stream.events.NotationDeclaration;
 
 import java.security.*;
@@ -44,6 +46,7 @@ public enum GoodState {
 	private SLibrary lib;
 
 	private KeyPair keypair = null;
+	private final String hashLimit = "0000";
 	
 	
 	public Notary(int id,Storage store) {
@@ -294,4 +297,20 @@ public enum GoodState {
 	}
 	
 	
+	public boolean verifyHash(String content,String hashValue) {
+		content = content+hashValue;
+		MessageDigest digest;
+		byte[] hash = null;
+		try {
+			digest = MessageDigest.getInstance("SHA-256");
+			hash = digest.digest(content.getBytes(StandardCharsets.UTF_8));
+			content = DatatypeConverter.printHexBinary(hash);
+			content = content.substring(0,4);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		if(content.equals(hashLimit))
+			return true;
+		return false;
+	}
 }

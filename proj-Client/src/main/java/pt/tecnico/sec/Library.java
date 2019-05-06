@@ -12,12 +12,17 @@ import java.net.BindException;
 import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
+
+import javax.xml.bind.DatatypeConverter;
 
 public class Library {
 	private ArrayList<Socket> servConnects = new ArrayList<Socket>();
@@ -38,6 +43,7 @@ public class Library {
 	private static int PORT;
     private User user;
     
+    private final String hashLimit = "0000";
 	//Byzantine
 	private HashMap<String,Boolean> acklist= new HashMap<String,Boolean>();
 	private HashMap<String,Recorded> readlist = new HashMap<String,Recorded>();
@@ -346,5 +352,24 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 
 	    }
 	
-	
+	public String hash(String content) {
+		MessageDigest digest;
+		byte[] hash = null;
+		String hashString= null;
+		int i=0;
+		do {
+			hashString = content+i;
+			try {
+				digest = MessageDigest.getInstance("SHA-256");
+				hash = digest.digest(hashString.getBytes(StandardCharsets.UTF_8));
+				hashString = DatatypeConverter.printHexBinary(hash);
+				hashString = hashString.substring(0,4);
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			i++;
+		}
+		while(!hashString.equals(hashLimit)); 
+		return ""+i;
+	}
 }
