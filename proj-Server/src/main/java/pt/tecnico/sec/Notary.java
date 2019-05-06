@@ -48,6 +48,7 @@ public enum GoodState {
 	
 	public Notary(int id,Storage store) {
 		idNotary = "notary"+ id;
+		System.out.println("Created notary " + idNotary);
 		this.store = store;
 		this.lib=new SLibrary(this);
 		goods = store.getGoods();

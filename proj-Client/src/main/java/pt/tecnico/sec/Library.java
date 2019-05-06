@@ -20,13 +20,11 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class Library {
-	private ArrayList<Socket> servConnects = new ArrayList<Socket>();
 	private ServerSocket serverSocket;
 
 	private int n;
 	private int f=1;
-    private HashMap<String,ObjectOutputStream> out = new HashMap<String,ObjectOutputStream>();
-    private HashMap<String,ObjectInputStream> in = new HashMap<String,ObjectInputStream>();
+    private HashMap<String,Socket> servers = new HashMap<String,Socket>();
     
     private ObjectOutputStream outU;
     private ObjectInputStream inU;
@@ -69,23 +67,24 @@ public class Library {
     	}
     
 	public void connectServer(String ip, HashMap<String, Integer>servPorts) {
+		Socket servConnect = null;
 		for(int port : servPorts.values()) {
 			try {
 				
 				Thread.sleep(500);
-				Socket servConnect = new Socket(ip, port);
+				servConnect = new Socket(ip, port);
 				System.out.println("connected to server at port: "+ port);
 				String sId="";
 				for(String id : servPorts.keySet()) {
 					if(servPorts.get(id).equals(port))
 						sId = id;
+					System.out.println(servPorts.get(id));
 				}
 					
-	            out.put(sId, new ObjectOutputStream(servConnect.getOutputStream())); 
-	            in.put(sId, new ObjectInputStream(servConnect.getInputStream()));
+	            servers.put(sId, servConnect); 
 	            n++;
 	//    			System.out.println("all good");
-	            servConnects.add(servConnect);
+	            //servConnects.add(servConnect);
 	          
 			
 			}catch (IOException | InterruptedException ex) {
@@ -160,10 +159,10 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		Message res = null;
 		ObjectOutputStream ouSt;
 		ObjectInputStream inSt;
-		for(String serv : out.keySet()) {
+		for(String serv : servers.keySet()) {
 			try {
-				ouSt = out.get(serv);
-				inSt = in.get(serv);
+				ouSt = new ObjectOutputStream(servers.get(serv).getOutputStream());
+				inSt = new ObjectInputStream( servers.get(serv).getInputStream());
 				ouSt.writeObject(intent);
 				res = (Message)inSt.readObject();
 				if(!PKI.verifySignature(res.getText(),res.getSig(),res.getID())) {
@@ -187,10 +186,10 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		Message res = null;
 		ObjectOutputStream ouSt;
 		ObjectInputStream inSt;
-		for(String serv : out.keySet()) {
+		for(String serv : servers.keySet()) {
 		try {
-			ouSt = out.get(serv);
-			inSt = in.get(serv);
+			ouSt = new ObjectOutputStream(servers.get(serv).getOutputStream());
+			inSt = new ObjectInputStream( servers.get(serv).getInputStream());
 			ouSt.writeObject(intent);
 			res = (Message)inSt.readObject();
 			int ts=Integer.parseInt(res.getText().split(" ")[1]);
@@ -218,37 +217,40 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		clearReadLists();
 		int reads=0;
 		Message res = null;
-		ObjectOutputStream ouSt;
-		ObjectInputStream inSt;
+		ObjectOutputStream ouSt = null;
+		ObjectInputStream inSt= null;
 		System.out.println("sending: "+intent.getText());
-		System.out.println(out.keySet());
-		for(String serv : out.keySet()) {
-		try {
-			ouSt = out.get(serv);
-			inSt = in.get(serv);
-			ouSt.writeObject(intent);
-			res = (Message)inSt.readObject();
-			String[] split =res.getText().split(" ");
-			String r = split[5];
-			System.out.println("message ID, serv: "+res.getID()+", " + serv);
-//			System.out.println("correct message from " +res.getID()+":");
-//			System.out.println((PKI.verifySignature(res.getText(),res.getSig(),serv)
-//					&& Integer.parseInt(r)==rid
-//					&& split[3].equals(challenge)));
-//			System.out.println("correct signature: "+PKI.verifySignature(res.getText(),res.getSig(),serv));
-//			System.out.println("correct rid: "+ (Integer.parseInt(r)==rid));
-//			System.out.println("correct challenge: "+split[3].equals(challenge));
-			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
-					&& Integer.parseInt(r)==rid
-					&& split[3].equals(challenge)) {
-//				System.out.println("recording message from "+res.getID());
-				int ts = Integer.parseInt(split[4]);
-				statelist.put(serv,new Pair(split[1], ts));
-				this.counterlist.put(serv,new Pair(split[2], ts));
-				reads++;
-				if(reads > (n+f)/2) {
-					return maximumValue(statelist)+" "+maximumValue(counterlist);
-				}
+		//System.out.println(out.keySet());
+		for(String serv : servers.keySet()) {
+			try {
+				
+				System.out.println("OIIII " +servers.get(serv).getPort());
+				ouSt = new ObjectOutputStream(servers.get(serv).getOutputStream());
+				inSt = new ObjectInputStream( servers.get(serv).getInputStream());
+				ouSt.writeObject(intent);
+				res = (Message)inSt.readObject();
+				String[] split =res.getText().split(" ");
+				String r = split[5];
+				System.out.println("message ID, serv: "+res.getID()+", " + serv);
+	//			System.out.println("correct message from " +res.getID()+":");
+	//			System.out.println((PKI.verifySignature(res.getText(),res.getSig(),serv)
+	//					&& Integer.parseInt(r)==rid
+	//					&& split[3].equals(challenge)));
+	//			System.out.println("correct signature: "+PKI.verifySignature(res.getText(),res.getSig(),serv));
+	//			System.out.println("correct rid: "+ (Integer.parseInt(r)==rid));
+	//			System.out.println("correct challenge: "+split[3].equals(challenge));
+				if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
+						&& Integer.parseInt(r)==rid
+						&& split[3].equals(challenge)) {
+	//				System.out.println("recording message from "+res.getID());
+					int ts = Integer.parseInt(split[4]);
+					statelist.put(serv,new Pair(split[1], ts));
+					this.counterlist.put(serv,new Pair(split[2], ts));
+					reads++;
+					if(reads > (n+f)/2) {
+						System.out.println("done reading");
+						return maximumValue(statelist)+" "+maximumValue(counterlist);
+					}
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

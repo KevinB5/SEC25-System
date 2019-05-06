@@ -65,13 +65,15 @@ public class App
         	J--;
         }
 
+        int finalId = 0;
         //para cada notario 
         for(Notary n : servers.values()) {
         	int id = Integer.parseInt(n.getID().substring(6));
-        	System.out.println("writting " + n.getID() +" "+ PORT+id);
-        	servPorts.put(n.getID(), PORT+id);
+        	//System.out.println("writting " + n.getID() +" "+ PORT+id);
+        	finalId = PORT+id;
+        	servPorts.put(n.getID(), finalId);
         	//lança as threads que vao tratar dos sockets
-	    	new Thread(new Connector(PORT+id, notary)).start();
+	    	new Thread(new Connector(finalId, n)).start();
 
         }
         store.writeServ(servPorts);
@@ -91,7 +93,7 @@ public class App
 	public final static class Connector implements Runnable {
 
 
-    	public static final int PORT_NUMBER = 8000;
+    	//public static final int PORT_NUMBER = 8000;
     	private Notary notary;
     	private ServerSocket serverSocket;
 		private Socket clientSocket;
