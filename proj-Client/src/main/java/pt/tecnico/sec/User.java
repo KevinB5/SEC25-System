@@ -242,7 +242,7 @@ public enum GoodState {
     		if(res.length!=2) {
     			System.out.println("correct syntax: sell <goodID>");
     		}else {
-    		this.getStateOfGoodInvisible(res[1]);
+//    		this.getStateOfGoodInvisible(res[1]);
     		this.intentionToSell(res[1]);
     		}
     	}else
@@ -350,7 +350,7 @@ public enum GoodState {
 	 */
 	private void buyGood (String user, String good) {
 		System.out.println("trying to buy "+good+ " from "+user);
-		this.getStateOfGoodInvisible(good);
+//		this.getStateOfGoodInvisible(good);
 		String counter = counters.get(good);
 		Message res= null;
 //		for(String c : counters.values())
@@ -389,7 +389,7 @@ public enum GoodState {
 	 * @param good
 	 */
 	private String transferGood(String buyer, String good, byte[] buyerSig) {
-		this.getStateOfGoodInvisible(good);//updates counter
+//		this.getStateOfGoodInvisible(good);//updates counter
 		String counter=counters.get(good);
 		String res= "";
 		try {
@@ -417,15 +417,16 @@ public enum GoodState {
 //	}
 	
 	public String intentionToSell(String userID, String goodID, String counter) throws InvalidKeyException, Exception {
-		this.getStateOfGoodInvisible(goodID);
+//		this.getStateOfGoodInvisible(goodID);
 		wts++;
 		String ret ="";
 		String msg =SELL +  " " +goodID + " "+ counter+" "+wts;
+		System.out.println("sending message:"+ msg);
 		try {
 		ret =  lib.write( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),wts);
 //		ret =  result.getText();
 		}catch(Exception e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();;
 		}
 		return ret;
 	}

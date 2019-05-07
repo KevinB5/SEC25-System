@@ -239,6 +239,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			ouSt.writeObject(intent);
 			res = (Message)inSt.readObject();
 			String[] split =res.getText().split(" ");
+			System.out.println("res: "+res.getText());
 			String r = split[5];
 			System.out.println("message ID, serv: "+res.getID()+", " + serv);
 //			System.out.println("correct message from " +res.getID()+":");
@@ -251,17 +252,17 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
 					&& Integer.parseInt(r)==rid
 					&& split[3].equals(challenge)) {
-				System.out.println("recording message from "+res.getID());
-				System.out.println(res.getText());
-				int ts = Integer.parseInt(split[4]);
-//				statelist.put(serv,new Pair(split[1], ts));
-//				this.counterlist.put(serv,new Pair(split[2], ts));
-				//Recorded(state,counter,sig,timestamp)
-				readlist.put(serv,new Recorded(split[1],split[2],res.getWriteSignature(),ts));
-				reads++;
+						System.out.println("recording message from "+res.getID());
+						System.out.println(res.getText());
+						int ts = Integer.parseInt(split[4]);
+			//				statelist.put(serv,new Pair(split[1], ts));
+			//				this.counterlist.put(serv,new Pair(split[2], ts));
+						//Recorded(state,counter,sig,timestamp)
+						readlist.put(serv,new Recorded(split[1],split[2],res.getWriteSignature(),ts));
+						reads++;
 				if(reads > (n+f)/2) {
 //					TODO: WriteBack here:
-//					writeback = new Message(split[0],"sell "+split[2]);
+					writeback = new Message(split[0],"sell "+split[2], null, null, null, null);
 					return split[0]+" "+maximumValue(readlist);
 				}
 			}

@@ -194,6 +194,7 @@ public enum GoodState {
 		if(PKI.verifySignature(command.getText(), command.getSig(), command.getID())) {
 			
 			System.out.println("user's "+ user + " signature validated");
+			System.out.println("received: "+command.getText());
 			
 			/* Types of messages:
 			 * 
@@ -216,7 +217,7 @@ public enum GoodState {
 		    			timestamps.put(res[1],Integer.parseInt(res[3]));
 		    			signatures.put(res[1],command.getSig());
 		    		}
-		    		//System.out.println("Returning "+rs);
+		    		System.out.println("Returning "+rs);
 		    		return new Message(this.idNotary, rs+" "+ts, PKI.sign(rs,idNotary,PASS),null, null,null);
 	    			}else
 	    		return new Message(this.idNotary, "wrong counter", PKI.sign("wrong counter",idNotary,PASS),null, null,null);
