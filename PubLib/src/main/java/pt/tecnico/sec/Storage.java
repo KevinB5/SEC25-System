@@ -107,7 +107,7 @@ public class Storage {
 	
 	}
 	
-	public void writePorts() {
+	public void writePorts(File servFile) {
 		BufferedWriter bw = null;
 		FileWriter fw = null;
 		String data ="";
@@ -116,10 +116,7 @@ public class Storage {
 		for(String server : servs.keySet()) {
 			data = "#" + server + " " +servs.get(server) + " ";
 			try {
-				servFile = new File(path2);
-				if (!servFile.exists()) {
-					servFile.createNewFile();
-				}
+				
 				fw = new FileWriter(servFile.getAbsoluteFile(), true);
 				bw = new BufferedWriter(fw);
 				bw.write(data);
@@ -145,7 +142,25 @@ public class Storage {
 	
 	public void writeServ(HashMap<String, Integer>ports) {
 		this.servs = ports;
-		this.writePorts();
+		servFile = new File(path2);
+		try {
+			if (!servFile.exists()) {
+				
+					servFile.createNewFile();
+				
+			}
+			else {
+				System.out.println("Deleting existing file");
+				if(servFile.delete()) {
+					servFile = new File(path2);
+					servFile.createNewFile();
+					}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.writePorts(servFile);
 		
 	}
 	
@@ -167,8 +182,6 @@ public class Storage {
 				String line = scnr.nextLine();
 				String[] fg = line.split(" ");
 				if(fg.length >1) {
-
-					System.out.println("putting "+fg[0].substring(1) +" "+ Integer.parseInt(fg[1]));
 					servs.put(fg[0].substring(1), Integer.parseInt(fg[1]));
 				}
 				//pwriter.println(line);

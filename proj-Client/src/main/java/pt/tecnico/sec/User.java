@@ -108,8 +108,6 @@ public enum GoodState {
 		
 			Storage store = new Storage();
 			HashMap<String, Integer> h = store.readServs();
-			for(String ui : h.keySet()) 
-				System.out.println(ui);
 			lib = new Library(this, ip,h);
 
 			
