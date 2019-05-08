@@ -203,6 +203,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			inSt = in.get(serv);
 			ouSt.writeObject(intent);
 			res = (Message)inSt.readObject();
+			System.out.println("message from notary: "+res.getText());
 			int ts=Integer.parseInt(res.getText().split(" ")[1]);
 			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
 					&& res.getText().split(" ")[0].equals("ACK") 

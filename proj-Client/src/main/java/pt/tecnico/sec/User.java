@@ -240,7 +240,16 @@ public enum GoodState {
     		if(res.length!=2) {
     			System.out.println("correct syntax: sell <goodID>");
     		}else {
-//    		this.getStateOfGoodInvisible(res[1]);
+    		/* Gets the State of the Good invisibly */    		
+    		String good = res[1];
+    		challenge = generateRandomString(20);
+			String[] s = getStateOfGood(good,challenge,false);
+			if(s!=null) {
+				if(!counters.containsKey(good))
+					counters.put(good, s[2]);
+				else
+					counters.replace(good, s[2]);
+			}
     		this.intentionToSell(res[1]);
     		}
     	}else
@@ -251,7 +260,7 @@ public enum GoodState {
     		}else {
         		challenge = generateRandomString(20);
         		String good =res[1];
-    			String[] s = getStateOfGood(good,challenge);
+    			String[] s = getStateOfGood(good,challenge,true);
     			if(s==null) {
     				System.out.println("communication failed");
     			}else
@@ -262,10 +271,21 @@ public enum GoodState {
     		}
     	
     	if(op.equals("buy"))
+    		/* "buy userID goodID" */
     		if(res.length!=3) {
     			System.out.println("correct syntax: buy <sellerID> <goodID>");
     		}else {
-    			//this.getStateOfGoodInvisible(res[1]);
+    			challenge = generateRandomString(20);
+    			String good =res[2];
+    			String[] s = getStateOfGood(good,challenge,true);
+    			if(s==null) {
+    				System.out.println("communication failed");
+    			}else
+    			if(!counters.containsKey(good))
+                    counters.put(good,s[2]);
+                else
+                    counters.replace(good,s[2]);
+   
     			this.buyGood(res[1], res[2]);
     		}
     	/*
@@ -388,13 +408,13 @@ public enum GoodState {
 	 */
 	private String transferGood(String buyer, String good, byte[] buyerSig) {
 //		this.getStateOfGoodInvisible(good);//updates counter
+		wts++;
 		String counter=counters.get(good);
 		String res= "";
 		try {
-			String msg=TRANSFER +" "+ buyer+" "+ good +" "+ counter; 
-			Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),buyerSig, null, null));
-		
-			res= result.getText();
+			String msg=TRANSFER +" "+ buyer+" "+ good +" "+ counter+" "+wts; 
+			res=  lib.write( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),buyerSig, null, null),wts);
+
 			System.out.println("answer from notary: "+res);
 			if(!res.equals(NOK)) {
 //				System.out.println(res);
@@ -430,7 +450,7 @@ public enum GoodState {
 	}
 
 	
-	public String[] getStateOfGood(String goodID, String challenge) throws InvalidKeyException, Exception {
+	public String[] getStateOfGood(String goodID, String challenge, boolean invisible) throws InvalidKeyException, Exception {
 		rid++;
 		
 		String msg= STATE + " " + goodID + " "+challenge + " "+ rid;
@@ -443,7 +463,9 @@ public enum GoodState {
 		}
 		if(!result.equals("NOT OK")) {
 		String[] split = result.split(" ");
-		System.out.println("STATE from notary:" +goodID+" "+result);
+		if(!invisible) {
+			System.out.println("STATE from notary:" +goodID+" "+result);	
+		}
 		//returns [state,counter]
 		return split;
 		}else
@@ -499,6 +521,18 @@ public enum GoodState {
     		String ret = "no such good";
     		System.out.println(command.getID()+" wants to buy "+ res[1]);
     		if(goods.containsKey(res[1])) {
+    			
+    			challenge = generateRandomString(20);
+    			String good =res[2];
+    			String[] s = getStateOfGood(good,challenge,true);
+    			if(s==null) {
+    				System.out.println("communication failed");
+    			}else
+    			if(!counters.containsKey(good))
+                    counters.put(good,s[2]);
+                else
+                    counters.replace(good,s[2]);    			
+    			
     			System.out.println("Asking notary...");
     			String rep = transferGood(command.getID(), res[1], command.getSig());
 //	    		System.out.println(rep);
@@ -532,7 +566,7 @@ public enum GoodState {
 
 	*/
 
-	public String getStateOfGoodInvisible(String goodID, String challenge) throws InvalidKeyException, Exception {
+	public String getStateOfGoodInvisible(String goodID, String challenge) throws InvalidKeyException, Exception {		
 		rid++;
 		String msg= STATE + " " + goodID + " "+challenge+ " "+ rid;
 		Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));

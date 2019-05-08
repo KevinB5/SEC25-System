@@ -238,10 +238,10 @@ public enum GoodState {
 	    		}
 	    	}
 	    	if(op.equals("transfer")) {
-	    		
+	    		/* TRANSFER +" "+ buyer+" "+ good +" "+ counter+" " + wts;  */
+
+    			String ts = res[4];
 	    		System.out.println("transfering "+res[2]+"...");
-	    		//"transfer <buyerID> <goodID> <goodcounter>"
-	    		System.out.println("Counters:" + counters);
 	    		System.out.println("Counter from seller: "+Integer.parseInt(res[3]));
 	    		if(Integer.parseInt(res[3]) == (counters.get(res[2]))){
 	    				//"buy <userID> <goodID> <goodCounter>
@@ -254,7 +254,8 @@ public enum GoodState {
 			    		//cert = eid.getCert();
 		    			//cert= null;
 			    		//eid.sign(cert,rs);
-			    		return new Message(this.idNotary, rs, PKI.sign(rs,idNotary,PASS),null, null,cert);
+						String mess = ACK + " "+ ts;
+			    		return new Message(this.idNotary, mess, PKI.sign(mess,idNotary,PASS),null, null,cert);
 		    		}else
 		    		return new Message(this.idNotary, "not valid transfer", PKI.sign("not valid transfer",idNotary,PASS),null, null,null);
 	    		}else
