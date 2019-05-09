@@ -240,67 +240,71 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		System.out.println("sending: "+intent.getText());
 		System.out.println(out.keySet());
 		for(String serv : out.keySet()) {
-		try {
-			ouSt = out.get(serv);
-			inSt = in.get(serv);
-			ouSt.writeObject(intent);
-			res = (Message)inSt.readObject();
-			String[] split =res.getText().split(" ");
-			System.out.println("res: "+res.getText());
-			String r = split[5];
-			System.out.println("message ID, serv: "+res.getID()+", " + serv);
-//			System.out.println("correct message from " +res.getID()+":");
-//			System.out.println((PKI.verifySignature(res.getText(),res.getSig(),serv)
-//					&& Integer.parseInt(r)==rid
-//					&& split[3].equals(challenge)));
-//			System.out.println("correct signature: "+PKI.verifySignature(res.getText(),res.getSig(),serv));
-//			System.out.println("correct rid: "+ (Integer.parseInt(r)==rid));
-//			System.out.println("correct challenge: "+split[3].equals(challenge));
-			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
-					&& Integer.parseInt(r)==rid
-					&& split[3].equals(challenge)) {
-						System.out.println("recording message from "+res.getID());
-						System.out.println(res.getText());
-						int ts = Integer.parseInt(split[4]);
-			//				statelist.put(serv,new Pair(split[1], ts));
-			//				this.counterlist.put(serv,new Pair(split[2], ts));
-						//Recorded(state,counter,sig,timestamp)
-						readlist.put(serv,new Recorded(split[1],split[2],ts));
-						signaturelist.put(serv, new RecordSig(res.getWriteSignature(),ts));
-						reads++;
-				if(reads > (n+f)/2) {
-					/*
-					System.out.println("Bizantine Quorum Achieved -- starting WriteBack");
-					byte[] maxsig = maxSig(signaturelist);
-					String[] statecounter = maximumValue(readlist);
-					String wb = null; //message to be sent in the writeback
-					if(statecounter[0].equals("ONSALE")) {
-						// message was "sell goodID"
-						wb="sell "+good+ " " +statecounter[1]+" "+ statecounter[2];
-					}else
-					writeback = new Message(split[0],wb, , null, null, null);
-					*/
-					return split[0]+" "+maximumValue(readlist);
+			try {
+				ouSt = out.get(serv);
+				inSt = in.get(serv);
+				ouSt.writeObject(intent);
+				res = (Message)inSt.readObject();
+				String[] split =res.getText().split(" ");
+				System.out.println("res: "+res.getText());
+				String r = split[5];
+				String goodID= split[0];
+				
+				
+				System.out.println("message ID, serv: "+res.getID()+", " + serv);
+	//			System.out.println("correct message from " +res.getID()+":");
+	//			System.out.println((PKI.verifySignature(res.getText(),res.getSig(),serv)
+	//					&& Integer.parseInt(r)==rid
+	//					&& split[3].equals(challenge)));
+	//			System.out.println("correct signature: "+PKI.verifySignature(res.getText(),res.getSig(),serv));
+	//			System.out.println("correct rid: "+ (Integer.parseInt(r)==rid));
+	//			System.out.println("correct challenge: "+split[3].equals(challenge));
+				if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
+						&& Integer.parseInt(r)==rid
+						&& split[3].equals(challenge)) {
+							System.out.println("recording message from "+res.getID());
+							System.out.println(res.getText());
+							int ts = Integer.parseInt(split[4]);
+				//				statelist.put(serv,new Pair(split[1], ts));
+				//				this.counterlist.put(serv,new Pair(split[2], ts));
+							//Recorded(state,counter,sig,timestamp)
+							readlist.put(serv,new Recorded(split[1],split[2],ts));
+							signaturelist.put(serv, new RecordSig(res.getWriteSignature(),ts));
+							reads++;
+					if(reads > (n+f)/2) {
+						/*
+						System.out.println("Bizantine Quorum Achieved -- starting WriteBack");
+						byte[] maxsig = maxSig(signaturelist);
+						String[] statecounter = maximumValue(readlist);
+						String wb = null; //message to be sent in the writeback
+						if(statecounter[0].equals("ONSALE")) {
+							// message was "sell goodID"
+							wb="sell "+good+ " " +statecounter[1]+" "+ statecounter[2];
+						}else
+						writeback = new Message(split[0],wb, , null, null, null);
+						*/
+
+						return split[0]+" " +maximumValue(readlist);
+					}
 				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		}
 		return "NOT OK";	
 	}
 	
 	
-	private String[] maximumValue(HashMap<String, Recorded> statelist2) {
+	private String maximumValue(HashMap<String, Recorded> statelist2) {
 		int max = 0;
 		String maxstate=null;
 		String maxcounter=null;
 		byte[] maxsig;
-		String[] ret = new String[3];
+		String ret = "";
 		//TODO: maxsig not being returned!
 		for(String serv : statelist2.keySet()) {
 			int ts = statelist2.get(serv).timestamp;
@@ -310,9 +314,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				max = ts;
 			}
 		}
-		ret[0]=maxstate;
-		ret[1]=maxcounter;
-		ret[2]= ""+max;
+		ret+= maxstate + " "+ maxcounter + " " + max;
 		return ret;		
 	}
 	
