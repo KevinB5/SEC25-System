@@ -240,16 +240,9 @@ public enum GoodState {
     		if(res.length!=2) {
     			System.out.println("correct syntax: sell <goodID>");
     		}else {
-    		/* Gets the State of the Good invisibly */    		
+    		/* Gets the State of the Good invisibly */
     		String good = res[1];
-    		challenge = generateRandomString(20);
-			String[] s = getStateOfGood(good,challenge,false);
-			if(s!=null) {
-				if(!counters.containsKey(good))
-					counters.put(good, s[2]);
-				else
-					counters.replace(good, s[2]);
-			}
+    		getStateOfGoodInvisible(good);
     		this.intentionToSell(res[1]);
     		}
     	}else
@@ -258,16 +251,7 @@ public enum GoodState {
     		if(res.length!=2) {
     			System.out.println("correct syntax: state <goodID>");
     		}else {
-        		challenge = generateRandomString(20);
-        		String good =res[1];
-    			String[] s = getStateOfGood(good,challenge,true);
-    			if(s==null) {
-    				System.out.println("communication failed");
-    			}else
-    			if(!counters.containsKey(good))
-                    counters.put(good,s[2]);
-                else
-                    counters.replace(good,s[2]);
+    			this.getStateOfGood(res[1],false);
     		}
     	
     	if(op.equals("buy"))
@@ -275,17 +259,8 @@ public enum GoodState {
     		if(res.length!=3) {
     			System.out.println("correct syntax: buy <sellerID> <goodID>");
     		}else {
-    			challenge = generateRandomString(20);
-    			String good =res[2];
-    			String[] s = getStateOfGood(good,challenge,true);
-    			if(s==null) {
-    				System.out.println("communication failed");
-    			}else
-    			if(!counters.containsKey(good))
-                    counters.put(good,s[2]);
-                else
-                    counters.replace(good,s[2]);
-   
+    			this.getStateOfGoodInvisible(res[2]);
+    			  
     			this.buyGood(res[1], res[2]);
     		}
     	/*
@@ -346,19 +321,6 @@ public enum GoodState {
 		}
 	}
 	*/
-	private void getStateOfGoodInvisible(String good) {
-		try {
-			//Random string of 20 lowercase characters
-			challenge = generateRandomString(20);
-			String s = getStateOfGoodInvisible(good,challenge);
-			//update counter
-			counters.put(good,s);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
 	
 	/**
 	 * Informar ao notary que quer comprar um dado good
@@ -450,9 +412,9 @@ public enum GoodState {
 	}
 
 	
-	public String[] getStateOfGood(String goodID, String challenge, boolean invisible) throws InvalidKeyException, Exception {
+	public String[] getStateOfGood(String goodID, boolean invisible) throws InvalidKeyException, Exception {
 		rid++;
-		
+		challenge= generateRandomString(20);
 		String msg= STATE + " " + goodID + " "+challenge + " "+ rid;
 		String result= null;
 		try {
@@ -521,17 +483,7 @@ public enum GoodState {
     		String ret = "no such good";
     		System.out.println(command.getID()+" wants to buy "+ res[1]);
     		if(goods.containsKey(res[1])) {
-    			
-    			challenge = generateRandomString(20);
-    			String good =res[2];
-    			String[] s = getStateOfGood(good,challenge,true);
-    			if(s==null) {
-    				System.out.println("communication failed");
-    			}else
-    			if(!counters.containsKey(good))
-                    counters.put(good,s[2]);
-                else
-                    counters.replace(good,s[2]);    			
+    			getStateOfGoodInvisible(res[1]);  			
     			
     			System.out.println("Asking notary...");
     			String rep = transferGood(command.getID(), res[1], command.getSig());
@@ -566,15 +518,16 @@ public enum GoodState {
 
 	*/
 
-	public String getStateOfGoodInvisible(String goodID, String challenge) throws InvalidKeyException, Exception {		
-		rid++;
-		String msg= STATE + " " + goodID + " "+challenge+ " "+ rid;
-		Message result=  lib.send( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null));
-		String[] split = result.getText().split(" ");
-		if(split[split.length-1].equals(challenge)) {
-		return split[split.length-2];}
-		else
-			return "";
+	public void getStateOfGoodInvisible(String goodID) throws InvalidKeyException, Exception {		
+		String good = goodID;
+		String[] s = getStateOfGood(good,true);
+		if(s==null) {
+			System.out.println("communication failed");
+		}else
+		if(!counters.containsKey(good))
+            counters.put(good,s[2]);
+        else
+            counters.replace(good,s[2]);    	
 	}
 	
 	

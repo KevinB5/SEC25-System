@@ -49,7 +49,7 @@ public class Library {
 	private HashMap<String,Recorded> readlist = new HashMap<String,Recorded>();
 //	private HashMap<String,Pair> statelist = new HashMap<String,Pair>();
 //	private HashMap<String,Pair> counterlist = new HashMap<String,Pair>();
-//	private HashMap<String,byte[]> signaturelist = new HashMap<>
+	private HashMap<String,RecordSig> signaturelist = new HashMap<String,RecordSig>();
 	
    // private PKI pki = new PKI(PKI.KEYSIZE);
     
@@ -73,10 +73,15 @@ public class Library {
     class Recorded {
     	  String state;
     	  String counter;
-    	  byte[] signature;
     	  int timestamp;
-    	  Recorded(String x,String y,byte[] s, int t) {this.state=x;this.counter=y;this.signature=s;this.timestamp=t;}
+    	  Recorded(String x,String y, int t) {this.state=x;this.counter=y;this.timestamp=t;}
     	}
+    
+    class RecordSig {
+  	  byte[] sig;
+  	  int timestamp;
+  	  RecordSig(byte[] s, int t) {this.sig=s;this.timestamp=t;}
+  	}
     
 	public void connectServer(String ip, HashMap<String, Integer>servPorts) {
 		for(int port : servPorts.values()) {
@@ -228,7 +233,8 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	public String read(Message intent, int rid, String challenge) throws Exception {
 		clearReadList();
 		int reads=0;
-		Message res,writeback = null;
+		Message res=null;
+		Message writeback = null;
 		ObjectOutputStream ouSt;
 		ObjectInputStream inSt;
 		System.out.println("sending: "+intent.getText());
@@ -259,11 +265,16 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			//				statelist.put(serv,new Pair(split[1], ts));
 			//				this.counterlist.put(serv,new Pair(split[2], ts));
 						//Recorded(state,counter,sig,timestamp)
-						readlist.put(serv,new Recorded(split[1],split[2],res.getWriteSignature(),ts));
+						readlist.put(serv,new Recorded(split[1],split[2],ts));
+						signaturelist.put(serv, new RecordSig(res.getWriteSignature(),ts));
 						reads++;
 				if(reads > (n+f)/2) {
-//					TODO: WriteBack here:
+					/*
+					System.out.println("Bizantine Quorum Achieved -- starting WriteBack");
+					byte[] maxsig = maxSig(signaturelist);
+					String[] statecounter = maximumValue(readlist);
 					writeback = new Message(split[0],"sell "+split[2], null, null, null, null);
+					*/
 					return split[0]+" "+maximumValue(readlist);
 				}
 			}
@@ -279,20 +290,35 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	}
 	
 	
-	private String maximumValue(HashMap<String, Recorded> statelist2) {
+	private String[] maximumValue(HashMap<String, Recorded> statelist2) {
 		int max = 0;
 		String maxstate=null;
 		String maxcounter=null;
 		byte[] maxsig;
+		String[] ret = new String[2];
 		//TODO: maxsig not being returned!
 		for(String serv : statelist2.keySet()) {
 			if(statelist2.get(serv).timestamp>=max) {
 				maxstate=statelist2.get(serv).state;
 				maxcounter=statelist2.get(serv).counter;
-				maxsig=statelist2.get(serv).signature;
 			}
 		}
-		return maxstate +" " +maxcounter;		
+		ret[0]=maxstate;
+		ret[1]=maxcounter;
+		return ret;		
+	}
+	
+	
+	private byte[] maxSig( HashMap<String,RecordSig> siglist) {
+		int max = 0;
+		byte[] maxsig = null;
+		for(String serv : siglist.keySet()) {
+			if(siglist.get(serv).timestamp>=max) {
+				
+				maxsig=siglist.get(serv).sig;
+			}
+		}
+		return maxsig;
 	}
 	
 	private void clearAcklist() {
@@ -304,6 +330,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	
 	private void clearReadList() {
 		readlist = new HashMap<String,Recorded>();
+		signaturelist = new HashMap<String,RecordSig>();
 	}
 	
 

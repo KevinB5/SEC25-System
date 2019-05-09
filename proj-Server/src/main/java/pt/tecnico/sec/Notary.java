@@ -257,13 +257,13 @@ public enum GoodState {
 						String mess = ACK + " "+ ts;
 			    		return new Message(this.idNotary, mess, PKI.sign(mess,idNotary,PASS),null, null,cert);
 		    		}else
-		    		return new Message(this.idNotary, "not valid transfer", PKI.sign("not valid transfer",idNotary,PASS),null, null,null);
+		    		return new Message(this.idNotary, "notvalidtransfer "+ts, PKI.sign("notvalidtransfer "+ts,idNotary,PASS),null, null,null);
 	    		}else
-	    		return new Message(this.idNotary, "wrong counter", PKI.sign("wrong counter",idNotary,PASS),null, null,null);
+	    		return new Message(this.idNotary, "wrongcounter "+ts, PKI.sign("wrongcounter "+ts,idNotary,PASS),null, null,null);
 	    	}else
-	    		return new Message(this.idNotary, "not valid operation", PKI.sign("not valid operation",idNotary,PASS),null, null,null);
+	    		return new Message(this.idNotary, "notValidOperation", PKI.sign("notValidOperation",idNotary,PASS),null, null,null);
 		}else
-			return new Message(this.idNotary, "signature not valid", PKI.sign("signature not valid",idNotary,PASS),null, null,null);
+			return new Message(this.idNotary, "signatureNotValid", PKI.sign("signatureNotValid",idNotary,PASS),null, null,null);
 	}
 	/**
 	 * Transferir o good ao user
