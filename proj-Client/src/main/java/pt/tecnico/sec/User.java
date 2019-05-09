@@ -418,7 +418,7 @@ public enum GoodState {
 		String msg= STATE + " " + goodID + " "+challenge + " "+ rid;
 		String result= null;
 		try {
-				result =lib.read( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),rid,challenge);
+				result =lib.read( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),rid,challenge,goodID);
 				//System.out.println(result);
 		}catch(Exception e) {
 			System.out.println(e.getMessage());

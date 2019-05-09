@@ -230,7 +230,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		return "NOT OK";	
 	}
 	
-	public String read(Message intent, int rid, String challenge) throws Exception {
+	public String read(Message intent, int rid, String challenge, String good) throws Exception {
 		clearReadList();
 		int reads=0;
 		Message res=null;
@@ -273,7 +273,12 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 					System.out.println("Bizantine Quorum Achieved -- starting WriteBack");
 					byte[] maxsig = maxSig(signaturelist);
 					String[] statecounter = maximumValue(readlist);
-					writeback = new Message(split[0],"sell "+split[2], null, null, null, null);
+					String wb = null; //message to be sent in the writeback
+					if(statecounter[0].equals("ONSALE")) {
+						// message was "sell goodID"
+						wb="sell "+good+ " " +statecounter[1]+" "+ statecounter[2];
+					}else
+					writeback = new Message(split[0],wb, , null, null, null);
 					*/
 					return split[0]+" "+maximumValue(readlist);
 				}
@@ -295,16 +300,19 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		String maxstate=null;
 		String maxcounter=null;
 		byte[] maxsig;
-		String[] ret = new String[2];
+		String[] ret = new String[3];
 		//TODO: maxsig not being returned!
 		for(String serv : statelist2.keySet()) {
-			if(statelist2.get(serv).timestamp>=max) {
+			int ts = statelist2.get(serv).timestamp;
+			if(ts>=max) {
 				maxstate=statelist2.get(serv).state;
 				maxcounter=statelist2.get(serv).counter;
+				max = ts;
 			}
 		}
 		ret[0]=maxstate;
 		ret[1]=maxcounter;
+		ret[2]= ""+max;
 		return ret;		
 	}
 	
