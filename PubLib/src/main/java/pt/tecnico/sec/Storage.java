@@ -24,22 +24,24 @@ import java.util.Scanner;
 public class Storage {
 	//private static String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
 	//private static String path = "../../"
-	private static String line = System.getProperty("file.separator");
-	private static String filename = line +"goods.txt";
-	private static String Sfilename = line +"servPorts.txt";
-	private static String path = originPath() + filename;
-	private static String path2 = originPath() + Sfilename;
+	private  String line = System.getProperty("file.separator");
+	private  String filename = line +"goods";
+	private  String Sfilename = line +"servPorts.txt";
+	private  String path = originPath() + filename;
+	private  String path2 = originPath() + Sfilename;
 
 	private static HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
+	private static HashMap<String, String> states = new HashMap<String, String>(); // <goodID,userID>
+
 	private final String pathLog= System.getProperty("user.dir")+"\\src\\main\\java\\pt\\tecnico\\state\\";
-	private final String logName = "transfer.txt";
+	private String logName = "";
 		
 	private HashMap<String,Integer> servs= new HashMap<String,Integer>() ;
 	private File systemFile;
 	private File servFile;
 	private FileOutputStream out ;
 		
-	public static String originPath() {
+	public String originPath() {
 		String origin = System.getProperty("user.dir");
 		int lastBar = 0;
 		for(int i=0; i < origin.length() ; i++) {
@@ -49,10 +51,11 @@ public class Storage {
 		return origin.substring(0,lastBar);
 	}
 	
-	public Storage() {
+	public Storage(int id) {
 		PKI.getInstance();
 		//put user1
 		String res = "good";
+		
 		/*
 		
 		for(int i = 1;i<7 ;i++) {
@@ -75,7 +78,15 @@ public class Storage {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}*/
+		this.path = path+id+".txt";
 		systemFile = new File(path);
+		if(!systemFile.isFile())
+			try {
+				systemFile.createNewFile();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 
 
 		
@@ -85,6 +96,10 @@ public class Storage {
 			//System.out.println(systemFile.isFile());
 				
 			String user = "";
+			String[] temp ;
+			String goodID = "";
+			String state = "";
+			
 			//File text = new File(path);
 		    //pwriter = new PrintWriter(new FileWriter(systemFile));
 
@@ -93,13 +108,18 @@ public class Storage {
 				String line = scnr.nextLine();
 				if(line.startsWith("#")) {
 					user = line.substring(1);
-				}else{
-					goods.put(line, user);
+				}else if(!line.isEmpty()){
+					temp= line.split(" ");
+					goodID = temp[0];
+					state = temp[1];
+					System.out.println("state: "+ state);
+					goods.put(goodID, user);
+					states.put(goodID, state);
 				}
 				//pwriter.println(line);
 			}
 		}catch(Exception e) {
-			System.out.println("Error in reading state file: " + e.getMessage());
+			e.printStackTrace();
 		}finally {
 			scnr.close();
 		}
@@ -138,6 +158,14 @@ public class Storage {
 	
 	public HashMap<String, String> getGoods() {
 		return goods;//goodID, userID
+	}
+	
+	public HashMap<String, String> getStates() {
+		return states;//goodID, userID
+	}
+	
+	public void setLog(String name) {
+		this.logName = "tf"+name+".txt";
 	}
 	
 	public void writeServ(HashMap<String, Integer>ports) {
@@ -198,17 +226,21 @@ public class Storage {
 	
 	
 	
-	public ArrayList<String> getGoods(String userID) {
-		ArrayList<String> res = new ArrayList<String>();
-		for(String goodID: goods.keySet() ) {
-			if(userID.equals(goods.get(goodID)))
-				res.add(goodID);
+	public HashMap<String, String> getGoods(String userID) {
+		HashMap<String, String> res = new HashMap<String, String>();
+
+		for(String good: goods.keySet() ) {
+			if(userID.equals(goods.get(good)))
+				res.put(good, states.get(good));
 				}
 		return res;
 	}
 	
+	
+	
 	public void updateFile(String goodID, String newOwner) {
 		try {
+			//systemFile = new File(path+id+".txt");
 
 
 		      if (!systemFile.isFile()) {
@@ -278,11 +310,14 @@ public class Storage {
 
 		String data = goodId+";"+seller+";"+buyer+";"+counter+";"+sigSeller+";"+sigBuyer+";$"+System.lineSeparator();
 		try {
+			System.out.println("heyyyy");
 			File file = new File(this.pathLog+ this.logName);
 			if (!file.exists()) {
 				file.createNewFile();
 			}
 			fw = new FileWriter(file.getAbsoluteFile(), true);
+			System.out.println("heyyyy222");
+
 			bw = new BufferedWriter(fw);
 			bw.write(data);
 		} catch (IOException e) {
@@ -301,6 +336,13 @@ public class Storage {
 	
 	public void readLog() {
 		File systemFile = new File(pathLog+logName);
+		if(!systemFile.isFile())
+			try {
+				systemFile.createNewFile();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		File tmpFile = new File(pathLog+"tmp.txt");
 		Scanner scnr = null;
 		BufferedWriter bw = null;

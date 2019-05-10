@@ -70,13 +70,7 @@ public class Library {
     	
     }
     
-    class Recorded {
-    	  String state;
-    	  String counter;
-    	  int timestamp;
-    	  Recorded(String x,String y, int t) {this.state=x;this.counter=y;this.timestamp=t;}
-    	}
-    
+
     class RecordSig {
   	  byte[] sig;
   	  int timestamp;
@@ -181,7 +175,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				inSt = in.get(serv);
 				ouSt.writeObject(intent);
 				res = (Message)inSt.readObject();
-				if(!PKI.verifySignature(res.getText(),res.getSig(),res.getID())) {
+				if(!PKI.verifySignature(res.getText(),res.getSig().getBytes(),res.getID())) {
 					throw new Exception("Invalid message signature");
 				}
 			} catch (IOException e) {
@@ -209,8 +203,9 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			ouSt.writeObject(intent);
 			res = (Message)inSt.readObject();
 			System.out.println("message from notary: "+res.getText());
-			int ts=Integer.parseInt(res.getText().split(" ")[1]);
-			if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
+			int ts=res.getRec().getTS();
+			System.out.println(ts + " " + wts);
+			if(PKI.verifySignature(res.getText(),res.getSig().getBytes(),res.getID())
 					&& res.getText().split(" ")[0].equals("ACK") 
 					&& ts==wts) {
 				this.acklist.put(serv, true);
@@ -230,7 +225,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		return "NOT OK";	
 	}
 	
-	public String read(Message intent, int rid, String challenge, String good) throws Exception {
+	public String read(Message intent, int rid, String challenge) throws Exception {
 		clearReadList();
 		int reads=0;
 		Message res=null;
@@ -247,11 +242,11 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				res = (Message)inSt.readObject();
 				String[] split =res.getText().split(" ");
 				System.out.println("res: "+res.getText());
-				String r = split[5];
-				String goodID= split[0];
+				String r = split[4];
 				
 				
-				System.out.println("message ID, serv: "+res.getID()+", " + serv);
+				
+				System.out.println("message from serv: "+res.getID()+", " + res.getText());
 	//			System.out.println("correct message from " +res.getID()+":");
 	//			System.out.println((PKI.verifySignature(res.getText(),res.getSig(),serv)
 	//					&& Integer.parseInt(r)==rid
@@ -259,17 +254,17 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	//			System.out.println("correct signature: "+PKI.verifySignature(res.getText(),res.getSig(),serv));
 	//			System.out.println("correct rid: "+ (Integer.parseInt(r)==rid));
 	//			System.out.println("correct challenge: "+split[3].equals(challenge));
-				if(PKI.verifySignature(res.getText(),res.getSig(),res.getID())
+				if(PKI.verifySignature(res.getText(),res.getSig().getBytes(),res.getID())
 						&& Integer.parseInt(r)==rid
 						&& split[3].equals(challenge)) {
-							System.out.println("recording message from "+res.getID());
-							System.out.println(res.getText());
-							int ts = Integer.parseInt(split[4]);
+							int ts = res.getRec().getTS();
+
 				//				statelist.put(serv,new Pair(split[1], ts));
 				//				this.counterlist.put(serv,new Pair(split[2], ts));
 							//Recorded(state,counter,sig,timestamp)
-							readlist.put(serv,new Recorded(split[1],split[2],ts));
-							signaturelist.put(serv, new RecordSig(res.getWriteSignature(),ts));
+							readlist.put(serv,res.getRec());
+
+							signaturelist.put(serv, new RecordSig(res.getSig().getBytes(),ts));
 							reads++;
 					if(reads > (n+f)/2) {
 						/*
@@ -309,8 +304,9 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		for(String serv : statelist2.keySet()) {
 			int ts = statelist2.get(serv).timestamp;
 			if(ts>=max) {
-				maxstate=statelist2.get(serv).state;
-				maxcounter=statelist2.get(serv).counter;
+				maxstate=statelist2.get(serv).getState();
+				int mr=statelist2.get(serv).getCounter();
+				maxcounter = String.valueOf(mr);
 				max = ts;
 			}
 		}

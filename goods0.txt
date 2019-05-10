@@ -1,0 +1,16 @@
+#user1
+good1 n
+good4 n
+good5 n
+#user2
+good6 n 
+good7 n
+#user3
+good8 n
+good2 n
+good3 n
+#user4 
+good10 n
+good9 n
+#user5 
+good11 n

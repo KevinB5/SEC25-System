@@ -14,40 +14,26 @@ public class Message implements Serializable{
 	private static final long serialVersionUID = 928168850408082591L;
 	
 private final String text;
-private final byte[] signature;
-private PublicKey key;
-private byte[] writeSignature;
+private final signature signature;
+private final signature writeSignature;
 private final String id;
-private final byte[] buyerSignature;
+private final signature buyerSignature;
 private final X509Certificate cert;
+private final Recorded rec;
 
- public Message(String id, String text, byte[] signature, byte[] buyerSignature, byte[] writeSignature, X509Certificate cert) {
+
+ public Message(String id, String text, signature[] signatures, Recorded recorded, X509Certificate cert) {
      this.text = text;
-     this.signature = signature;
+     this.signature = signatures[0];
 //     this.key = key;
-     this.writeSignature=writeSignature;
+     this.writeSignature=signatures[1];
      this.id=id;
-     this.buyerSignature=buyerSignature;
+     this.buyerSignature=signatures[2];
      this.cert = cert;
+     this.rec = recorded;
  }
  
- public Message(String id, String text, byte[] signature, HashMap<String,Object> secParameters ) {
-     this.text = text;
-     this.signature = signature;
-     this.id=id;
-     this.buyerSignature = (byte[]) secParameters.get("signature");
-     this.cert = (X509Certificate) secParameters.get("certificate");
-     this.key = (PublicKey) secParameters.get("key");
- }
  
- public Message(String id, String text, byte[] signature) {
-     this.text = text;
-     this.signature = signature;
-     this.id=id;
-     this.buyerSignature = null;
-     this.cert = null;
-     this.key = null;
- }
  
  public String getID() {
 	 return id;
@@ -58,18 +44,18 @@ private final X509Certificate cert;
      return text;
  }
  
- public byte[] getSig() {
+ public signature getSig() {
 	 return signature;
  }
  
- public byte[] buyerSignature() {
+ public signature buyerSignature() {
 	 return buyerSignature;
  }
  
- public PublicKey getObj() {
-	 return key;
+ public Recorded getRec() {
+	 return rec;
  }
- public byte[] getWriteSignature() {
+ public signature getWriteSignature() {
 	 return writeSignature;
  }
 }

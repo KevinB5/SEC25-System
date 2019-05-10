@@ -1,1 +1,6 @@
-good4;user1;user2;2;[B@968695;[B@792e07ca
+good4;user1;user2;2;[B@968695;[B@792e07cagood1;user1;user2;1;[B@20653cdc;[B@24026576;$
+good1;user2;user1;1;[B@4db555c4;[B@2b03047e;$
+good1;user1;user2;1;[B@2433db40;[B@3220b23;$
+good1;user2;user1;1;[B@374c80f2;[B@68d063b3;$
+good1;user1;user2;1;[B@2f541849;[B@2af255cf;$
+good1;user2;user1;1;[B@15d3490d;[B@613df4a6;$

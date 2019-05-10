@@ -37,6 +37,8 @@ public class PKI {
 	public static KeyStore KEYSTORE;
 	private static char[] pwdArray = "password".toCharArray();
     private static PKI single_instance = null;
+	private static String line = System.getProperty("file.separator");
+
 //    private static ProtectionParameter protParam = new KeyStore.PasswordProtection(pwdArray);
     private static String PATH;
 
@@ -49,7 +51,7 @@ private PKI() {
 		
 		//KEYSTORE.load(null, pwdArray);
 //		Storage st = new Storage();
-		PATH = Storage.originPath()+ "/KeyStoreFile.jks";
+		PATH = originPath()+ "/KeyStoreFile.jks";
 
 		File keystorefile = new File(PATH);
 		
@@ -82,6 +84,15 @@ private PKI() {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
+}
+public static String originPath() {
+	String origin = System.getProperty("user.dir");
+	int lastBar = 0;
+	for(int i=0; i < origin.length() ; i++) {
+		if(origin.charAt(i)==line.charAt(0))
+			lastBar=i;
+	}
+	return origin.substring(0,lastBar);
 }
 
 public static PKI getInstance() 
@@ -383,7 +394,7 @@ public static void createKeys(String userID, String pword) {
 		return;
 }
 
-public static X509Certificate generateCertificate(String dn, String subject, KeyPair pair, int days, String algorithm)
+private static X509Certificate generateCertificate(String dn, String subject, KeyPair pair, int days, String algorithm)
 		  throws GeneralSecurityException, IOException
 		{
 		  PrivateKey privkey = pair.getPrivate();

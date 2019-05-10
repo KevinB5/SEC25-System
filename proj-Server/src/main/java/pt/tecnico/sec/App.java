@@ -54,13 +54,13 @@ public class App
         System.out.println("Server ID");
         nu = Integer.parseInt(System.console().readLine());  
         */
-        Storage store = new Storage();
-        store.readLog();
+        Storage store = new Storage(0);
+        //store.readLog();
         
         J=N;
     	//notary= new Notary(nu,store);//atribuir aqui a porta
         while(J!=0) {
-        	notary= new Notary(J,store);//atribuir aqui a porta
+        	notary= new Notary(J);//atribuir aqui a porta
         	servers.put(J, notary);
         	J--;
         }

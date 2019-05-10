@@ -4,11 +4,6 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-    <parent>
-    <artifactId>HDS</artifactId>
-    <groupId>pt.tecnico.sec</groupId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
 
   <groupId>pt.tecnico.sec</groupId>
   <artifactId>proj-Client</artifactId>
