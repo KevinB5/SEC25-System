@@ -225,17 +225,18 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		return "NOT OK";	
 	}
 	
-	public String read(Message intent, int rid, String challenge) throws Exception {
+	public String read(Message intent, int rid, String challenge, String good) throws Exception {
 		clearReadList();
 		int reads=0;
 		Message res=null;
-		Message writeback = null;
 		ObjectOutputStream ouSt;
 		ObjectInputStream inSt;
 		System.out.println("sending: "+intent.getText());
 		System.out.println(out.keySet());
 		for(String serv : out.keySet()) {
 			try {
+				System.out.println("reaching "+serv);
+				System.out.println("n,f: "+n+" "+f);
 				ouSt = out.get(serv);
 				inSt = in.get(serv);
 				ouSt.writeObject(intent);
@@ -258,7 +259,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 						&& Integer.parseInt(r)==rid
 						&& split[3].equals(challenge)) {
 							int ts = res.getRec().getTS();
-
+							System.out.println("all good");
 				//				statelist.put(serv,new Pair(split[1], ts));
 				//				this.counterlist.put(serv,new Pair(split[2], ts));
 							//Recorded(state,counter,sig,timestamp)
@@ -267,31 +268,42 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 							signaturelist.put(serv, new RecordSig(res.getSig().getBytes(),ts));
 							reads++;
 					if(reads > (n+f)/2) {
-						/*
+						/*WRITE BACK*/
+						String owner = split[1];
 						System.out.println("Bizantine Quorum Achieved -- starting WriteBack");
 						byte[] maxsig = maxSig(signaturelist);
-						String[] statecounter = maximumValue(readlist);
+						String statecounterts = maximumValue(readlist);
 						String wb = null; //message to be sent in the writeback
-						if(statecounter[0].equals("ONSALE")) {
+						String[] sct = statecounterts.split(" ");
+						String state = sct[0];
+						String counter = sct[1];
+						String maxts = sct[2];
+						if(state.equals("ONSALE")) {
 							// message was "sell goodID"
-							wb="sell "+good+ " " +statecounter[1]+" "+ statecounter[2];
+							wb="sell "+good+ " " +counter+" "+ maxts;
+						}else {
+							// message was "owner goodID"
+							wb= "owner "+good+" "+ counter +" "+ maxts;
+						}
+						signature[] sigs = new signature[3];
+						sigs[0]= new signature(res.getWriteSignature().getBytes(), wb);
+						String response=write(new Message(owner,wb,sigs,null,null),Integer.parseInt(maxts));
+					    if(response.equals("OK")) {
+					    	return split[0]+" " +maximumValue(readlist);
+					    	}
 						}else
-						writeback = new Message(split[0],wb, , null, null, null);
-						*/
-
-						return split[0]+" " +maximumValue(readlist);
+						return "NOT OK";
 					}
-				}
-			} catch (IOException e) {
+				}catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			e.printStackTrace();
 		}
-		return "NOT OK";	
+		}
+		return "NOT OK";
 	}
+	
 	
 	
 	private String maximumValue(HashMap<String, Recorded> statelist2) {

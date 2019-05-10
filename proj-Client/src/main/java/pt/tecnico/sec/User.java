@@ -446,7 +446,7 @@ public enum GoodState {
 	    	sigs[2]= null;
 
 
-			result= lib.read(new Message(idUser, msg,sigs , null, null),rid, challenge);
+			result= lib.read(new Message(idUser, msg,sigs , null, null),rid, challenge,goodID);
 				//result =lib.read( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),rid,challenge,goodID);
 				//System.out.println(result);
 		}catch(Exception e) {
