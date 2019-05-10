@@ -37,6 +37,7 @@ public class Storage {
 	private String logName = "";
 		
 	private HashMap<String,Integer> servs= new HashMap<String,Integer>() ;
+	private HashMap<Integer, File> files = new  HashMap<Integer, File>();
 	private File systemFile;
 	private File servFile;
 	private FileOutputStream out ;
@@ -49,6 +50,26 @@ public class Storage {
 				lastBar=i;
 		}
 		return origin.substring(0,lastBar);
+	}
+	
+	public Storage() {
+		PKI.getInstance();
+		//put user1
+		int id = 0;
+		
+		this.path = path+id+".txt";
+		systemFile = new File(path);
+		files.put(id, systemFile);
+		if(!systemFile.isFile())
+			try {
+				systemFile.createNewFile();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		this.refresh(id);
+
+		
 	}
 	
 	public Storage(int id) {
@@ -80,6 +101,7 @@ public class Storage {
 		}*/
 		this.path = path+id+".txt";
 		systemFile = new File(path);
+		files.put(id, systemFile);
 		if(!systemFile.isFile())
 			try {
 				systemFile.createNewFile();
@@ -87,9 +109,11 @@ public class Storage {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+		this.refresh(id);
 
-
-		
+	}
+	
+	private void refresh(int id) {
 		Scanner scnr = null;
 		PrintWriter pwriter = null;
 		try {
@@ -99,9 +123,11 @@ public class Storage {
 			String[] temp ;
 			String goodID = "";
 			String state = "";
+			systemFile=files.get(id);
 			
 			//File text = new File(path);
 		    //pwriter = new PrintWriter(new FileWriter(systemFile));
+			System.out.println("reading from file: "+ this.systemFile.getPath());
 
 			scnr = new Scanner(systemFile);
 			while(scnr.hasNextLine()) {
@@ -156,11 +182,13 @@ public class Storage {
 		}
 	}
 	
-	public HashMap<String, String> getGoods() {
+	public HashMap<String, String> getGoods(int id) {
+		refresh(id);
 		return goods;//goodID, userID
 	}
 	
-	public HashMap<String, String> getStates() {
+	public HashMap<String, String> getNStates(int id) {
+		refresh(id);
 		return states;//goodID, userID
 	}
 	
@@ -268,7 +296,7 @@ public class Storage {
 
 		        if (!line.trim().equals(goodID)) {
 		        	if(foundOwner&!written) {
-		        		pwriter.println(goodID);
+		        		pwriter.println(goodID+" "+"n");
 		        		written=true;
 		        	}
 		        	else if(line.trim().equals('#'+newOwner))

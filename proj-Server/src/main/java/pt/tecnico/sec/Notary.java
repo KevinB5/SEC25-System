@@ -45,33 +45,28 @@ public enum GoodState {
 //	private PKI keyManager;
 	private String PASS;
 	private SLibrary lib;
+	private final int id;
+	
 
 	private KeyPair keypair = null;
 	private final String hashLimit = "0000";
 	
 	
 	public Notary(int id) {
+		this.id=id;
 		idNotary = "notary"+ id;
         store = new Storage(id);
         store.setLog(String.valueOf(id));
         store.readLog();		
         this.lib=new SLibrary(this);
-		goods = store.getGoods();
+        this.updateState();
 		System.out.println(goods);
 
 		for(String goodID: goods.keySet()) {
 			counters.put(goodID, 0);
 			timestamps.put(goodID, 0);
 		}
-		HashMap<String, String> cs = store.getStates();
-		
-		for(String good: cs.keySet()) {
-			System.out.println("getting state for good: "+ good + " "+cs.get(good));
-			if(cs.get(good).equals("n"))
-				states.put(good, GoodState.NOTONSALE);
-			else 
-				states.put(good, GoodState.ONSALE);
-		}
+
 
 //		
 //		PKI.getInstance();
@@ -100,6 +95,20 @@ public enum GoodState {
 			e.printStackTrace();
 		}
 	
+	}
+	
+	private void updateState(){
+		goods = store.getGoods(id);
+
+		HashMap<String, String> cs = store.getNStates(id);
+		
+		for(String good: cs.keySet()) {
+			System.out.println("getting state for good: "+ good + " "+cs.get(good));
+			if(cs.get(good).equals("n"))
+				states.put(good, GoodState.NOTONSALE);
+			else 
+				states.put(good, GoodState.ONSALE);
+		}
 	}
 	
 	String getID() {
@@ -323,6 +332,7 @@ public enum GoodState {
 	 */
 	private String transferGood( String seller,String buyer , String goodID,byte[] sigSeller,byte[]sigBuyer) throws Exception {
 		//for(String s: goods.keySet()) {System.out.println(s);}
+		this.updateState();
 System.out.println(goods.get(goodID));
 		if(goods.get(goodID).equals(seller)) {
 			System.out.println("SELLER OK "+ seller);
