@@ -2,6 +2,14 @@
 
 $ -> comando no terminal
 
+*********************+ alteracoes ************+
+
+cd lib
+mvn install:install-file -Dfile=pteidlibj.jar -DpomFile=pom.xml
+
+
+
+
 compilar e correr :
 $cd ..\SEC25-System\
 $mvn install
