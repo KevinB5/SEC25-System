@@ -242,7 +242,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				res = (Message)inSt.readObject();
 				String[] split =res.getText().split(" ");
 				System.out.println("res: "+res.getText());
-				String r = split[4];
+				int r = res.getRec().getCounter();
 				
 				
 				
@@ -255,7 +255,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	//			System.out.println("correct rid: "+ (Integer.parseInt(r)==rid));
 	//			System.out.println("correct challenge: "+split[3].equals(challenge));
 				if(PKI.verifySignature(res.getText(),res.getSig().getBytes(),res.getID())
-						&& Integer.parseInt(r)==rid
+						&& r==rid
 						&& split[3].equals(challenge)) {
 							int ts = res.getRec().getTS();
 
@@ -266,7 +266,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 
 							signaturelist.put(serv, new RecordSig(res.getSig().getBytes(),ts));
 							reads++;
-					if(reads > (n+f)/2) {
+					if(reads == 1/* > (n+f)/2*/) {
 						/*
 						System.out.println("Bizantine Quorum Achieved -- starting WriteBack");
 						byte[] maxsig = maxSig(signaturelist);

@@ -3,8 +3,6 @@ good1 n
 good4 n
 good5 n
 #user2
-good1 n
-good1 n
 good6 n 
 good7 n
 #user3
