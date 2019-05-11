@@ -1,5 +1,7 @@
 ﻿# SEC25-System
 
+https://stackoverflow.com/questions/4688123/how-to-open-the-command-prompt-and-insert-commands-using-java
+
 $ -> comando no terminal
 
 compilar e correr :
