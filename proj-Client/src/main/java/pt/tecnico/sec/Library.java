@@ -204,7 +204,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			res = (Message)inSt.readObject();
 			System.out.println("message from notary: "+res.getText());
 			int ts=res.getRec().getTS();
-			System.out.println(ts + " " + wts);
+			System.out.println("timestamps: "+ts + " " + wts);
 			if(PKI.verifySignature(res.getText(),res.getSig().getBytes(),res.getID())
 					&& res.getText().split(" ")[0].equals("ACK") 
 					&& ts==wts) {
@@ -249,13 +249,20 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				System.out.println("r , rid" + r + " " + rid);
 
 				System.out.println("message from serv: "+res.getID()+", " + res.getText());
-	//			System.out.println("correct message from " +res.getID()+":");
-	//			System.out.println((PKI.verifySignature(res.getText(),res.getSig(),serv)
-	//					&& Integer.parseInt(r)==rid
-	//					&& split[3].equals(challenge)));
-	//			System.out.println("correct signature: "+PKI.verifySignature(res.getText(),res.getSig(),serv));
-	//			System.out.println("correct rid: "+ (Integer.parseInt(r)==rid));
-	//			System.out.println("correct challenge: "+split[3].equals(challenge));
+				
+				String owner = split[1];
+				byte[] maxsig = maxSig(signaturelist);
+				/*
+				if(state.equals("ONSALE")) {
+					// message was "sell goodID"
+					wb="sell "+good+ " " +counter+" "+ maxts;
+				}else {
+					// message was "owner goodID"
+					wb= "owner "+good+" "+ counter +" "+ maxts;
+				}
+				*/
+//				signature[] sigs = new signature[3];
+//				sigs[0]= new signature(res.getWriteSignature().getBytes(), wb);				
 				if(PKI.verifySignature(res.getText(),res.getSig().getBytes(),res.getID())
 						&& r==rid
 						&& split[3].equals(challenge)) {
@@ -263,40 +270,14 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 
 							int ts = res.getRec().getTS();
 							System.out.println("all good");
-				//				statelist.put(serv,new Pair(split[1], ts));
-				//				this.counterlist.put(serv,new Pair(split[2], ts));
-							//Recorded(state,counter,sig,timestamp)
 							readlist.put(serv,res.getRec());
 
 							signaturelist.put(serv, new RecordSig(res.getSig().getBytes(),ts));
 							reads++;
 					if(reads > (n+f)/2) {
-						/*WRITE BACK*/
-						String owner = split[1];
-						System.out.println("Bizantine Quorum Achieved -- starting WriteBack");
-						byte[] maxsig = maxSig(signaturelist);
-						String statecounterts = maximumValue(readlist);
-						String wb = null; //message to be sent in the writeback
-						String[] sct = statecounterts.split(" ");
-						String state = sct[0];
-						String counter = sct[1];
-						String maxts = sct[2];
-						if(state.equals("ONSALE")) {
-							// message was "sell goodID"
-							wb="sell "+good+ " " +counter+" "+ maxts;
-						}else {
-							// message was "owner goodID"
-							wb= "owner "+good+" "+ counter +" "+ maxts;
-						}
-						signature[] sigs = new signature[3];
-						sigs[0]= new signature(res.getWriteSignature().getBytes(), wb);
-						String response=write(new Message(owner,wb,sigs,null,null),Integer.parseInt(maxts));
-					    if(response.equals("OK")) {
 					    	return split[0]+" " +maximumValue(readlist);
-					    	}
-						}else
-						return "NOT OK";
 					}
+				}
 				}catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

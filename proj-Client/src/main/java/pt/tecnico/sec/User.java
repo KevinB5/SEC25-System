@@ -288,6 +288,7 @@ public enum GoodState {
 		String res="";
 		try {
 			res = intentionToSell(idUser, good, counters.get(good));
+			System.out.println("res is "+res);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -429,11 +430,8 @@ public enum GoodState {
 	    	sigs[2]=null;
 
     		Recorded rec = new Recorded("", integer, 0);
-
-
 			ret= lib.write(new Message(idUser, msg,sigs , rec, null), wts);
-		//ret =  lib.write( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),wts);
-//		ret =  result.getText();
+
 		}catch(Exception e) {
 			e.printStackTrace();;
 		}
@@ -459,6 +457,11 @@ public enum GoodState {
     		Recorded rec = new Recorded("", counter, -1);
 
 			result= lib.read(new Message(idUser, msg,sigs , rec, null),rid, challenge,goodID);
+
+			/*  WRITE-BACK HERE   */
+			
+			
+			System.out.println("ret equals: "+result);
 
 				//result =lib.read( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),rid,challenge,goodID);
 				System.out.println("got from lib: "+result);

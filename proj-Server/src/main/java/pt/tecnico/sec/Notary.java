@@ -239,17 +239,19 @@ public enum GoodState {
 	    	
 	    	String op =  message[0]; //the first word is the operation required
 	    	//array de assinaturas
-
+	    	String good = message[1];
 	    	
 	    	if(op .equals("sell")) {
-    			int ts = command.getRec().getCounter();
+    			int counter = command.getRec().getCounter();
+    			int ts = command.getRec().getTS();
 
-	    		if(command.getRec().getCounter()==(counters.get(message[1]))) {
+	    		if(ts>= timestamps.get(good) 
+	    				&& counter==(counters.get(good))) {
+	    			
 		    		String rs=this.verifySelling(user, message[1]);//userID, goodID
-		    		
 		    		if(rs.equals("ACK")) {
-		    			timestamps.put(message[1],ts);
-		    			signatures.put(message[1],command.getSig().getBytes());
+		    			timestamps.put(good,ts);
+		    			signatures.put(good,command.getSig().getBytes());
 		    		}
 		    		String mess = rs+" "+ts;
 		    		System.out.println("Returning "+mess);
