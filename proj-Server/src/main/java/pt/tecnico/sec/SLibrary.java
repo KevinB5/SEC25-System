@@ -20,7 +20,7 @@ public class SLibrary {
     public void connect(String userID, int Uport) {
 		try {
 			Socket clientSocket = new Socket(IP, Uport);
-//			System.out.println("connected to server at port: "+ Uport);
+			System.out.println("connected to server at port: "+ Uport);
 			this.sockets.put(userID, clientSocket);
 			
 		}catch(ConnectException cnn) {

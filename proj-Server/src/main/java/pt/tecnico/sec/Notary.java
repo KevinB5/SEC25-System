@@ -41,6 +41,15 @@ public enum GoodState {
 	private HashMap<String,Integer> timestamps = new HashMap<String, Integer>();
 	private HashMap<String,byte[]> signatures = new HashMap<String, byte[]>(); //<goodID,signature>
 //	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
+	private boolean sentEcho = false;
+	private boolean sentReady = false;
+	private boolean delivered = false;
+	
+	private HashMap<String, String> echos = new HashMap<String, String>();
+	private HashMap<String, String> readies = new HashMap<String, String>();
+
+
+	
 	private Storage store;
 //	private PKI keyManager;
 	private String PASS;
@@ -57,8 +66,9 @@ public enum GoodState {
 		idNotary = "notary"+ id;
         this.store = store;
         store.setLog(String.valueOf(id));
-        store.readLog();		
+        store.readLog();
         this.lib=new SLibrary(this);
+
         this.updateState();
 		System.out.println(goods);
 
@@ -95,6 +105,14 @@ public enum GoodState {
 			e.printStackTrace();
 		}
 	
+	}
+	
+	public void connect() {
+		HashMap<String, Integer> h = store.readServs();
+		for(String server:h.keySet()) {
+			if(!server.equals(this.idNotary))
+				lib.connect(server, h.get(server));
+		}
 	}
 	
 	private void updateState(){
@@ -255,9 +273,14 @@ public enum GoodState {
 		    		}
 		    		String mess = rs+" "+ts;
 		    		System.out.println("Returning "+mess);
-		    		sigs[0]=  new signature(PKI.sign(mess,idNotary,PASS), mess);
+		    		//sigs[0]=  new signature(PKI.sign(mess,idNotary,PASS), mess);
 		    		Recorded rec = new Recorded("", counter, (ts));
-		    		return new Message(this.idNotary, mess,sigs,rec,null);
+		    		result =  new Message(this.idNotary, mess,sigs,rec,null);
+		    		result.setSignature(
+		    				new signature(
+		    						PKI.sign(result.getHash(), idNotary, PASS), result.getHash())
+		    				);
+		    		return result;
 	    			}else
 	    		error ="wrong counter";
 	    		sigs[0]=  new signature(PKI.sign(error,idNotary,PASS), error);
@@ -270,21 +293,36 @@ public enum GoodState {
 	    		if(message.length!=4) {
 	    			System.out.println(idNotary+ ": request is wrong");
 	    			String rs = "WARNING: State request must issue a challenge and rid";
-	    			sigs[0] = new signature(PKI.sign(rs,idNotary,PASS), rs);
+	    			//sigs[0] = new signature(PKI.sign(rs,idNotary,PASS), rs);
 		    		Recorded rec = new Recorded("", -1, -1);
+		    		
+		    		result =  new Message(this.idNotary, rs,sigs,rec,null);
+		    		//notario assina totalidade da mensagem
+		    		result.setSignature(
+		    				new signature(
+		    						PKI.sign(result.getHash(), idNotary, PASS), result.getHash())
+		    				);
+		    		return result;
 
-	    			return new Message(this.idNotary, rs,sigs, rec,null);
+	    			//return new Message(this.idNotary, rs,sigs, rec,null);
 	    		}
 	    		else {
 	    			System.out.println(idNotary+ ": sending state ");
 	    			//cria um recorded para enviar o estado
 	    			Recorded rec=  this.verifiyStateOfGood(message[1],message[2]);//goodID, userID , counter , challenge
 	    			rec.setTS(timestamps.get(message[1])); 
-	    			String mess ="state " +goods.get(message[1])+" "+ rec.getState() + " "+ message[2] +  " "+ message[3];
+	    			String mess ="state "+ rec.getState() + " "+ message[2] +  " "+ message[3];
 	    			System.out.println("state: " + mess+" counter:"+rec.getCounter());
-	    			sigs[0] = new signature(PKI.sign(mess, idNotary,PASS), mess);//// adicionar mais assinaturas
+	    			//sigs[0] = new signature(PKI.sign(mess, idNotary,PASS), mess);//// adicionar mais assinaturas
 	    			sigs[1] = new signature(signatures.get(message[1]),"");
-	    			return new Message(this.idNotary, mess , sigs, rec,null);
+	    			
+	    			result =  new Message(this.idNotary, mess,sigs,rec,null);
+		    		result.setSignature(
+		    				new signature(
+		    						PKI.sign(result.getHash(), idNotary, PASS), result.getHash())
+		    				);
+		    		return result;
+	    			//return new Message(this.idNotary, mess , sigs, rec,null);
 	    		}
 	    	}
 	    	if(op.equals("transfer")) {
@@ -314,27 +352,60 @@ public enum GoodState {
 		    			error = "notvalidtransfer "+ts;
 		    		sigs[0]=  new signature(PKI.sign(error,idNotary,PASS), error);
 		    		Recorded rec = new Recorded("", -1, -1);
+		    		
+		    		result =  new Message(this.idNotary, error,sigs,rec,null);
+		    		//notario assina totalidade da mensagem
+		    		result.setSignature(
+		    				new signature(
+		    						PKI.sign(result.getHash(), idNotary, PASS), result.getHash())
+		    				);
+		    		return result;
 
-		    		return new Message(this.idNotary, error,sigs, rec,null);
+		    		//return new Message(this.idNotary, error,sigs, rec,null);
 	    		}else
 	    			error = "wrongcounter "+command.getRec().getCounter();
 	    		sigs[0]=  new signature(PKI.sign(error,idNotary,PASS), error);
 	    		Recorded rec = new Recorded("", 0, Integer.parseInt(ts));
 
-	    		return new Message(this.idNotary, error,sigs, rec,null);
+	    		result =  new Message(this.idNotary, error,sigs,rec,null);
+	    		//notario assina totalidade da mensagem
+	    		result.setSignature(
+	    				new signature(
+	    						PKI.sign(result.getHash(), idNotary, PASS), result.getHash())
+	    				);
+	    		return result;
+
+	    		//return new Message(this.idNotary, error,sigs, rec,null);
 	    	}else
 	    		error = "notValidOperation";
 	    		sigs[0]=  new signature(PKI.sign(error,idNotary,PASS), error);
 	    		Recorded rec = new Recorded("", -1, -1);
 
-	    		return new Message(this.idNotary, error,sigs, rec,null);
+	    		result =  new Message(this.idNotary, error,sigs,rec,null);
+	    		//notario assina totalidade da mensagem
+	    		result.setSignature(
+	    				new signature(
+	    						PKI.sign(result.getHash(), idNotary, PASS), result.getHash())
+	    				);
+	    		return result;
+
+	    		//return new Message(this.idNotary, error,sigs, rec,null);
 		}else
 			
 			error = "signatureNotValid";
 		    sigs[0]=  new signature(PKI.sign(error,idNotary,PASS), error);
     		Recorded rec = new Recorded("", 0, Integer.parseInt(message[4]));
+    		
 
-		return new Message(this.idNotary, error,sigs, rec,null);
+    		result =  new Message(this.idNotary, error,sigs,rec,null);
+    		//notario assina totalidade da mensagem
+    		result.setSignature(
+    				new signature(
+    						PKI.sign(result.getHash(), idNotary, PASS), result.getHash())
+    				);
+    		return result;
+
+		//return new Message(this.idNotary, error,sigs, rec,null);
 	}
 	/**
 	 * Transferir o good ao user

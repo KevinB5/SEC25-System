@@ -264,6 +264,16 @@ public static boolean verifySignature(String data, byte[] signature, String uID)
 	return sig.verify(signature);
 }
 
+public static boolean verifySignature(byte[] data, byte[] signature, String uID) throws Exception {
+	
+	Signature sig = Signature.getInstance("SHA256withRSA");
+	PKI.getInstance();
+	sig.initVerify(PKI.getPublicKey(uID));
+	sig.update(data);
+	
+	return sig.verify(signature);
+}
+
 public static byte[] sign(String data, String idUser, String pass) throws InvalidKeyException, Exception{
 //	System.out.println("Signing message");
 	Signature rsa = Signature.getInstance("SHA256withRSA"); 
@@ -275,6 +285,22 @@ public static byte[] sign(String data, String idUser, String pass) throws Invali
 //  privatekey = (PrivateKey) KEYSTORE.getKey(idUser, pass.toCharArray());
 	rsa.initSign(myPrivateKey);
 	rsa.update(data.getBytes());
+	//System.out.println("Signing " + data);
+//	System.out.println("Signed message");
+	return rsa.sign();
+}
+
+public static byte[] sign(byte[] data, String idUser, String pass) throws InvalidKeyException, Exception{
+//	System.out.println("Signing message");
+	Signature rsa = Signature.getInstance("SHA256withRSA"); 
+//	PrivateKey privatekey;
+	
+	KeyStore.ProtectionParameter protParam =    new KeyStore.PasswordProtection(pass.toCharArray());
+	KeyStore.PrivateKeyEntry pkEntry = (KeyStore.PrivateKeyEntry) KEYSTORE.getEntry(idUser, protParam);
+	PrivateKey myPrivateKey = pkEntry.getPrivateKey();
+//  privatekey = (PrivateKey) KEYSTORE.getKey(idUser, pass.toCharArray());
+	rsa.initSign(myPrivateKey);
+	rsa.update(data);
 	//System.out.println("Signing " + data);
 //	System.out.println("Signed message");
 	return rsa.sign();

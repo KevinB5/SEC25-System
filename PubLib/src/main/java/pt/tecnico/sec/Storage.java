@@ -220,6 +220,12 @@ public class Storage {
 		
 	}
 	
+	/**
+	 * Lê do ficheiro com os ports dos servidores e retorna um hashmap
+	 * 
+	 * @return map <NotaryID, NotaryPort>
+	 */
+	
 	public HashMap<String, Integer>readServs(){
 		
 		servFile = new File(path2);

@@ -38,7 +38,12 @@ public class App
         try {
 			serverSocket = new ServerSocket(PORT);
 	        System.out.println("Server accepting connections on port: "+ PORT);
+	        System.out.println("you can now connect to other servers");
+        	String cmd = System.console().readLine();
+        	if(cmd.equals("connect"))
+        		notary.connect();
 	        while (true) {
+
 	        	Socket clientSocket = serverSocket.accept();
 	        	(new Thread(new ConnectClient(clientSocket, notary))).start();
 	        }
