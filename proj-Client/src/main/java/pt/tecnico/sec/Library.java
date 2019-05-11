@@ -163,7 +163,8 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 
 	
 /****Connection to the server ****/////	
-	public Message send(Message intent) throws Exception {
+    
+	public Message sendDeprecated(Message intent) throws Exception {
 		if(intent.getSig().equals(null))
 			throw new Exception("Must sign message first");
 		Message res = null;
@@ -384,6 +385,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	    }
 	
 	public String hash(String content) {
+		/* Returns string i such that content+i hashes to a string with hashLimit in the beginning */
 		MessageDigest digest;
 		byte[] hash = null;
 		String hashString= null;

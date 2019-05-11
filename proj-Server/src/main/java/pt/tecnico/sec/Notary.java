@@ -256,7 +256,7 @@ public enum GoodState {
 		    		String mess = rs+" "+ts;
 		    		System.out.println("Returning "+mess);
 		    		sigs[0]=  new signature(PKI.sign(mess,idNotary,PASS), mess);
-		    		Recorded rec = new Recorded("", 0, (ts));
+		    		Recorded rec = new Recorded("", counter, (ts));
 		    		return new Message(this.idNotary, mess,sigs,rec,null);
 	    			}else
 	    		error ="wrong counter";
@@ -280,9 +280,10 @@ public enum GoodState {
 	    			//cria um recorded para enviar o estado
 	    			Recorded rec=  this.verifiyStateOfGood(message[1],message[2]);//goodID, userID , counter , challenge
 	    			rec.setTS(timestamps.get(message[1])); 
-	    			String mess ="state " + rec.getState() + " "+ message[2] +  " "+ message[3];
+	    			String mess ="state " +goods.get(message[1])+" "+ rec.getState() + " "+ message[2] +  " "+ message[3];
 	    			System.out.println("state: " + mess+" counter:"+rec.getCounter());
 	    			sigs[0] = new signature(PKI.sign(mess, idNotary,PASS), mess);//// adicionar mais assinaturas
+	    			sigs[1] = new signature(signatures.get(message[1]),"");
 	    			return new Message(this.idNotary, mess , sigs, rec,null);
 	    		}
 	    	}
