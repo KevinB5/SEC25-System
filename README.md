@@ -2,7 +2,7 @@
 
 $ -> comando no terminal
 
-*********************+ alteracoes ************+
+********************* alteracoes ***************
 
 cd lib
 mvn install:install-file -Dfile=pteidlibj.jar -DpomFile=pom.xml
@@ -16,10 +16,10 @@ $mvn clean install
 
 abrir um terminal para cada server e correr argumentos variam : porto , id notario
 $cd ..\SEC25-System\proj-Server\
-********+
-mvn clean compile exec:java -Dexec.args="8003 4"
+********
+$mvn clean compile exec:java -Dexec.args="8003 4"
 
-+******
+*********
 (abrir número de clientes que pretender, dos quatro possíveis)
 $cd ..\SEC25-System\proj-Cliente\
 $mvn clean compile exec:java
