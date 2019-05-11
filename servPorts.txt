@@ -1,4 +1,4 @@
-#notary4 8004 
-#notary3 8003 
-#notary2 8002 
-#notary1 8001 
+#notary4 8003 
+#notary2 8001 
+#notary3 8002 
+#notary1 8000 

@@ -153,14 +153,14 @@ public class Storage {
 	
 	}
 	
-	public void writePorts(File servFile) {
+	public void writePorts(File servFile, String server, int port) {
 		BufferedWriter bw = null;
 		FileWriter fw = null;
 		String data ="";
 		
 
-		for(String server : servs.keySet()) {
-			data = "#" + server + " " +servs.get(server) + " ";
+		//for(String server : servs.keySet()) {
+			data = "#" + server + " " +port + " ";
 			try {
 				
 				fw = new FileWriter(servFile.getAbsoluteFile(), true);
@@ -179,7 +179,7 @@ public class Storage {
 					ex.printStackTrace();
 				}
 			}
-		}
+		
 	}
 	
 	public HashMap<String, String> getGoods(int id) {
@@ -196,8 +196,8 @@ public class Storage {
 		this.logName = "tf"+name+".txt";
 	}
 	
-	public void writeServ(HashMap<String, Integer>ports) {
-		this.servs = ports;
+	public void writeServ(String server, int port) {
+		this.servs.put(server, port);
 		servFile = new File(path2);
 		try {
 			if (!servFile.exists()) {
@@ -205,18 +205,18 @@ public class Storage {
 					servFile.createNewFile();
 				
 			}
-			else {
+			/*else {
 				System.out.println("Deleting existing file");
 				if(servFile.delete()) {
 					servFile = new File(path2);
 					servFile.createNewFile();
 					}
-			}
+			}*/
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		this.writePorts(servFile);
+		this.writePorts(servFile,server,port);
 		
 	}
 	

@@ -243,10 +243,11 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				res = (Message)inSt.readObject();
 				String[] split =res.getText().split(" ");
 				System.out.println("res: "+res.getText());
-				String r = split[4];
+				int r = Integer.parseInt(split[4]);
 				
 				
-				
+				System.out.println("r , rid" + r + " " + rid);
+
 				System.out.println("message from serv: "+res.getID()+", " + res.getText());
 	//			System.out.println("correct message from " +res.getID()+":");
 	//			System.out.println((PKI.verifySignature(res.getText(),res.getSig(),serv)
@@ -256,8 +257,10 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	//			System.out.println("correct rid: "+ (Integer.parseInt(r)==rid));
 	//			System.out.println("correct challenge: "+split[3].equals(challenge));
 				if(PKI.verifySignature(res.getText(),res.getSig().getBytes(),res.getID())
-						&& Integer.parseInt(r)==rid
+						&& r==rid
 						&& split[3].equals(challenge)) {
+					System.out.println("heyyy");
+
 							int ts = res.getRec().getTS();
 							System.out.println("all good");
 				//				statelist.put(serv,new Pair(split[1], ts));
