@@ -11,13 +11,15 @@ mvn install:install-file -Dfile=pteidlibj.jar -DpomFile=pom.xml
 
 
 compilar e correr :
-$cd ..\SEC25-System\
-$mvn install
+$cd ..\SEC25-System\Publib
+$mvn clean install
 
-correr cada módulo (Server e Clientes, abrir linha de comandos para cada):
+abrir um terminal para cada server e correr argumentos variam : porto , id notario
 $cd ..\SEC25-System\proj-Server\
-$mvn clean compile exec:java
+********+
+mvn clean compile exec:java -Dexec.args="8003 4"
 
++******
 (abrir número de clientes que pretender, dos quatro possíveis)
 $cd ..\SEC25-System\proj-Cliente\
 $mvn clean compile exec:java
