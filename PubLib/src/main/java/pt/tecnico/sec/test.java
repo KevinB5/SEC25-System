@@ -18,7 +18,7 @@ public class test {
 		if(eid.verifySignature(eid.sign(cert,"teste"),"teste"))
 			System.out.println("VALIDOU");
 		else
-			System.out.println("MACACO");
+			System.out.println("MATEMATICO");
 	}
 
 }

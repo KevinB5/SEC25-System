@@ -23,12 +23,11 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/eIDLib_PKCS11_test/lib/pteidlibj.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Cintia/SEC25-System/lib/pteidlibj.jar"/>
 	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/afs/.ist.utl.pt/users/9/9/ist193799/git/SEC25-System/PubLib/Temp/pteid_jni/pteidlibj.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -64,7 +64,7 @@ public class eIDLib{
 		try {
 			System.out.println("            //Load the PTEidlibj");
 			
-			String path = System.getProperty("user.dir")+"\\lib\\Temp\\";
+			String path = System.getProperty("user.dir")+"\\Temp\\";
 			
 			path = path.replaceAll("\\\\","/");
 			System.out.println(path);
