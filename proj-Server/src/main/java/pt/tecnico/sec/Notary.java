@@ -278,8 +278,8 @@ public enum GoodState {
 	    			//cria um recorded para enviar o estado
 	    			Recorded rec=  this.verifiyStateOfGood(message[1],message[2]);//goodID, userID , counter , challenge
 	    			rec.setTS(timestamps.get(message[1])); 
-	    			String mess ="state " + rec.getState() + " "+ message[2];
-	    			System.out.println("state: " + mess);
+	    			String mess ="state " + rec.getState() + " "+ message[2] +  " "+ message[3];
+	    			System.out.println("state: " + mess+" counter:"+rec.getCounter());
 	    			sigs[0] = new signature(PKI.sign(mess, idNotary,PASS), mess);//// adicionar mais assinaturas
 	    			return new Message(this.idNotary, mess , sigs, rec,null);
 	    		}
@@ -289,7 +289,7 @@ public enum GoodState {
 
     			String ts =message[3];
 	    		System.out.println("transfering "+message[2]+"...");
-	    		//System.out.println("Counter from seller: "+Integer.parseInt(message[3])+ "counter here: "+counters.get(message[2]));
+	    		System.out.println("Counter from seller: "+command.getRec().getCounter()+ "counter here: "+counters.get(message[2]));
 	    		if(command.getRec().getCounter() == (counters.get(message[2]))){
 	    				//"buy <userID> <goodID> <goodCounter>
 	    			System.out.println("we in");
@@ -343,13 +343,13 @@ public enum GoodState {
 	 */
 	private String transferGood( String seller,String buyer , String goodID,byte[] sigSeller,byte[]sigBuyer) throws Exception {
 		//for(String s: goods.keySet()) {System.out.println(s);}
-		this.updateState();
-System.out.println(goods.get(goodID));
+		//this.updateState();
 		if(goods.get(goodID).equals(seller)) {
 			System.out.println("SELLER OK "+ seller);
 			if(states.get(goodID).equals(GoodState.ONSALE)) {
-				System.out.println("YEAH YEAH YEAH");
-				if(PKI.verifySignature("intentionbuy "+goodID + " "+counters.get(goodID), sigBuyer, buyer)){
+				String sigMsg = "intentionbuy "+goodID + " "+counters.get(goodID);
+				System.out.println("verifying signature for :"+"intentionbuy "+goodID + " "+counters.get(goodID));
+				if(PKI.verifySignature(sigMsg, sigBuyer, buyer)){
 					System.out.println("we in");
 					store.writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
 					store.updateFile(goodID, buyer);

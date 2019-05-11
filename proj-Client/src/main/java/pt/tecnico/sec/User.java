@@ -335,9 +335,10 @@ public enum GoodState {
 	 * @param  
 	 */
 	private void buyGood (String user, String good) {
-		System.out.println("trying to buy "+good+ " from "+user);
 //		this.getStateOfGoodInvisible(good);
 		int counter = counters.get(good);
+		System.out.println("trying to buy "+good+ " from "+user+"with counter "+ counter);
+
 		Message res= null;
 //		for(String c : counters.values())
 //			System.out.println(c);
@@ -346,8 +347,8 @@ public enum GoodState {
 			return;
 		}
 		try {
-			String msg = "intentionbuy " +good ;
-    		Recorded rec = new Recorded("", counters.get(good), 0);
+			String msg = "intentionbuy " +good +" "+counter;
+    		Recorded rec = new Recorded("", counter, 0);
 
 			//manda 
 			System.out.println("Asking to buy "+good+ " from "+user);
@@ -389,10 +390,11 @@ public enum GoodState {
 	    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
 	    	sigs[1]=null;
 	    	sigs[2]=new signature(buyerSig, text);
+	    	System.out.println("transfering with counter: "+counters.get(good));
 
     		Recorded rec = new Recorded("", counters.get(good), -1);
 
-			res= lib.write(new Message(idUser, msg,sigs , null, null), wts);
+			res= lib.write(new Message(idUser, msg,sigs , rec, null), wts);
 			//res=  lib.write( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),buyerSig, null, null),wts);
 
 			System.out.println("answer from notary: "+res);
@@ -449,8 +451,12 @@ public enum GoodState {
 	    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
 	    	sigs[1]=null;
 	    	sigs[2]= null;
+	    	int counter=0;
+	    	
+	    	if(counters.containsKey(goodID))
+	    		counter = counters.get(goodID);
 
-    		Recorded rec = new Recorded("", counters.get(goodID), -1);
+    		Recorded rec = new Recorded("", counter, -1);
 
 			result= lib.read(new Message(idUser, msg,sigs , rec, null),rid, challenge);
 				//result =lib.read( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),rid,challenge,goodID);
@@ -584,10 +590,11 @@ public enum GoodState {
 			System.out.println("communication failed");
 		}else
 			
+			System.out.println("counter from notary :"+s[3]);
 		if(!counters.containsKey(good))
-            counters.put(good,Integer.parseInt(s[4]));
+            counters.put(good,Integer.parseInt(s[3]));
         else
-            counters.replace(good,Integer.parseInt(s[4]));   	
+            counters.replace(good,Integer.parseInt(s[3]));   	
 	}
 	
 	
