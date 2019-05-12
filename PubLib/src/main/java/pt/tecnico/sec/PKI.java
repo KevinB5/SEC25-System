@@ -44,14 +44,15 @@ public class PKI {
 
 	
 	
-private PKI() {
+ private PKI() {
 	try {
 		//get instance do keystore
 		KEYSTORE = KeyStore.getInstance("JKS");
 		
 		//KEYSTORE.load(null, pwdArray);
 //		Storage st = new Storage();
-		PATH = originPath()+ "/KeyStoreFile.jks";
+		System.out.println(originPath()+line);
+		PATH = originPath()+line+ "KeyStoreFile.jks";
 
 		File keystorefile = new File(PATH);
 		
@@ -342,82 +343,90 @@ public static boolean containsKeyofUser(String id) {
 
 //creates and stores keys in KeyStore
 public static void createKeys(String userID, String pword) {
-    KeyPairGenerator keyGen;
-    KeyPair keyPair = null;
-    char [] pwdArray = "password".toCharArray();
-    X509Certificate cert = null;
 	try {
-		/*
-		KEYSTORE = KeyStore.getInstance(KeyStore.getDefaultType());
-		
-		
-		KEYSTORE.load(null, pwdArray);
-		
-		try(FileOutputStream fos = new FileOutputStream("newKeyStoreFileName.jks")) {
-		    KEYSTORE.store(fos, pwdArray);
-		}
-		*/
-		File keystorefile = new File(PATH);
-		InputStream keystoreStream = new FileInputStream(keystorefile);
-		KEYSTORE.load(keystoreStream, pwdArray);
-		
-		keyGen = KeyPairGenerator.getInstance("RSA");
-		keyGen.initialize(1024);
-
-		keyPair = keyGen.generateKeyPair();
-					
-//		pubKey = keyPair.getPublic();
-		//KEYS.put(userID,pubKey);
-		
-//		System.out.println("saving Public key for "+ userID);
-		
-
-		char[] password = pword.toCharArray();
-		 
-		cert = generateCertificate(userID,"Keys", keyPair, 7, "SHA256withRSA");
-
-		
-		//guardar o certificado na keystore para poder obter a pubkey
-
-		setKey(userID, cert);
-		
-			
-		Certificate[] chain = {cert};
-		
-		//guardar a privatekey
-		KeyStore.PrivateKeyEntry privateKeyEntry = new KeyStore.PrivateKeyEntry(keyPair.getPrivate(),chain);
-//        KEYSTORE.setEntry("privateKey",privateKeyEntry, new KeyStore.PasswordProtection(password));
-		KEYSTORE.setKeyEntry(userID, keyPair.getPrivate(), password, chain);
-		FileOutputStream output = new FileOutputStream(PATH);
-
-		KEYSTORE.store(output, pwdArray);
-
-		  /*
-		System.out.println("Saving private key");
-		KeyStore.PrivateKeyEntry skEntry = new KeyStore.PrivateKeyEntry((PrivateKey) keyPair.getPrivate(), chain);
-		KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(password);
-		
-		KEYSTORE.setEntry(userID,skEntry,protParam);
-		System.out.println("Private key safe and secure");
-	//KEYSTORE.setKeyEntry(userID,(PrivateKey) keyPair.getPrivate(), password, null);
+		if(getPublicKey(userID)==null) {
+			KeyPairGenerator keyGen;
+			KeyPair keyPair = null;
+			char [] pwdArray = "password".toCharArray();
+			X509Certificate cert = null;
+			try {
+				/*
+				KEYSTORE = KeyStore.getInstance(KeyStore.getDefaultType());
+				
+				
+				KEYSTORE.load(null, pwdArray);
+				
+				try(FileOutputStream fos = new FileOutputStream("newKeyStoreFileName.jks")) {
+				    KEYSTORE.store(fos, pwdArray);
+				}
 				*/
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (KeyStoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CertificateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (GeneralSecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return;
+				File keystorefile = new File(PATH);
+				InputStream keystoreStream = new FileInputStream(keystorefile);
+				KEYSTORE.load(keystoreStream, pwdArray);
+				
+				keyGen = KeyPairGenerator.getInstance("RSA");
+				keyGen.initialize(1024);
+	
+				keyPair = keyGen.generateKeyPair();
+							
+	//		pubKey = keyPair.getPublic();
+				//KEYS.put(userID,pubKey);
+				
+	//		System.out.println("saving Public key for "+ userID);
+				
+	
+				char[] password = pword.toCharArray();
+				 
+				cert = generateCertificate(userID,"Keys", keyPair, 7, "SHA256withRSA");
+	
+				
+				//guardar o certificado na keystore para poder obter a pubkey
+	
+				setKey(userID, cert);
+				
+					
+				Certificate[] chain = {cert};
+				
+				//guardar a privatekey
+				KeyStore.PrivateKeyEntry privateKeyEntry = new KeyStore.PrivateKeyEntry(keyPair.getPrivate(),chain);
+	//        KEYSTORE.setEntry("privateKey",privateKeyEntry, new KeyStore.PasswordProtection(password));
+				KEYSTORE.setKeyEntry(userID, keyPair.getPrivate(), password, chain);
+				FileOutputStream output = new FileOutputStream(PATH);
+	
+				KEYSTORE.store(output, pwdArray);
+	
+				  /*
+				System.out.println("Saving private key");
+				KeyStore.PrivateKeyEntry skEntry = new KeyStore.PrivateKeyEntry((PrivateKey) keyPair.getPrivate(), chain);
+				KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(password);
+				
+				KEYSTORE.setEntry(userID,skEntry,protParam);
+				System.out.println("Private key safe and secure");
+			//KEYSTORE.setKeyEntry(userID,(PrivateKey) keyPair.getPrivate(), password, null);
+						*/
+				} catch (NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				} catch (KeyStoreException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (CertificateException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+	
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (GeneralSecurityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}else
+			System.out.println("já existe chave");
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	
 }
 
 private static X509Certificate generateCertificate(String dn, String subject, KeyPair pair, int days, String algorithm)

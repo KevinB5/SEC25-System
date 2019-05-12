@@ -28,6 +28,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/afs/.ist.utl.pt/users/9/9/ist193799/git/SEC25-System/PubLib/Temp/pteid_jni/pteidlibj.jar"/>
+	<classpathentry kind="lib" path="Temp/pteid_jni/pteidlibj.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

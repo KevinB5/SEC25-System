@@ -80,21 +80,8 @@ public class eIDLib{
 			sig = Signature.getInstance(cert.getSigAlgName());
 			System.out.println(cert.getSigAlgName());
 			
-		} catch (NoSuchAlgorithmException | CertificateException e) {
-			e.printStackTrace();
-		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PteidException e) {
+		} catch (NoSuchFieldException | NoSuchAlgorithmException | CertificateException | PteidException 
+				| IllegalAccessException | SecurityException | IllegalArgumentException | UnsatisfiedLinkError e ) {
 			CertificateFactory cf;
 			try {
 				cf = CertificateFactory.getInstance("X.509");
