@@ -207,7 +207,42 @@ public class eIDLib{
         String javaVersion = System.getProperty("java.version");
         long p11_session = 0;
         byte[] signature = null;
-    
+        
+        String path = System.getProperty("user.dir")+"\\Temp\\";
+		
+		path = path.replaceAll("\\\\","/");
+		System.out.println(path);
+        System.setProperty("java.library.path", path);
+        Field fieldSysPath;
+		try {
+			
+			fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+        fieldSysPath.setAccessible(true);
+        System.out.println(System.getProperty("java.library.path"));
+        System.loadLibrary("pteidlibj");
+        pteid.Init("");
+        pteid.SetSODChecking(false);
+        fieldSysPath.set(null, null);
+		} catch (PteidException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		 // Initializes the eID Lib
+        
+			} catch (NoSuchFieldException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			} catch (SecurityException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			
+		} catch (IllegalArgumentException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IllegalAccessException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
         java.util.Base64.Encoder encoder = java.util.Base64.getEncoder();
      
         String libName = "libpteidpkcs11.so";
