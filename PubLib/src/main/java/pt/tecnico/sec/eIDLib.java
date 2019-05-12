@@ -53,6 +53,7 @@ public class eIDLib{
 	
 	private static Signature sig;
 	private static X509Certificate cert;
+	private static String line = System.getProperty("file.separator");
 	
  
 	public static X509Certificate getCert() {
@@ -85,7 +86,8 @@ public class eIDLib{
 			CertificateFactory cf;
 			try {
 				cf = CertificateFactory.getInstance("X.509");
-				cert = (X509Certificate)cf.generateCertificate(new FileInputStream(System.getProperty("user.dir")+"/test.cert"));
+				cert = (X509Certificate)cf.generateCertificate(new FileInputStream(
+						System.getProperty("user.dir")+line+"lib"+line+"certificate.crt"));
 				sig = Signature.getInstance(cert.getSigAlgName());
 				System.out.println("2 "+cert);
 			} catch (CertificateException | FileNotFoundException | NoSuchAlgorithmException e1) {
