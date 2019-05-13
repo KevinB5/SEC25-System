@@ -65,7 +65,7 @@ public class eIDLib{
 		try {
 			System.out.println("            //Load the PTEidlibj");
 			
-			String path = System.getProperty("user.dir")+"\\Temp\\";
+			String path = System.getProperty("user.dir")+line+"Temp"+line;
 			
 			path = path.replaceAll("\\\\","/");
 			System.out.println(path);
@@ -85,6 +85,7 @@ public class eIDLib{
 				| IllegalAccessException | SecurityException | IllegalArgumentException | UnsatisfiedLinkError e ) {
 			CertificateFactory cf;
 			try {
+				System.out.println("Fake Certificate");
 				cf = CertificateFactory.getInstance("X.509");
 				cert = (X509Certificate)cf.generateCertificate(new FileInputStream(
 						System.getProperty("user.dir")+line+"lib"+line+"certificate.crt"));
@@ -208,7 +209,7 @@ public class eIDLib{
         long p11_session = 0;
         byte[] signature = null;
         
-        String path = System.getProperty("user.dir")+"\\Temp\\";
+        String path = System.getProperty("user.dir")+line+"Temp"+line;
 		
 		path = path.replaceAll("\\\\","/");
 		System.out.println(path);
