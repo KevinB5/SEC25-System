@@ -78,10 +78,6 @@ public enum GoodState {
 			timestamps.put(goodID, 0);
 		}
 
-
-//		
-//		PKI.getInstance();
-//		PKI.createKeys(idNotary);
 		Random random = new Random();	
 		
 		int rnd = random.nextInt();
@@ -356,7 +352,6 @@ public enum GoodState {
 	    			rec.setTS(timestamps.get(message[1])); 
 	    			String mess ="state "+ rec.getState() + " "+ message[2] +  " "+ message[3];
 	    			System.out.println("state: " + mess+" counter:"+rec.getCounter());
-	    			//sigs[0] = new signature(PKI.sign(mess, idNotary,PASS), mess);//// adicionar mais assinaturas
 	    			sigs[1] = writesignatures.get(message[1]);
 	    			sigs[2] = new signature(signatures.get(message[1]),"");
 	    			result =  new Message(this.idNotary, mess,sigs,rec,null);
@@ -365,7 +360,6 @@ public enum GoodState {
 		    						PKI.sign(result.getHash(), idNotary, PASS), result.getHash())
 		    				);
 		    		return result;
-	    			//return new Message(this.idNotary, mess , sigs, rec,null);
 	    		}
 	    	}
 	    	if(op.equals("transfer")) {
@@ -451,7 +445,6 @@ public enum GoodState {
     				);
     		return result;
 
-		//return new Message(this.idNotary, error,sigs, rec,null);
 	}
 	/**
 	 * Transferir o good ao user
@@ -462,8 +455,6 @@ public enum GoodState {
 	 * @throws Exception 
 	 */
 	private String transferGood( String seller,String buyer , String goodID,byte[] sigSeller,byte[]sigBuyer) throws Exception {
-		//for(String s: goods.keySet()) {System.out.println(s);}
-		//this.updateState();
 		if(goods.get(goodID).equals(seller)) {
 			System.out.println("SELLER OK "+ seller);
 			if(states.get(goodID).equals(GoodState.ONSALE)) {
@@ -474,7 +465,6 @@ public enum GoodState {
 					store.writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
 					store.updateFile(goodID, buyer);
 					goods.replace(goodID, buyer); 
-//				System.out.println("replacing " + goodID + " " + buyer);
 					states.replace(goodID, GoodState.NOTONSALE);
 					counters.replace(goodID,counters.get(goodID)+1);
 					System.out.println("good counter: "+counters.get(goodID));
