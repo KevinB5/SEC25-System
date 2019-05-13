@@ -263,7 +263,7 @@ public enum GoodState {
     	signature[] sigs = new signature[3];//propria write buyer
     	String error ="";
     	//System.out.println("signature verification: "+this.verifySignature(command.getText(), command.getSig(), command.getID()));
-		if(PKI.verifySignature(command.getText(), command.getSig().getBytes(), command.getID())) {
+		if(PKI.verifySignature(command.getHash(), command.getSig().getBytes(), command.getID())) {
 			
 			System.out.println("user's "+ user + " signature validated");
 			System.out.println("received: "+command.getText());
@@ -284,7 +284,7 @@ public enum GoodState {
 	    	
 	    	
 	    	if(op .equals("sell")) {
-	    		this.startBroadCast(command.getText());
+	    		this.startBroadCast(command.getText(), command.getSellSig());
 	    		while(!delivered) {
 	    			 try { 
 	    				 waitID=Thread.currentThread().getId();
@@ -377,7 +377,7 @@ public enum GoodState {
 	    	if(op.equals("transfer")) {
 	    		/* TRANSFER +" "+ buyer+" "+ good +" "+ counter+" " + wts;  */
 	    		
-	    		this.startBroadCast(command.getText());
+	    		this.startBroadCast(command.getText(), command.getSellSig());
 	    		while(!delivered) {
 	    			 try { 
 	    				 waitID=Thread.currentThread().getId();
@@ -456,7 +456,7 @@ public enum GoodState {
 			
 			error = "signatureNotValid";
 		    sigs[0]=  new signature(PKI.sign(error,idNotary,PASS), error);
-    		Recorded rec = new Recorded("", 0, Integer.parseInt(message[4]));
+    		Recorded rec = new Recorded("", 0, -1);
     		
 
     		result =  new Message(this.idNotary, error,sigs,rec,null);
@@ -506,10 +506,12 @@ public enum GoodState {
 		return NOK;
 	}
 	
-	private void startBroadCast(String msg) {
+	private void startBroadCast(String msg, signature sigt) {
 		System.out.println("starting broadcast");
+		signature[] sigs = new signature[3];//propria write buyer
+		sigs[0]=sigt;
 		
-		Message mss= new Message(this.idNotary,ECH+" "+msg, null);
+		Message mss= new Message(this.idNotary,ECH+" "+msg, sigs);
 		this.sentEcho=true;
 		for(String server: servers) {
 			try {
@@ -526,8 +528,9 @@ public enum GoodState {
 
 	private void start2ndPhase(String msg){
 		System.out.println("starting 2nd broadcast");
+		signature[] sigs = new signature[3];//propria write buyer
 
-		Message mss= new Message(this.idNotary,RDY+" "+msg, null);
+		Message mss= new Message(this.idNotary,RDY+" "+msg, sigs);
 connect();
 		for(String server: servers) {
 			try {

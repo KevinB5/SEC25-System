@@ -489,8 +489,7 @@ public enum GoodState {
 			try {
 				signature[] sigs = new signature[3];//propria write buyer
 		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);////important
-		    	sigs[1]=null;
-		    	sigs[2]=null;
+
 
 	    		Recorded rec = new Recorded("", integer, 0);
 	    		Message message =  new Message(idUser, msg,sigs , rec, null);
@@ -563,8 +562,9 @@ public enum GoodState {
 		try {
 			signature[] sigs = new signature[3];//propria write buyer
 	    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
-	    	sigs[1]=null;
-	    	sigs[2]= null;
+	    	
+	    	System.out.println(sigs[0]==null);
+
 	    	int counter=0;
 	    	
 	    	if(counters.containsKey(goodID))
