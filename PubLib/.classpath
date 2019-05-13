@@ -29,7 +29,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="Temp/pteid_jni/pteidlibj.jar"/>
-	<classpathentry kind="lib" path="C:/Users/kevin/Documents/GitHub/SEC25-System/PubLib/Temp/pteid_jni/pteidlibj.jar"/>
 	<classpathentry kind="lib" path="lib/eIDLib_PKCS11_test/lib/pteidlibj.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
