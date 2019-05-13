@@ -446,7 +446,7 @@ public enum GoodState {
 	    	sigs[2]=new signature(buyerSig, text);
 	    	System.out.println("transfering with counter: "+counters.get(good));
 
-    		Recorded rec = new Recorded("", counters.get(good), -1);
+    		Recorded rec = new Recorded("", counters.get(good), wts);
 
 			//res= lib.write(new Message(idUser, msg,sigs , rec, null), wts);
 			//res=  lib.write( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),buyerSig, null, null),wts);
@@ -488,12 +488,20 @@ public enum GoodState {
 			System.out.println("sending message:"+ msg);
 			try {
 				signature[] sigs = new signature[3];//propria write buyer
-		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
+		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);////important
 		    	sigs[1]=null;
 		    	sigs[2]=null;
 
 	    		Recorded rec = new Recorded("", integer, 0);
-				ret= lib.write(id, new Message(idUser, msg,sigs , rec, null), wts);
+	    		Message message =  new Message(idUser, msg,sigs , rec, null);
+	    		
+	    		message.setSignature(
+	    				new signature(
+		    				PKI.sign(
+		    						message.getHash(), idUser,PASS) , message.getHash()
+		    				
+	    				));
+				ret= lib.write(id,message, wts);
 				System.out.println("received: "+ret);
 
 			}catch(Exception e) {
@@ -564,8 +572,16 @@ public enum GoodState {
 
     		Recorded rec = new Recorded("", counter, -1);
     		
-
-			result= lib.read(new Message(idUser, msg,sigs , rec, null),rid, challenge,goodID);
+    		//Recorded rec = new Recorded("", integer, 0);
+    		Message message =  new Message(idUser, msg,sigs , rec, null);
+    		
+    		message.setSignature(
+    				new signature(
+	    				PKI.sign(
+	    						message.getHash(), idUser,PASS) , message.getHash()
+	    				
+    				));
+			result= lib.read(message,rid, challenge,goodID);
 
 			/*  WRITE-BACK HERE   */
 			
@@ -639,8 +655,16 @@ public enum GoodState {
         	sigs[1]=null;
         	sigs[2]=null;
     		Recorded rec = new Recorded("", -1, -1);
+    		Message message =  new Message(idUser, error,sigs , rec, null);
+    		
+    		message.setSignature(
+    				new signature(
+	    				PKI.sign(
+	    						message.getHash(), idUser,PASS) , message.getHash()
+	    				
+    				));
 
-    		return new Message(idUser, error,sigs, rec, null);}
+    		return message;}
 
     	
     	if(op.equals("intentionbuy")) {//buy goodID counter
@@ -663,22 +687,46 @@ public enum GoodState {
 	        	sigs[2]=null;
 	    		int counter=counters.get(good);
 	    		Recorded rec = new Recorded("", counter, 0);
+	    		Message message =  new Message(idUser, rep,sigs , rec, null);
+	    		
+	    		message.setSignature(
+	    				new signature(
+		    				PKI.sign(
+		    						message.getHash(), idUser,PASS) , message.getHash()
+		    				
+	    				));
 
 
-	    		return new Message(idUser, rep, sigs, rec, null);//construtor que poe os restantes parametros a null automáticamente
+	    		return message;//construtor que poe os restantes parametros a null automáticamente
 	    		}
         	sigs[0]= new signature(PKI.sign(ret,idUser,PASS), ret);
     		Recorded rec = new Recorded("", -1, -1);
+    		Message message =  new Message(idUser, ret,sigs , rec, null);
+    		
+    		message.setSignature(
+    				new signature(
+	    				PKI.sign(
+	    						message.getHash(), idUser,PASS) , message.getHash()
+	    				
+    				));
 
-    		return new Message(idUser, ret, sigs, rec,null);//construtor que poe os restantes parametros a null automáticamente
+    		return message;//construtor que poe os restantes parametros a null automáticamente
     	}
 
     	else {
         	String errOp = "no valid operation " + command.getText();
         	sigs[0]= new signature(PKI.sign(errOp,idUser,PASS), errOp);
     		Recorded rec = new Recorded("", -1, -1);
+    		Message message =  new Message(idUser, errOp,sigs, rec,null );
+    		
+    		message.setSignature(
+    				new signature(
+	    				PKI.sign(
+	    						message.getHash(), idUser,PASS) , message.getHash()
+	    				
+    				));
 
-        	return new Message(idUser, errOp,sigs, rec,null );
+        	return message;
     	}
 
     		
