@@ -260,10 +260,12 @@ public enum GoodState {
 
 	private void ownerGood(String good) throws Exception {
 		
-		getStateOfGood(good, true);
+//		getStateOfGood(good, true);
 		wts++;
 		
 		String msg = "owner "+good +" "+counters.get(good)+" "+wts;
+		
+		System.out.println("message: "+msg);
 		
 		signature[] sigs = new signature[3];//propria write buyer
 		sigs[1]= new signature(PKI.sign(msg, idUser, PASS), msg);
@@ -385,6 +387,7 @@ public enum GoodState {
 	}
 	
 	public String intentionToSell(String userID, String goodID, Integer counter) throws InvalidKeyException, Exception {
+		this.getStateOfGoodInvisible(goodID);
 		wts++;
 		String ret ="";
 		String msg =SELL +  " " +goodID + " " + counter + " " + wts;

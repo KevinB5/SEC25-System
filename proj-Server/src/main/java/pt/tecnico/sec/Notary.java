@@ -193,12 +193,11 @@ public enum GoodState {
 			return null;
 			}
 		
-		String state = "";
 		int counter;
-		state += goods.get(goodID) + " " + states.get(goodID).toString();
+		String ownerstate = goods.get(goodID) + " " + states.get(goodID).toString();
 		counter = counters.get(goodID);
 		
-		Recorded result = new Recorded(state, counter, timestamps.get(goodID));
+		Recorded result = new Recorded(ownerstate, counter, timestamps.get(goodID));
 		return result;
 		// returns "<state , counter , challenge>"
 	}
@@ -285,7 +284,7 @@ public enum GoodState {
 		    		String rs=this.verifySelling(user, message[1]);//userID, goodID
 		    		if(rs.equals("ACK")) {
 		    			timestamps.put(good,ts);
-
+		    			goods.put(good, user);
 		    			System.out.println("SIGNATURE2: "+signatures.get(good));
 		    			if(command.getWriteSignature()!=null)
 		    				writesignatures.put(good,command.getWriteSignature());
@@ -351,7 +350,7 @@ public enum GoodState {
 	    			Recorded rec=  this.verifiyStateOfGood(message[1],message[2]);//goodID, userID , counter , challenge
 	    			rec.setTS(timestamps.get(message[1])); 
 	    			String mess ="state "+ rec.getState() + " "+ message[2] +  " "+ message[3];
-	    			System.out.println("state: " + mess+" counter:"+rec.getCounter());
+	    			System.out.println(mess+", counter:"+rec.getCounter());
 	    			sigs[1] = writesignatures.get(message[1]);
 	    			sigs[2] = new signature(signatures.get(message[1]),"");
 	    			result =  new Message(this.idNotary, mess,sigs,rec,null);

@@ -175,6 +175,9 @@ public class Library {
 				inSt = in.get(serv);
 				ouSt.writeObject(intent);
 				res = (Message)inSt.readObject();
+				
+				System.out.println("text from notary: "+res.getText());
+				
 				String[] split =res.getText().split(" ");
 				
 				
@@ -188,6 +191,9 @@ public class Library {
 				int counter = rec.getCounter();
 				int ts = rec.getTS();
 								
+				System.out.println("owner,state,challenge,counter,ts,r\n");
+				System.out.println(owner+"//"+state+"//"+challnge+"//"+counter+"//"+ts+"//"+split[4]);
+				
 				
 				int r = Integer.parseInt(split[4]);
 
@@ -204,11 +210,13 @@ public class Library {
 				else{
 					if(state.equals("ONSALE")) {
 					String msg ="sell " +good + " "+(counter-1)+" "+ts;
+					System.out.println("testing with: "+msg);
 					writerVerified = PKI.verifySignature(msg, res.getWriteSignature().getBytes(), owner);
 
 
 					}else {
 						String msg ="owner " +good + " "+(counter-1)+" "+ts;
+						System.out.println("testing with: "+msg);
 						writerVerified = PKI.verifySignature(msg, res.getWriteSignature().getBytes(), owner);
 					}
 					
