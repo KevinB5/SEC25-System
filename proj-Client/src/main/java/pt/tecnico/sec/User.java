@@ -123,13 +123,12 @@ public enum GoodState {
 			};
 			printgoods();
 			
-			Random random = new Random();	
-			
-			int rnd = random.nextInt();
-			PASS = idUser + rnd;
+			PASS = idUser;
 
 			PKI.getInstance();
+			
 			PKI.createKeys(id, PASS);
+			
 			/*try {
 				lib.sendKey(pub);
 			} catch (InvalidKeyException e) {
@@ -248,7 +247,7 @@ public enum GoodState {
     		}else {
     		/* Gets the State of the Good invisibly */
     		String good = res[1];
-    		getStateOfGoodInvisible(good);
+    		this.getStateOfGoodInvisible(good);
     		this.intentionToSell(res[1]);
     		}
     	}else
@@ -307,6 +306,7 @@ public enum GoodState {
 	 * 
 	 * @param good
 	 * @return estado do good
+	 * @throws Exception 
 	 */
 	/*
 	private void getStateOfGood(String good) {
@@ -329,13 +329,43 @@ public enum GoodState {
 	}
 	*/
 	
+	private void ownerGood(String good) throws Exception {
+		
+		getStateOfGood(good, true);
+		wts++;
+		
+		String msg = "owner "+good +" "+counters.get(good)+" "+wts;
+		
+		signature[] sigs = new signature[3];//propria write buyer
+		sigs[1]= new signature(PKI.sign(msg, idUser, PASS), msg);
+		
+		
+		Recorded rec = new Recorded("", counters.get(good), wts);
+		
+		Message result =  new Message(idUser, msg,sigs,rec,null);
+		byte[] sig =PKI.sign(result.getHash(), idUser, PASS);
+		
+		result.setSignature(
+				new signature(
+						sig, result.getHash()));
+
+		String ret= lib.write(result, wts);
+	}
+	
+	
+	
+	
+	
+	
 	/**
 	 * Informar ao notary que quer comprar um dado good
 	 * 
 	 * @param good
 	 * @param  
+	 * @throws Exception 
+	 * @throws InvalidKeyException 
 	 */
-	private void buyGood (String user, String good) {
+	private void buyGood (String user, String good) throws InvalidKeyException, Exception {
 //		this.getStateOfGoodInvisible(good);
 		int counter = counters.get(good);
 		System.out.println("trying to buy "+good+ " from "+user+"with counter "+ counter);
@@ -364,6 +394,9 @@ public enum GoodState {
 				System.out.println("yeeeyeee");
 				goods.put(good, GoodState.NOTONSALE);
 				printgoods();
+				if(counters.get(good)>wts)
+					wts=counters.get(good);
+				ownerGood(good);
 			}else {
 				System.out.println("Not OK");
 			}
@@ -380,22 +413,36 @@ public enum GoodState {
 	 * Transferir um dado good
 	 * 
 	 * @param good
+	 * @throws Exception 
+	 * @throws InvalidKeyException 
 	 */
-	private String transferGood(String buyer, String good, byte[] buyerSig, String text) {
-//		this.getStateOfGoodInvisible(good);//updates counter
+	private String transferGood(String buyer, String good, byte[] buyerSig, String text) throws InvalidKeyException, Exception {
+		this.getStateOfGoodInvisible(good);
 		wts++;
 		String res= "";
+		String msg=TRANSFER +" "+ buyer+" "+ good +" "+wts; 
 		try {
-			String msg=TRANSFER +" "+ buyer+" "+ good +" "+wts; 
+			int counter=0;
+			
+			if(counters.containsKey(good))
+				counter = counters.get(good);
+			
 			signature[] sigs = new signature[3];//propria write buyer
-	    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
 	    	sigs[1]=null;
 	    	sigs[2]=new signature(buyerSig, text);
-	    	System.out.println("transfering with counter: "+counters.get(good));
+			
+			
+    		Recorded rec = new Recorded("",counter, wts);
+    		
+    		Message result =  new Message(idUser, msg,sigs,rec,null);
+    		result.setSignature(
+    				new signature(
+    						PKI.sign(result.getHash(), idUser, PASS), result.getHash())
+    				);
+			
+	    	System.out.println("transfering with counter: "+counter);
 
-    		Recorded rec = new Recorded("", counters.get(good), -1);
-
-			res= lib.write(new Message(idUser, msg,sigs , rec, null), wts);
+			res= lib.write(result, wts);
 			//res=  lib.write( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),buyerSig, null, null),wts);
 
 			System.out.println("answer from notary: "+res);
@@ -417,20 +464,28 @@ public enum GoodState {
 //		System.out.println("selling "+ goodID);
 //	}
 	
-	public String intentionToSell(String userID, String goodID, Integer integer) throws InvalidKeyException, Exception {
+	public String intentionToSell(String userID, String goodID, Integer counter) throws InvalidKeyException, Exception {
 //		this.getStateOfGoodInvisible(goodID);
 		wts++;
 		String ret ="";
-		String msg =SELL +  " " +goodID + " "+wts;
+		String msg =SELL +  " " +goodID + " " + counter + " " + wts;
 		System.out.println("sending message:"+ msg);
 		try {
 			signature[] sigs = new signature[3];//propria write buyer
-	    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
-	    	sigs[1]=null;
-	    	sigs[2]=null;
-
-    		Recorded rec = new Recorded("", integer, 0);
-			ret= lib.write(new Message(idUser, msg,sigs , rec, null), wts);
+			sigs[1]= new signature(PKI.sign(msg, userID, PASS), msg);
+			
+    		Recorded rec = new Recorded("", counter, wts);
+    		
+    		Message result =  new Message(userID, msg,sigs,rec,null);
+    		byte[] sig =PKI.sign(result.getHash(), userID, PASS);
+    		
+    		result.setSignature(
+    				new signature(
+    						sig, result.getHash()));
+    		
+//    		System.out.println("HASH_Sell: "+result.getHash());
+//    		System.out.println("Signature_Sell: "+sig);
+			ret= lib.write(result, wts);
 
 		}catch(Exception e) {
 			e.printStackTrace();;
@@ -439,45 +494,70 @@ public enum GoodState {
 	}
 
 	
-	public String[] getStateOfGood(String goodID, boolean invisible) throws InvalidKeyException, Exception {
+	public void getStateOfGood(String goodID, boolean invisible) throws InvalidKeyException, Exception {
+		System.out.println("Entering getStateOfGood");
 		rid++;
 		challenge= generateRandomString(20);
 		String msg= STATE + " " + goodID + " "+challenge + " "+ rid;
-		String result= null;
+
 		try {
+			int counter=0;
+			
+			if(counters.containsKey(goodID))
+				counter = counters.get(goodID);
+			
 			signature[] sigs = new signature[3];//propria write buyer
-	    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
-	    	sigs[1]=null;
-	    	sigs[2]= null;
-	    	int counter=0;
-	    	
-	    	if(counters.containsKey(goodID))
-	    		counter = counters.get(goodID);
 
-    		Recorded rec = new Recorded("", counter, -1);
+			Recorded rec = new Recorded("", counter, -1);
+    		
+    		Message mess =  new Message(idUser, msg,sigs,rec,null);
+    		
+    		byte[] sig = PKI.sign(mess.getHash(), idUser, PASS);
+    		
+//    		System.out.println("HASH: "+mess.getHash());
+//    		System.out.println("Signature: "+sig);
+    		
+    		mess.setSignature(
+    				new signature(
+    						sig, mess.getHash())
+    				);
+    		    		
+    		System.out.println("Sending read request");
+			Message result= lib.read(mess,rid, challenge,goodID);
+			System.out.println("Read result: "+result.getText());
+			
 
-			result= lib.read(new Message(idUser, msg,sigs , rec, null),rid, challenge,goodID);
-
-			/*  WRITE-BACK HERE   */
+			result.setSignature(new signature(PKI.sign("", idUser, PASS), ""));
+			
+			if(result.getText().equals("zerocounter")) {
+				if(!invisible)
+					System.out.println("STATE from notary:" +goodID+" "+result.getRec().state +" "+(result.getRec().counter+1));
+			}else {
+				
+//			System.out.println("received from lib: "+ result.getText());
+			
+			int wbts= result.getRec().timestamp;
 			
 			
-			System.out.println("ret equals: "+result);
+			String WBResult = lib.write(result, wbts);
+			
+			System.out.println("WBResult: "+WBResult);
+//			String[] split = new String[3];
+			if(WBResult.equals("OK")) {
+				if(!invisible)
+					System.out.println("STATE from notary:" +goodID+" "+result.getRec().state +" "+(result.getRec().counter+1));
+				
+				if(!counters.containsKey(goodID))
+		            counters.put(goodID,result.getRec().counter);
+		        else
+		            counters.replace(goodID,result.getRec().counter);   
+			}
+				
+			}
 
-				//result =lib.read( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),null, null, null),rid,challenge,goodID);
-				System.out.println("got from lib: "+result);
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
 		}
-		if(!result.equals("NOT OK")) {
-		String[] split = result.split(" ");
-		if(!invisible) {
-			// resul =  state + counter + ts
-			System.out.println("STATE from notary:" +goodID+" "+result);	
-		}
-		//returns [state,counter]
-		return split;
-		}else
-			return null;
 	}
 
 	
@@ -587,18 +667,9 @@ public enum GoodState {
 
 	*/
 
-	public void getStateOfGoodInvisible(String goodID) throws InvalidKeyException, Exception {		
-		String good = goodID;
-		String[] s = getStateOfGood(good,true);
-		if(s==null) {
-			System.out.println("communication failed");
-		}else
-			
-			System.out.println("counter from notary :"+s[3]);
-		if(!counters.containsKey(good))
-            counters.put(good,Integer.parseInt(s[3]));
-        else
-            counters.replace(good,Integer.parseInt(s[3]));   	
+	public void getStateOfGoodInvisible(String goodID) throws InvalidKeyException, Exception {
+		getStateOfGood(goodID,true);
+		
 	}
 	
 	

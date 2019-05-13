@@ -17,6 +17,7 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,6 +51,8 @@ public class Library {
 //	private HashMap<String,Pair> statelist = new HashMap<String,Pair>();
 //	private HashMap<String,Pair> counterlist = new HashMap<String,Pair>();
 	private HashMap<String,RecordSig> signaturelist = new HashMap<String,RecordSig>();
+	private HashMap<String,RecordSig> writesignaturelist = new HashMap<String,RecordSig>();
+	private HashMap<String,RecordCert> certlist = new HashMap<String,RecordCert>();
 	
    // private PKI pki = new PKI(PKI.KEYSIZE);
     
@@ -70,11 +73,18 @@ public class Library {
     	
     }
     
+    
+    class RecordCert {
+    	  X509Certificate cert;
+    	  int timestamp;
+    	  RecordCert(X509Certificate c, int t) {this.cert=c;this.timestamp=t;}
+    	}
+    
 
     class RecordSig {
-  	  byte[] sig;
+  	  signature sig;
   	  int timestamp;
-  	  RecordSig(byte[] s, int t) {this.sig=s;this.timestamp=t;}
+  	  RecordSig(signature s, int t) {this.sig=s;this.timestamp=t;}
   	}
     
 	public void connectServer(String ip, HashMap<String, Integer>servPorts) {
@@ -163,7 +173,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 
 	
 /****Connection to the server ****/////	
-    
+    /*
 	public Message sendDeprecated(Message intent) throws Exception {
 		if(intent.getSig().equals(null))
 			throw new Exception("Must sign message first");
@@ -189,7 +199,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		}
 		return res;	
 	}
-    
+    */
 	
 	public String write(Message intent, int wts) throws Exception {
 		clearAcklist();
@@ -206,12 +216,22 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			System.out.println("message from notary: "+res.getText());
 			int ts=res.getRec().getTS();
 			System.out.println("timestamps: "+ts + " " + wts);
-			if(PKI.verifySignature(res.getText(),res.getSig().getBytes(),res.getID())
+			
+			System.out.println(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID()));
+			System.out.println(res.getText().split(" ")[0].equals("ACK") );
+			System.out.println(ts==wts);
+			
+			if(!(res.getCertificate()==null))
+				certlist.put(serv,new RecordCert(res.getCertificate(),ts));
+			
+			if(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID())
 					&& res.getText().split(" ")[0].equals("ACK") 
 					&& ts==wts) {
 				this.acklist.put(serv, true);
 				acks++;
 				if(acks> (n+f)/2) {
+					X509Certificate maxcert= maxCert(certlist);
+					System.out.println("CERT: "+maxcert);
 					return "OK";
 				}
 			}
@@ -226,7 +246,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		return "NOT OK";	
 	}
 	
-	public String read(Message intent, int rid, String challenge, String good) throws Exception {
+	public Message read(Message intent, int rid, String challenge, String good) throws Exception {		
 		clearReadList();
 		int reads=0;
 		Message res=null;
@@ -237,46 +257,132 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		for(String serv : out.keySet()) {
 			try {
 				System.out.println("reaching "+serv);
-				System.out.println("n,f: "+n+" "+f);
+//				System.out.println("n,f: "+n+" "+f);
 				ouSt = out.get(serv);
 				inSt = in.get(serv);
 				ouSt.writeObject(intent);
 				res = (Message)inSt.readObject();
 				String[] split =res.getText().split(" ");
 				System.out.println("res: "+res.getText());
-				int r = Integer.parseInt(split[4]);
 				
-				
-				System.out.println("r , rid" + r + " " + rid);
 
 				System.out.println("message from serv: "+res.getID()+", " + res.getText());
 				
+				Recorded rec = res.getRec();
+				
+				/* Values for comparison */
 				String owner = split[1];
-				byte[] maxsig = maxSig(signaturelist);
-				/*
-				if(state.equals("ONSALE")) {
-					// message was "sell goodID"
-					wb="sell "+good+ " " +counter+" "+ maxts;
-				}else {
-					// message was "owner goodID"
-					wb= "owner "+good+" "+ counter +" "+ maxts;
+				String state = split[2];
+				String challnge = split[3];
+				
+				int counter = rec.getCounter();
+				int ts = rec.getTS();
+				
+				System.out.println("Received Timestamp: "+ts);
+				
+				
+				int r = Integer.parseInt(split[4]);
+
+//				System.out.println("owner,state,challenge,counter,ts,r: "+ owner +" "+state +" "+challnge + " "+counter +" "+ts+" "+r);
+				
+//				System.out.println("r , rid" + r + " " + rid);
+
+				boolean writerVerified = false;
+				
+				
+//				System.out.println("WSignature_READ: "+res.getWriteSignature().getBytes());
+//				System.out.println("BSignature_READ: "+res.buyerSignature().getBytes());
+				
+				System.out.println(state + " "+ counter + " "+ts);
+				
+				
+				/* checks if signature of writer is okay -- contains special case for counter = ts = 0  */
+				if(state.equals("NOTONSALE") && counter==0 && ts ==0)
+					writerVerified = true;
+				else{
+					if(state.equals("ONSALE")) {
+					String msg ="sell " +good + " "+(counter-1)+" "+ts;
+					System.out.println("message test: "+msg);
+					writerVerified = PKI.verifySignature(msg, res.getWriteSignature().getBytes(), owner);
+
+
+					}else {
+						String msg ="sell " +good + " "+(counter-1)+" "+ts;
+						System.out.println("message test: "+msg);
+						writerVerified = PKI.verifySignature(msg, res.getWriteSignature().getBytes(), owner);
+					/*
+					String msg ="owner " +good + " "+counter+" "+ts;
+					System.out.println("message test: "+msg);
+					writerVerified = PKI.verifySignature(msg, res.getWriteSignature().getBytes(), owner);
+					*/
+					}
+					
 				}
-				*/
-//				signature[] sigs = new signature[3];
-//				sigs[0]= new signature(res.getWriteSignature().getBytes(), wb);				
-				if(PKI.verifySignature(res.getText(),res.getSig().getBytes(),res.getID())
-						&& r==rid
-						&& split[3].equals(challenge)) {
-					System.out.println("heyyy");
-
-							int ts = res.getRec().getTS();
-							System.out.println("all good");
-							readlist.put(serv,res.getRec());
-
-							signaturelist.put(serv, new RecordSig(res.getSig().getBytes(),ts));
-							reads++;
+				
+//				System.out.println("writerVerified: "+ writerVerified);
+				
+				if(writerVerified)
+					writesignaturelist.put(serv, new RecordSig(res.getWriteSignature(),ts));
+//				System.out.println("signature:");
+//				System.out.println(test+" "+ res.getWriteSignature().getBytes()+" "+ owner);
+				
+				if(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID())
+					&& r==rid
+					&& challnge.equals(challenge)
+					&& writerVerified) {
+					
+//						System.out.println("all good");
+						
+						readlist.put(serv,res.getRec());
+						signaturelist.put(serv, new RecordSig(res.buyerSignature(),ts));
+						reads++;
+						
 					if(reads > (n+f)/2) {
-					    	return split[0]+" " +maximumValue(readlist);
+						
+						/* prepare message for write-back */
+						
+						Recorded WBRec = maximumValue(readlist);
+						signature maxSig = maxSig(signaturelist);
+						signature maxWriteSig = maxSig(writesignaturelist);
+						
+//						System.out.println("NULL? "+(maxSig==null));
+//						System.out.println("NULL? "+(maxWriteSig==null));
+						
+						int maxts = WBRec.getTS();
+						
+						if(maxts==0) {
+//							System.out.println("ZERO COUNTER");
+							signature[] zcsig = new signature[3];
+							Message zerocounter = new Message(owner,"zerocounter",zcsig,WBRec,null);
+//							System.out.println("message" + zerocounter.getText());
+							return zerocounter;
+						}
+//						System.out.println("NON-TRIVIAL STATE");
+						int maxcounter = WBRec.getCounter(); 
+						String[] maxownerstate = WBRec.getState().split(" ");
+						String maxstate = maxownerstate[1];
+						String maxowner = maxownerstate[0];
+						String wb = null; //Write-Back message
+//						System.out.println(maxstate);
+						if(maxstate.equals("ONSALE")) {
+//							System.out.println("ONSALE");
+							// message was "sell goodID"
+							wb="sell "+good+ " " +maxcounter+" "+ maxts;
+						}else {
+//							System.out.println("NOTONSALE");
+							// message was "owner goodID"
+							wb= "owner "+good+" "+ maxcounter +" "+ maxts;
+						}
+						signature[] WBSig = new signature[3];
+						
+						
+						WBSig[1]= maxWriteSig;
+						Message writeBack = new Message(maxowner, wb, WBSig,  WBRec, null);			
+						
+//						System.out.println("WRITEBACK HASH: "+ writeBack.getHash());
+//						System.out.println("WRITEBACK SIG: "+maxSig);
+						
+						return writeBack;
 					}
 				}
 				}catch (IOException e) {
@@ -286,35 +392,49 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			e.printStackTrace();
 		}
 		}
-		return "NOT OK";
+		return null;
+	}
+	
+	
+	private X509Certificate maxCert(HashMap<String,RecordCert> certlist2) {
+		int max=0;
+		X509Certificate maxcert = null;
+		for(String serv : certlist2.keySet()) {
+			int ts = certlist2.get(serv).timestamp;
+			if(ts>=max) {
+				maxcert=certlist2.get(serv).cert;
+			}
+		}
+		return maxcert;
+		
 	}
 	
 	
 	
-	private String maximumValue(HashMap<String, Recorded> statelist2) {
+	private Recorded maximumValue(HashMap<String, Recorded> statelist2) {
 		int max = 0;
 		String maxstate=null;
-		String maxcounter=null;
-		byte[] maxsig;
-		String ret = "";
+		int maxcounter= 0;
+		Recorded ret = null;
 		//TODO: maxsig not being returned!
 		for(String serv : statelist2.keySet()) {
 			int ts = statelist2.get(serv).timestamp;
 			if(ts>=max) {
 				maxstate=statelist2.get(serv).getState();
 				int mr=statelist2.get(serv).getCounter();
-				maxcounter = String.valueOf(mr);
+				maxcounter = mr;
 				max = ts;
 			}
 		}
-		ret+= maxstate + " "+ maxcounter + " " + max;
+		ret = new Recorded(maxstate,maxcounter,max);
+//		ret+= maxstate + " "+ maxcounter + " " + max;
 		return ret;		
 	}
 	
 	
-	private byte[] maxSig( HashMap<String,RecordSig> siglist) {
+	private signature maxSig( HashMap<String,RecordSig> siglist) {
 		int max = 0;
-		byte[] maxsig = null;
+		signature maxsig = null;
 		for(String serv : siglist.keySet()) {
 			if(siglist.get(serv).timestamp>=max) {
 				
@@ -334,6 +454,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	private void clearReadList() {
 		readlist = new HashMap<String,Recorded>();
 		signaturelist = new HashMap<String,RecordSig>();
+		writesignaturelist = new HashMap<String,RecordSig>();
 	}
 	
 
@@ -384,7 +505,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 
 	    }
 	
-	public String hash(String content) {
+	public String powHash(String content) {
 		/* Returns string i such that content+i hashes to a string with hashLimit in the beginning */
 		MessageDigest digest;
 		byte[] hash = null;
