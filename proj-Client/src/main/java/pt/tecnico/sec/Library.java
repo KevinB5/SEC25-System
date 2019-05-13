@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -36,6 +39,8 @@ public class Library {
     private ObjectOutputStream outU;
     private ObjectInputStream inU;
     private String ip;
+	static int acks=0;
+
     private final String idUser;   
 	//private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\ports.txt";
 	private HashMap <String, Socket> sockets = new HashMap<String, Socket>();
@@ -191,27 +196,33 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 	}
     
 	
-	public String write(Message intent, int wts) throws Exception {
+	public String write(String serv,Message intent, int wts) throws Exception {
 		clearAcklist();
-		int acks=0;
 		Message res = null;
 		ObjectOutputStream ouSt;
 		ObjectInputStream inSt;
-		for(String serv : out.keySet()) {
+		//for(String serv : out.keySet()) {
 		try {
 			ouSt = out.get(serv);
 			inSt = in.get(serv);
 			ouSt.writeObject(intent);
 			res = (Message)inSt.readObject();
-			System.out.println("message from notary: "+res.getText());
-			int ts=res.getRec().getTS();
-			System.out.println("timestamps: "+ts + " " + wts);
-			if(PKI.verifySignature(res.getText(),res.getSig().getBytes(),res.getID())
+			//System.out.println("message from notary: "+res.getText());
+			Thread.sleep(1000*3);
+			//int ts=res.getRec().getTS();
+			System.out.println("verifying answer");
+			if(res ==null)
+				return "NOT OK";	
+				
+			System.out.println(res.getSig().getBytes());
+			if(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID())
 					&& res.getText().split(" ")[0].equals("ACK") 
-					&& ts==wts) {
+					/*&& ts==wts*/) {
 				this.acklist.put(serv, true);
 				acks++;
+				System.out.println(acks);
 				if(acks> (n+f)/2) {
+					acks=0;
 					return "OK";
 				}
 			}
@@ -222,11 +233,13 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		}
+		//}
 		return "NOT OK";	
 	}
 	
-	public String read(Message intent, int rid, String challenge, String good) throws Exception {
+
+	
+	public String read( Message intent, int rid, String challenge, String good) throws Exception {
 		clearReadList();
 		int reads=0;
 		Message res=null;
@@ -234,6 +247,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 		ObjectInputStream inSt;
 		System.out.println("sending: "+intent.getText());
 		System.out.println(out.keySet());
+		
 		for(String serv : out.keySet()) {
 			try {
 				System.out.println("reaching "+serv);
@@ -263,8 +277,10 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 				}
 				*/
 //				signature[] sigs = new signature[3];
-//				sigs[0]= new signature(res.getWriteSignature().getBytes(), wb);				
-				if(PKI.verifySignature(res.getText(),res.getSig().getBytes(),res.getID())
+//				sigs[0]= new signature(res.getWriteSignature().getBytes(), wb);	
+				byte[] hash = res.getHash();
+				
+				if(PKI.verifySignature(hash,res.getSig().getBytes(),res.getID())
 						&& r==rid
 						&& split[3].equals(challenge)) {
 					System.out.println("heyyy");
@@ -286,6 +302,7 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			e.printStackTrace();
 		}
 		}
+		
 		return "NOT OK";
 	}
 	

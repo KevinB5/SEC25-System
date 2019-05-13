@@ -6,6 +6,12 @@ import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import pt.tecnico.sec.App.ConnectClient;
 
 public class SLibrary {
 	private HashMap<String,Socket> sockets = new HashMap<String, Socket>();
@@ -31,53 +37,93 @@ public class SLibrary {
 		}
 	}
 	
-	public Message sendMessage(String uID, Message msg) throws Exception {
-		 ObjectOutputStream outU= null;
-		 ObjectInputStream inU=null;
-		 Message resp= null;
-		 try {
-//			 System.out.println("Sending message to "+ uID);
-		 	
-			 Socket clientSocket = sockets.get(uID);
-			 if(clientSocket == null)
-				 throw new Exception("Must connect to user "+ uID+" first");
-				outU = new ObjectOutputStream(clientSocket.getOutputStream());
-				inU= new ObjectInputStream(clientSocket.getInputStream());
-		 		
-		 		outU.writeObject(msg);
-		 		//outU.reset();
-		 		//
-		 		
-				//
-		 		//resp = (Message) inU.readObject();
-				//return execRequest(resp);
-				//this.stopConnectServer();
-		 		Message temp = (Message) inU.readObject();
-		 		if (temp.getClass().equals(String.class)) {
-		 			System.out.println(temp);
-		 			return null;
-		 		}
-		 		else {
-		 			resp = (Message) temp;
-		 		}
-				//System.out.println("inU.readObject() " + inU.readObject());
-				return resp;
+	public void sendMessage(String uID, Message msg) throws Exception {
+		ExecutorService executor = Executors.newSingleThreadExecutor();
 
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}catch(NullPointerException ne) {
-				System.out.println(ne.getMessage());
-			
-			
-			}catch(Exception e) {
-				e.printStackTrace();
-			}
-			//resp = pki.encrypt(,resp); falta buscar a chave privada do user
-	        return resp;
-
-	    }
+		executor.submit(new Sender(uID, msg));
+	}
 	
+	private class Sender implements Runnable{
+		String uID;
+		Message msg;
+		
+		private Sender(String uID, Message msg) {
+			this.uID=uID;
+			this.msg=msg;
+		}
+
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			ObjectOutputStream outU= null;
+			 ObjectInputStream inU=null;
+			 Message resp= null;
+			 try {
+				 System.out.println("Sending message to "+ uID);
+				 
+		         ReadWriteLock lock = new ReentrantReadWriteLock();
+		         
+		         
+			 	
+				 Socket clientSocket = sockets.get(uID);
+				 if(clientSocket == null)
+					 throw new Exception("Must connect to user "+ uID+" first");
+					outU = new ObjectOutputStream(clientSocket.getOutputStream());
+					//inU= new ObjectInputStream(clientSocket.getInputStream());
+				
+
+				    lock.writeLock().lock();
+				    try {
+					outU.writeObject(msg);
+					outU.flush();
+
+				    } catch (Exception e) {
+							e.printStackTrace();
+				    }finally {
+							//liberta assim que terminar a escrita
+							lock.writeLock().unlock();
+					}
+			 		
+			 		//outU.writeObject(msg);
+			 		//outU.reset();
+			 		//
+			 		
+					//
+			 		//resp = (Message) inU.readObject();
+					//return execRequest(resp);
+					//this.stopConnectServer();
+//			 		Message temp = (Message) inU.readObject();
+//			 		if (temp.getClass().equals(String.class)) {
+//			 			System.out.println(temp);
+//			 			return ;
+//			 		}
+//			 		else {
+//			 			resp = (Message) temp;
+//			 		}
+//					//System.out.println("inU.readObject() " + inU.readObject());
+//					return ;
+
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+				System.out.println(e.getMessage());				
+				}catch(NullPointerException ne) {
+					System.out.println(ne.getMessage());
+				
+				
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+				//resp = pki.encrypt(,resp); falta buscar a chave privada do user
+		        return ;
+
+		    }
+		
+
+			
+		}
+		
+	
+		 	
 	
 	
 	

@@ -37,6 +37,18 @@ private byte[] encodedhash;
      hash();
  }
  
+ public Message(String id, String text, signature[] signatures) {
+	 this.id=id;
+	 this.text=text;
+	 this.cert=null;
+     this.signature = signatures[0];
+//   this.key = key;
+   this.writeSignature=signatures[1];
+	 this.buyerSignature=null;
+	 this.rec = null;
+
+ }
+ 
  private void hash() {
 	 String fullMsg = id + text + rec.getState() + rec.getCounter() + rec.getTS();
 	 try {
