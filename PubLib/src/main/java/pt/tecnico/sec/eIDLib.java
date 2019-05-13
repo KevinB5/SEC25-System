@@ -67,7 +67,7 @@ public class eIDLib{
 			
 			String path = System.getProperty("user.dir")+line+"Temp"+line;
 			
-			path = path.replaceAll("\\\\","/");
+//			path = path.replaceAll("\\\\","/");
 			System.out.println(path);
 	        System.setProperty("java.library.path", path);
 	        Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
@@ -211,7 +211,7 @@ public class eIDLib{
         
         String path = System.getProperty("user.dir")+line+"Temp"+line;
 		
-		path = path.replaceAll("\\\\","/");
+//		path = path.replaceAll("\\\\","/");
 		System.out.println(path);
         System.setProperty("java.library.path", path);
         Field fieldSysPath;
