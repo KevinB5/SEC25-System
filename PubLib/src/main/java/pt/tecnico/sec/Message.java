@@ -18,6 +18,7 @@ public class Message implements Serializable{
 	
 private final String text;
 private signature signature;
+private signature sellSig;
 private final signature writeSignature;
 private final String id;
 private final signature buyerSignature;
@@ -27,7 +28,7 @@ private byte[] encodedhash;
 
  public Message(String id, String text, signature[] signatures, Recorded recorded, X509Certificate cert) {
      this.text = text;
-     this.signature = signatures[0];
+     this.sellSig = signatures[0];
 //     this.key = key;
      this.writeSignature=signatures[1];
      this.id=id;
@@ -35,6 +36,18 @@ private byte[] encodedhash;
      this.cert = cert;
      this.rec = recorded;
      hash();
+ }
+ 
+ public Message(String id, String text, signature[] signatures) {
+	 this.id=id;
+	 this.text=text;
+	 this.cert=null;
+     this.sellSig = signatures[0];
+//   this.key = key;
+   this.writeSignature=signatures[1];
+	 this.buyerSignature=null;
+	 this.rec = null;
+
  }
  
  private void hash() {
@@ -59,6 +72,10 @@ private byte[] encodedhash;
 
  public String getText() {
      return text;
+ }
+ 
+ public signature getSellSig() {
+	 return sellSig;
  }
  
  public byte[] getHash() {

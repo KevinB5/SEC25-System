@@ -1,5 +1,6 @@
 package pt.tecnico.sec;
 
+import java.awt.List;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,6 +32,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.function.Function;
 
 import javax.crypto.Cipher;
 
@@ -75,6 +82,7 @@ public class User {
 
 	private int wts=0;
 	private int rid=0;
+	private Set<String> servs;
 
 
 	
@@ -101,9 +109,10 @@ public enum GoodState {
 		
 			Storage store = new Storage(1);
 			HashMap<String, Integer> h = store.readServs();
+			servs= h.keySet(); 
 			lib = new Library(this, ip,h);
-			
 			HashMap<String, String> res =store.getGoods(id);
+
 			for(String good : res.keySet()) {
 				counters.put(good, 0);
 				if(res.get(good).equals("n"))
@@ -212,6 +221,7 @@ public enum GoodState {
     		String good = res[1];
     		this.getStateOfGoodInvisible(good);
     		this.intentionToSell(res[1]);
+
     		}
     	}else
     	
@@ -242,8 +252,51 @@ public enum GoodState {
 	private void intentionToSell(String good) {
 		String res="";
 		try {
-			res = intentionToSell(idUser, good, counters.get(good));
-			System.out.println("res is "+res);
+			ArrayList<Sell> tasks = new ArrayList<Sell>();
+			ArrayList<Future<String>>fut = new ArrayList<Future<String>>();
+			int i=0;
+			for(String not : servs) {
+				i++;
+				tasks.add(new Sell( not, good, counters.get(good)));
+				}
+			
+    		wts++;
+    		ExecutorService executor = Executors.newWorkStealingPool();
+    		
+    		executor.invokeAll(tasks)
+    	    .stream()
+    	    .map(new Function<Future<String>, Object>() {
+				@Override
+				public Object apply(Future<String> future) {
+				    try {
+				    	System.out.println(future.get());
+				        return future.get();
+				    }
+				    catch (Exception e) {
+				        throw new IllegalStateException(e);
+				    }
+				}
+			});
+    	    /*
+    		for(Sell task : tasks) {
+        		Future<String> future = executor.submit(task);
+        		fut.add(future);
+
+    		}
+    		Thread.sleep(1000*10);
+    		for(Future future: fut) {
+    			if(future.isDone()) {
+    				//System.out.println("waiting result");
+    				System.out.println("result"+future.get());
+
+
+    			}
+
+
+    			}
+    		*/
+		
+			//System.out.println("res is "+res);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -280,7 +333,7 @@ public enum GoodState {
 				new signature(
 						sig, result.getHash()));
 
-		String ret= lib.write(result, wts);
+//		String ret= lib.write(result, wts);
 	}
 	
 	
@@ -372,7 +425,10 @@ public enum GoodState {
 			
 	    	System.out.println("transfering with counter: "+counter);
 
-			res= lib.write(result, wts);
+//			res= lib.write(result, wts);
+
+			//res= lib.write(new Message(idUser, msg,sigs , rec, null), wts);
+			//res=  lib.write( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),buyerSig, null, null),wts);
 
 			System.out.println("answer from notary: "+res);
 			if(res.equals(OK)) {
@@ -385,15 +441,73 @@ public enum GoodState {
 		return res;
 		
 	}
+
+
+	private class Sell implements Callable<String>{
+		//private PKI pki;
+		private String goodID;
+		private int integer;
+		String id;
+		Sell(String id, String goodID, Integer integer){
+			this.goodID=goodID;
+			this.integer=integer;
+			this.id=id;
+		}
+		@Override
+		public String call() throws Exception {
+			// TODO Auto-generated method stub
+			String ret ="";
+			String msg =SELL +  " " +goodID + " "+wts;
+			System.out.println("sending message:"+ msg);
+			try {
+				signature[] sigs = new signature[3];//propria write buyer
+		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
+		    	sigs[1]=null;
+		    	sigs[2]=null;
+
+	    		Recorded rec = new Recorded("", integer, 0);
+				ret= lib.write(id, new Message(idUser, msg,sigs , rec, null), wts);
+				System.out.println("received: "+ret);
+
+			}catch(Exception e) {
+				e.printStackTrace();;
+			}
+			return ret;
+			//return null;
+		}
+	}
 	
-	public String intentionToSell(String userID, String goodID, Integer counter) throws InvalidKeyException, Exception {
-		this.getStateOfGoodInvisible(goodID);
+	private class Transfer implements Callable<String>{
+
+		@Override
+		public String call() throws Exception {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+	}
+	
+	private class State implements Callable<String>{
+
+		@Override
+		public String call() throws Exception {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+	}
+	
+	/*
+	public String intentionToSell(String userID, String goodID, Integer integer) throws InvalidKeyException, Exception {
+//		this.getStateOfGoodInvisible(goodID);
+>>>>>>> branch 'newmaster' of https://github.com/KevinB5/SEC25-System.git
 		wts++;
 		String ret ="";
 		String msg =SELL +  " " +goodID + " " + counter + " " + wts;
 		System.out.println("sending message:"+ msg);
 		try {
 			signature[] sigs = new signature[3];//propria write buyer
+<<<<<<< HEAD
 			sigs[1]= new signature(PKI.sign(msg, userID, PASS), msg);
 			
     		Recorded rec = new Recorded("", counter, wts);
@@ -406,13 +520,21 @@ public enum GoodState {
     						sig, result.getHash()));
     		
 			ret= lib.write(result, wts);
+=======
+	    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
+	    	sigs[1]=null;
+	    	sigs[2]=null;
+
+    		Recorded rec = new Recorded("", integer, 0);
+			//ret= lib.write(new Message(idUser, msg,sigs , rec, null), wts);
+>>>>>>> branch 'newmaster' of https://github.com/KevinB5/SEC25-System.git
 
 		}catch(Exception e) {
 			e.printStackTrace();;
 		}
 		return ret;
 	}
-
+*/
 	
 	public void getStateOfGood(String goodID, boolean invisible) throws InvalidKeyException, Exception {
 		System.out.println("Entering getStateOfGood");
@@ -443,7 +565,7 @@ public enum GoodState {
 			Message result= lib.read(mess,rid, challenge,goodID);
 			System.out.println("Read result: "+result.getText());
 			
-
+    		
 			result.setSignature(new signature(PKI.sign("", idUser, PASS), ""));
 			
 			if(result.getText().equals("zerocounter")) {
@@ -454,20 +576,21 @@ public enum GoodState {
 			
 			int wbts= result.getRec().timestamp;
 			
-			
-			String WBResult = lib.write(result, wbts);
-			
-			System.out.println("WBResult: "+WBResult);
-			
-			if(WBResult.equals("OK")) {
-				if(!invisible)
-					System.out.println("STATE from notary:" +goodID+" "+result.getRec().state +" "+(result.getRec().counter+1));
-				
-				if(!counters.containsKey(goodID))
-		            counters.put(goodID,result.getRec().counter);
-		        else
-		            counters.replace(goodID,result.getRec().counter);   
+			for(String serv: servs) {
+				String WBResult = lib.write(serv,result, wbts);
+				System.out.println("WBResult: "+WBResult);
+				if(WBResult.equals("OK")) {
+					if(!invisible)
+						System.out.println("STATE from notary:" +goodID+" "+result.getRec().state +" "+(result.getRec().counter+1));
+					
+					if(!counters.containsKey(goodID))
+						counters.put(goodID,result.getRec().counter);
+					else
+						counters.replace(goodID,result.getRec().counter);   
+				}
 			}
+			
+			
 				
 			}
 

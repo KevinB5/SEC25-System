@@ -18,7 +18,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import javax.management.monitor.Monitor;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.stream.events.NotationDeclaration;
 
@@ -35,6 +39,11 @@ public enum GoodState {
 	private static final String OK ="OK";
 	private static final String NOK ="Not OK";
 	private static final String ACK = "ACK";
+	private static final String first = "FirstStage";
+	private static final String ECH = "Echo";
+	private static final String RDY = "Ready";
+	private long waitID;
+
 	private HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
 	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,state>
 	private HashMap<String, Integer> counters = new HashMap<String, Integer>(); // <goodID,counter>
@@ -48,26 +57,32 @@ public enum GoodState {
 	
 	private HashMap<String, String> echos = new HashMap<String, String>();
 	private HashMap<String, String> readies = new HashMap<String, String>();
-
-
+	
+	private Collection<String> servers ;
 	
 	private Storage store;
 //	private PKI keyManager;
 	private String PASS;
 	private SLibrary lib;
 	private final int id;
+	private int f;
+	private int N;
 	
 
 	private KeyPair keypair = null;
 	private final String hashLimit = "0000";
+	private int responses=0;
+
 	
 	
-	public Notary(int id, Storage store) {
+	public Notary(int id, Storage store,int f) {
 		this.id=id;
 		idNotary = "notary"+ id;
         this.store = store;
         store.setLog(String.valueOf(id));
         store.readLog();
+        this.f = f;
+        N=3*f+1;
         this.lib=new SLibrary(this);
 
         this.updateState();
@@ -106,9 +121,15 @@ public enum GoodState {
 	
 	public void connect() {
 		HashMap<String, Integer> h = store.readServs();
+		servers= h.keySet();
+
+		servers.remove(idNotary);
 		for(String server:h.keySet()) {
-			if(!server.equals(this.idNotary))
+			if(!server.equals(this.idNotary)){
 				lib.connect(server, h.get(server));
+				this.echos.put(server,"");
+				this.readies.put(server,"");
+			}
 		}
 	}
 	
@@ -226,10 +247,12 @@ public enum GoodState {
 	 * @throws Exception
 	 */
 	
-	public Message execute(Message command) throws Exception {
+	public synchronized Message execute(Message command) throws Exception {
+		boolean err =false;
 
 		Message result = null;
     	String [] message = command.getText().split(" "); //received message broken up by spaces
+    	
     	if(message.length<2)
     		throw new Exception("Operation not valid: missing arguments"); //message has to have at least 2 words
     	
@@ -268,11 +291,27 @@ public enum GoodState {
 	    	//array de assinaturas
 	    	String good = message[1];
 	    	
+	    	
 	    	if(op .equals("sell")) {
-	    		String[] info = command.getWriteSignature().getData().split(" ");
-	    		
-    			int counter = Integer.parseInt(info[2]);
-    			int ts =Integer.parseInt(info[3]);
+//	    		String[] info = command.getWriteSignature().getData().split(" ");
+//	    		
+//    			int counter = Integer.parseInt(info[2]);
+//    			int ts =Integer.parseInt(info[3]);
+	    		this.startBroadCast(command.getText());
+	    		while(!delivered) {
+	    			 try { 
+	    				 waitID=Thread.currentThread().getId();
+	    	                wait();
+	    	            } catch (InterruptedException e)  {
+	    	                Thread.currentThread().interrupt(); 
+	    	                System.out.println("BRB did not reach consensus , returning"); 
+	    	                return null;
+	    	            }
+	    		}
+	    		delivered=false;
+
+    			int counter = command.getRec().getCounter();
+    			int ts = command.getRec().getTS();
 
     			System.out.println("COUNTERS: "+counter+" "+counters.get(good) );
     			
@@ -328,6 +367,19 @@ public enum GoodState {
 	    	}
 	    	if(op.equals("state")) {
 //	    		System.out.println(idNotary +": received getState request");
+	    		System.out.println(idNotary +": received getState request");
+	    		
+//	    		this.startBroadCast(command.getText());
+//	    		while(!this.delivered==true) {
+//	    			long delay = 1000*8L;
+//	    		    timer.schedule(task, delay);
+//	    		    return null;
+//	    		    
+//	    			//lançar um timer
+//	    			//caso passe o timer mensagem é descartada
+//	    			//o que acontece caso o atraso se deva à rede ou assim?
+//	    			//períodos de espera muito longos will fuck up the system
+//	    		}
 	    		if(message.length!=4) {
 	    			System.out.println(idNotary+ ": request is wrong");
 	    			String rs = "WARNING: State request must issue a challenge and rid";
@@ -363,6 +415,19 @@ public enum GoodState {
 	    	}
 	    	if(op.equals("transfer")) {
 	    		/* TRANSFER +" "+ buyer+" "+ good +" "+ counter+" " + wts;  */
+	    		
+	    		this.startBroadCast(command.getText());
+	    		while(!delivered) {
+	    			 try { 
+	    				 waitID=Thread.currentThread().getId();
+	    	                wait();
+	    	            } catch (InterruptedException e)  {
+	    	                Thread.currentThread().interrupt(); 
+	    	                System.out.println("BRB did not reach consensus , returning"); 
+	    	                return null;
+	    	            }
+	    		}
+	    		delivered=false;
 
     			String ts =message[3];
 	    		System.out.println("transfering "+message[2]+"...");
@@ -477,6 +542,141 @@ public enum GoodState {
 				return NOK;
 		}
 		return NOK;
+	}
+	
+	private void startBroadCast(String msg) {
+		System.out.println("starting broadcast");
+		Message mss= new Message(this.idNotary,ECH+" "+msg, null);
+		this.sentEcho=true;
+		for(String server: servers) {
+			try {
+				//envia mensagem de echo
+				lib.sendMessage(server, mss);
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+	private void start2ndPhase(String msg){
+		System.out.println("starting 2nd broadcast");
+
+		Message mss= new Message(this.idNotary,RDY+" "+msg, null);
+connect();
+		for(String server: servers) {
+			try {
+				lib.sendMessage(server, mss);
+
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+	}
+	
+	synchronized void handleBroadCast(Message msg) {
+		System.out.println("HANDLE BROADCAST");
+		String text=msg.getText();
+		String[] spl = text.split(" ");
+		String cmd= spl[0];
+		String uid =msg.getID();
+		String req="";
+		int acks=0;
+		
+		
+		for(int i=1;i<spl.length;i++ ){req+=spl[i] +" ";}
+
+		switch(cmd) {
+			case(ECH):
+				if(this.echos.get(uid)=="") {
+					responses++;
+					System.out.println("new echo from: "+uid);
+					  echos.put(uid,req);
+					  //verifica consensus
+					  for(String serv : echos.keySet()) {
+							  if(echos.get(serv).equals(req)) {
+								  acks++;
+
+								  System.out.println("ack echo from: "+ serv+ " total acks: "+ acks);
+								  System.out.println(acks>(N+f)/2 );
+								  System.out.println((N+f)/2);
+								  if(acks>(N+f)/2 & sentReady==false){
+									  //acks=0;
+									  sentReady = true;
+									  System.out.println("1stphase completed");
+									  /*return*/ start2ndPhase(req);
+									  responses=0;
+								  }
+							  } 
+						  
+						  
+					  }
+					  if(responses>(N+f)/2 & acks<2f) {
+							Thread[] list = new Thread[Thread.activeCount()];
+							 Thread.currentThread().getThreadGroup().enumerate(list);
+							 for(Thread t:list) {
+								 if (t.getId()==waitID) {
+									 t.interrupt();
+								 }
+							 }
+								
+							
+							}
+
+				}
+				break;
+			case(RDY):
+				if(this.readies.get(uid)=="") {
+					responses++;
+					//System.out.println("heyyyy 2nd time");
+					  System.out.println("new ready from: "+ uid);
+
+					readies.put(uid, req);
+					for(String serv: readies.keySet()) {
+						if(readies.get(serv).equals(req)) {
+							acks++;
+
+							  System.out.println("ack ready from: "+ serv + " total acks: "+ acks);
+
+							if(acks>f & this.sentReady==false) {
+								start2ndPhase(req);						}
+							if(acks>2f & this.delivered==false) {
+								responses=0;
+								acks=0;
+								delivered=true;
+								notifyAll();
+								break;
+								//System.out.println(Thread.activeCount());
+								//return to user
+							}
+						}
+					}
+					if(responses>(N+f)/2 & acks<2f) {
+						System.out.println("no no no");
+						Thread[] list = new Thread[Thread.activeCount()];
+						 Thread.currentThread().getThreadGroup().enumerate(list);
+						 for(Thread t:list) {
+							 if (t.getId()==waitID) {
+								 t.interrupt();
+							 }
+						 }
+							
+						
+						}
+				}
+			break;
+				
+			default:
+				break;
+			
+			
+		}
+		return;
 	}
 	
 	

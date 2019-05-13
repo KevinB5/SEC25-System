@@ -34,7 +34,7 @@ public class App
         Storage store = new Storage(id);
         store.writeServ("notary"+id, PORT);
         
-    	notary= new Notary(id, store);//atribuir aqui a porta
+    	notary= new Notary(id, store,f);//atribuir aqui a porta
         try {
 			serverSocket = new ServerSocket(PORT);
 	        System.out.println("Server accepting connections on port: "+ PORT);

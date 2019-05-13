@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -37,6 +40,8 @@ public class Library {
     private ObjectOutputStream outU;
     private ObjectInputStream inU;
     private String ip;
+	static int acks=0;
+
     private final String idUser;   
 	private HashMap <String, Socket> sockets = new HashMap<String, Socket>();
 	private static int PORT;
@@ -119,15 +124,13 @@ public class Library {
 		}
 	}
     
-	
-	public String write(Message intent, int wts) throws Exception {
-		System.out.println("Sending WriteRequest...");
+
+	public String write(String serv,Message intent, int wts) throws Exception {
 		clearAcklist();
-		int acks=0;
 		Message res = null;
 		ObjectOutputStream ouSt;
 		ObjectInputStream inSt;
-		for(String serv : out.keySet()) {
+		//for(String serv : out.keySet()) {
 		try {
 			ouSt = out.get(serv);
 			inSt = in.get(serv);
@@ -137,16 +140,25 @@ public class Library {
 			
 			if(!(res.getCertificate()==null))
 				certlist.put(serv,new RecordCert(res.getCertificate(),ts));
-			
+			//System.out.println("message from notary: "+res.getText());
+			Thread.sleep(1000*3);
+			//int ts=res.getRec().getTS();
+			System.out.println("verifying answer");
+			if(res ==null)
+				return "NOT OK";	
+				
+			System.out.println(res.getSig().getBytes());
 			if(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID())
 					&& res.getText().split(" ")[0].equals("ACK") 
 					&& ts==wts) {
 				this.acklist.put(serv, true);
 				acks++;
+				System.out.println(acks);
 				if(acks> (n+f)/2) {
 					System.out.println("Achieved Quorum of Acks");
 					X509Certificate maxcert= maxCert(certlist);
 					System.out.println("Certificate Received:\n"+maxcert);
+					acks=0;
 					return "OK";
 				}
 			}
@@ -157,7 +169,7 @@ public class Library {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		}
+		//}
 		return "NOT OK";	
 	}
 	
@@ -169,6 +181,9 @@ public class Library {
 		ObjectOutputStream ouSt;
 		ObjectInputStream inSt;
 
+		System.out.println("sending: "+intent.getText());
+		System.out.println(out.keySet());
+		
 		for(String serv : out.keySet()) {
 			try {
 				ouSt = out.get(serv);
@@ -221,6 +236,14 @@ public class Library {
 					}
 					
 				}
+//				signature[] sigs = new signature[3];
+//				sigs[0]= new signature(res.getWriteSignature().getBytes(), wb);	
+				byte[] hash = res.getHash();
+				
+				if(PKI.verifySignature(hash,res.getSig().getBytes(),res.getID())
+						&& r==rid
+						&& split[3].equals(challenge)) {
+					System.out.println("heyyy");
 
 				System.out.println("Writer Verified: "+writerVerified);
 				
@@ -281,7 +304,8 @@ public class Library {
 						return writeBack;
 					}
 				}
-				}catch (IOException e) {
+				}
+			}catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
@@ -303,6 +327,8 @@ public class Library {
 		}
 		return maxcert;
 		
+		
+	/*	return "NOT OK";*/
 	}
 	
 	
