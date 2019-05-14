@@ -546,6 +546,7 @@ public enum GoodState {
 	
 	private void startBroadCast(String msg) {
 		System.out.println("starting broadcast");
+		
 		Message mss= new Message(this.idNotary,ECH+" "+msg, null);
 		this.sentEcho=true;
 		for(String server: servers) {

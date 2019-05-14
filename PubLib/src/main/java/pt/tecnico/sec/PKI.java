@@ -344,7 +344,7 @@ public static boolean containsKeyofUser(String id) {
 //creates and stores keys in KeyStore
 public static void createKeys(String userID, String pword) {
 	try {
-		if(getPublicKey(userID)==null) {
+		//if(getPublicKey(userID)==null) {
 			KeyPairGenerator keyGen;
 			KeyPair keyPair = null;
 			char [] pwdArray = "password".toCharArray();
@@ -420,8 +420,8 @@ public static void createKeys(String userID, String pword) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-		}else
-			System.out.println("já existe chave");
+		/*}else
+			System.out.println("já existe chave");*/
 	} catch (Exception e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
