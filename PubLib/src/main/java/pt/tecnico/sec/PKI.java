@@ -128,6 +128,7 @@ public static void setKey(String uID, X509Certificate cert) {
 
 public static PublicKey getPublicKey(String uID) throws Exception {
 	
+	try {
 	File keystorefile = new File(PATH);
 	InputStream keystoreStream = new FileInputStream(keystorefile);
 
@@ -137,7 +138,12 @@ public static PublicKey getPublicKey(String uID) throws Exception {
 //System.out.println(KEYSTORE.containsAlias(uID));
 //System.out.println(KEYSTORE.aliases());
 	
-	return KEYSTORE.getCertificate(uID+"c").getPublicKey();
+	System.out.println("certificate getPublic: "+KEYSTORE.getCertificate(uID).getPublicKey());
+	
+	return KEYSTORE.getCertificate(uID).getPublicKey();
+	}catch(Exception e){
+		return null;
+	}
 	
 }
 
@@ -145,7 +151,9 @@ public static PrivateKey getPrivateKey(String id, String pass) throws NoSuchAlgo
 	
 //  PrivateKey myPrivateKey = null ;
 System.out.println("getting key for "+ id);
-	
+
+System.out.println("pass: "+pass);
+
 	KeyStore.ProtectionParameter protParam =    new KeyStore.PasswordProtection(pass.toCharArray());
 	KeyStore.PrivateKeyEntry pkEntry = (KeyStore.PrivateKeyEntry) KEYSTORE.getEntry(id, protParam);
 	PrivateKey myPrivateKey = pkEntry.getPrivateKey();
@@ -344,10 +352,11 @@ public static boolean containsKeyofUser(String id) {
 //creates and stores keys in KeyStore
 public static void createKeys(String userID, String pword) {
 	try {
-		//if(getPublicKey(userID)==null) {
+		if(getPublicKey(userID)==null) {
+			
+//			char [] pwdArray = pword.toCharArray();
 			KeyPairGenerator keyGen;
 			KeyPair keyPair = null;
-			char [] pwdArray = "password".toCharArray();
 			X509Certificate cert = null;
 			try {
 				/*
@@ -420,8 +429,14 @@ public static void createKeys(String userID, String pword) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-		/*}else
-			System.out.println("já existe chave");*/
+		
+			
+		}else{
+			System.out.println("já existe chave");
+			File keystorefile = new File(PATH);
+			InputStream keystoreStream = new FileInputStream(keystorefile);
+			KEYSTORE.load(keystoreStream, pwdArray);
+		}
 	} catch (Exception e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();

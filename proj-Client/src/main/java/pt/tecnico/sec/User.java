@@ -412,9 +412,7 @@ public enum GoodState {
 			
 			signature[] sigs = new signature[3];//propria write buyer
 	    	sigs[1]=null;
-	    	sigs[2]=new signature(buyerSig, text);
-<<<<<<< HEAD
-			
+	    	sigs[2]=new signature(buyerSig, text);	
 			
     		Recorded rec = new Recorded("",counter, wts);
     		
@@ -426,15 +424,8 @@ public enum GoodState {
 			
 	    	System.out.println("transfering with counter: "+counter);
 
-//			res= lib.write(result, wts);
-=======
-	    	System.out.println("transfering with counter: "+counters.get(good));
 
-    		Recorded rec = new Recorded("", counters.get(good), wts);
->>>>>>> e08b45feac04792729e9bb9daff62d1415ec361e
-
-			//res= lib.write(new Message(idUser, msg,sigs , rec, null), wts);
-			//res=  lib.write( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),buyerSig, null, null),wts);
+//			res= lib.write(new Message(idUser, msg,sigs , rec, null), wts);
 
 			System.out.println("answer from notary: "+res);
 			if(res.equals(OK)) {
@@ -468,8 +459,7 @@ public enum GoodState {
 			try {
 				signature[] sigs = new signature[3];//propria write buyer
 		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);////important
-		    	sigs[1]=null;
-		    	sigs[2]=null;
+
 
 	    		Recorded rec = new Recorded("", integer, 0);
 	    		Message message =  new Message(idUser, msg,sigs , rec, null);
@@ -564,9 +554,13 @@ public enum GoodState {
 			
 			signature[] sigs = new signature[3];//propria write buyer
 
+	    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
+	    	
+	    	System.out.println(sigs[0]==null);
+
+
 			Recorded rec = new Recorded("", counter, -1);
     		
-<<<<<<< HEAD
     		Message mess =  new Message(idUser, msg,sigs,rec,null);
     		
     		byte[] sig = PKI.sign(mess.getHash(), idUser, PASS);
@@ -582,7 +576,6 @@ public enum GoodState {
 			
     		
 			result.setSignature(new signature(PKI.sign("", idUser, PASS), ""));
-=======
     		//Recorded rec = new Recorded("", integer, 0);
     		Message message =  new Message(idUser, msg,sigs , rec, null);
     		
@@ -595,7 +588,6 @@ public enum GoodState {
 			result= lib.read(message,rid, challenge,goodID);
 
 			/*  WRITE-BACK HERE   */
->>>>>>> e08b45feac04792729e9bb9daff62d1415ec361e
 			
 			if(result.getText().equals("zerocounter")) {
 				if(!invisible)
