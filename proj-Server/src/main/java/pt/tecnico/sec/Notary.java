@@ -183,11 +183,11 @@ public enum GoodState {
 	 * @throws Exception 
 	 */
 	private String verifySelling(String userID, String goodID) throws Exception {
-//		System.out.println("Verifying "+goodID);
+		System.out.println("Verifying "+goodID);
 		if(!goods.containsKey(goodID))
 			return "No such good";
 		int novo = counters.get(goodID);
-//		System.out.println(goods.get(goodID));
+		System.out.println(goods.get(goodID));
 		if(goods.get(goodID).equals(userID)) {
 			if(!states.get(goodID).equals(GoodState.ONSALE)) {
 				novo++;
@@ -287,6 +287,7 @@ public enum GoodState {
 	    		this.startBroadCast(command.getText(), command.getSellSig());
 	    		while(!delivered) {
 	    			 try { 
+	    				 System.out.println("waiting");
 	    				 waitID=Thread.currentThread().getId();
 	    	                wait();
 	    	            } catch (InterruptedException e)  {

@@ -263,20 +263,27 @@ public enum GoodState {
     		wts++;
     		ExecutorService executor = Executors.newWorkStealingPool();
     		
-    		executor.invokeAll(tasks)
-    	    .stream()
-    	    .map(new Function<Future<String>, Object>() {
-				@Override
-				public Object apply(Future<String> future) {
-				    try {
-				    	System.out.println(future.get());
-				        return future.get();
-				    }
-				    catch (Exception e) {
-				        throw new IllegalStateException(e);
-				    }
-				}
-			});
+    		for(Future<String> answer : executor.invokeAll(tasks)) {
+    			System.out.println(answer.toString());
+    			if(answer.toString().equals(OK)) {
+    				System.out.println("changing state of "+good);
+    				goods.replace(good, GoodState.ONSALE);
+    			}
+    		}
+//    	    .stream()
+//    	    .map(new Function<Future<String>, Object>() {
+//				@Override
+//				public Object apply(Future<String> future) {
+//				    try {
+//				    	System.out.println(future.get());
+//				        return future.get();
+//				    }
+//				    catch (Exception e) {
+//				        throw new IllegalStateException(e);
+//				    }
+//				}
+//			});
+    		
     	    /*
     		for(Sell task : tasks) {
         		Future<String> future = executor.submit(task);
@@ -461,7 +468,7 @@ public enum GoodState {
 		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);////important
 
 
-	    		Recorded rec = new Recorded("", integer, 0);
+	    		Recorded rec = new Recorded("", integer, wts);
 	    		Message message =  new Message(idUser, msg,sigs , rec, null);
 	    		
 	    		message.setSignature(

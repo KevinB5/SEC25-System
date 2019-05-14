@@ -136,21 +136,29 @@ public class Library {
 			inSt = in.get(serv);
 			ouSt.writeObject(intent);
 			res = (Message)inSt.readObject();
-			int ts=res.getRec().getTS();
 			
+			Thread.sleep(1000*3);
+
+			
+			if(res ==null) {
+				System.out.println("so sad");
+				return "NOT OK";}	
+			int ts=res.getRec().getTS();
+
+				
 			if(!(res.getCertificate()==null))
 				certlist.put(serv,new RecordCert(res.getCertificate(),ts));
 			//System.out.println("message from notary: "+res.getText());
-			Thread.sleep(1000*3);
 			//int ts=res.getRec().getTS();
 			System.out.println("verifying answer");
-			if(res ==null)
-				return "NOT OK";	
-				
+			System.out.println(ts + " " + wts);
+
+	
 			System.out.println(res.getSig().getBytes());
 			if(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID())
 					&& res.getText().split(" ")[0].equals("ACK") 
 					&& ts==wts) {
+				System.out.println("YAYYYY");
 				this.acklist.put(serv, true);
 				acks++;
 				System.out.println(acks);
@@ -162,7 +170,8 @@ public class Library {
 					return "OK";
 				}
 			}
-		} catch (IOException e) {
+		}
+		 catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
@@ -273,7 +282,7 @@ public class Library {
 						int maxts = WBRec.getTS();
 						
 						if(maxts==0) {
-//							System.out.println("ZERO COUNTER");
+							System.out.println("ZERO COUNTER");
 							signature[] zcsig = new signature[3];
 							Message zerocounter = new Message(owner,"zerocounter",zcsig,WBRec,null);
 //							System.out.println("message" + zerocounter.getText());

@@ -51,7 +51,7 @@ public class PKI {
 		
 		//KEYSTORE.load(null, pwdArray);
 //		Storage st = new Storage();
-		System.out.println(originPath()+line);
+//		System.out.println(originPath()+line);
 		PATH = originPath()+line+ "KeyStoreFile.jks";
 
 		File keystorefile = new File(PATH);
@@ -138,7 +138,7 @@ public static PublicKey getPublicKey(String uID) throws Exception {
 //System.out.println(KEYSTORE.containsAlias(uID));
 //System.out.println(KEYSTORE.aliases());
 	
-	System.out.println("certificate getPublic: "+KEYSTORE.getCertificate(uID).getPublicKey());
+//	System.out.println("certificate getPublic: "+KEYSTORE.getCertificate(uID).getPublicKey());
 	
 	return KEYSTORE.getCertificate(uID).getPublicKey();
 	}catch(Exception e){
@@ -150,9 +150,9 @@ public static PublicKey getPublicKey(String uID) throws Exception {
 public static PrivateKey getPrivateKey(String id, String pass) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException {//userID, password
 	
 //  PrivateKey myPrivateKey = null ;
-System.out.println("getting key for "+ id);
+//System.out.println("getting key for "+ id);
 
-System.out.println("pass: "+pass);
+//System.out.println("pass: "+pass);
 
 	KeyStore.ProtectionParameter protParam =    new KeyStore.PasswordProtection(pass.toCharArray());
 	KeyStore.PrivateKeyEntry pkEntry = (KeyStore.PrivateKeyEntry) KEYSTORE.getEntry(id, protParam);
