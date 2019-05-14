@@ -39,11 +39,13 @@ import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -55,7 +57,7 @@ public class eIDLib{
 	private static X509Certificate cert;
 	private static String line = System.getProperty("file.separator");
 	private static boolean cardExist = true;
-	
+	private  static PrivateKey priv ;
  
 	public static X509Certificate getCert() {
 		return cert;
@@ -63,6 +65,15 @@ public class eIDLib{
 
 	// Falta buscar as chaves RSA e assinar os objectos propriamente
 	public eIDLib() {
+		try {
+			KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+			keyGen.initialize(1024);
+			KeyPair pair = keyGen.generateKeyPair();
+			priv = pair.getPrivate();
+		} catch (NoSuchAlgorithmException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 		try {
 			System.out.println("            //Load the PTEidlibj");
 			
@@ -80,7 +91,6 @@ public class eIDLib{
 	        pteid.SetSODChecking(false); // Don't check the integrity of the ID, address and photo (!)
 	        cert = getCertFromByteArray(getCertificateInBytes(0));
 			sig = Signature.getInstance(cert.getSigAlgName());
-			System.out.println(cert.getSigAlgName());
 			
 		} catch (NoSuchFieldException | NoSuchAlgorithmException | CertificateException | PteidException 
 				| IllegalAccessException | SecurityException | IllegalArgumentException | UnsatisfiedLinkError e ) {
@@ -90,7 +100,7 @@ public class eIDLib{
 				cf = CertificateFactory.getInstance("X.509");
 				cert = (X509Certificate)cf.generateCertificate(new FileInputStream(
 						System.getProperty("user.dir")+line+"lib"+line+"certificate.crt"));
-				System.out.println("PRINT: " +cert.getSigAlgName());
+				System.out.println("Fake Cert: " +cert);
 				sig = Signature.getInstance(cert.getSigAlgName());
 			} catch (CertificateException | FileNotFoundException | NoSuchAlgorithmException e1) {
 				// TODO Auto-generated catch block
@@ -198,13 +208,16 @@ public class eIDLib{
 				e.printStackTrace();
 			}
 		}else {
-			try {
-				sig.initVerify(cert);
-			} catch (InvalidKeyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			signature = cert.getSignature();
+				try {
+					sig.initSign(priv);
+					sig.update(data.getBytes(Charset.forName("UTF-8")));
+					signature = sig.sign();
+					
+					sig.initVerify(cert);
+				} catch (InvalidKeyException | SignatureException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 		return signature;
          
@@ -228,12 +241,13 @@ public class eIDLib{
             //e.printStackTrace();
         	try {
         		cardExist = false;
-        		CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        		cert = (X509Certificate)cf.generateCertificate(new FileInputStream(
-						System.getProperty("user.dir")+line+"lib"+line+"certificate.crt"));
+        		if(cert==null) {
+	        		CertificateFactory cf = CertificateFactory.getInstance("X.509");
+	        		cert = (X509Certificate)cf.generateCertificate(new FileInputStream(
+							System.getProperty("user.dir")+line+"lib"+line+"certificate.crt"));
+        		}
         		sig = Signature.getInstance(cert.getSigAlgName());
-        		System.out.println(cert.getSigAlgName());
-        		System.out.println(cert);
+				System.out.println("Fake Cert2: " +cert);
         	}catch(Exception ex) {
         		ex.printStackTrace();
         	}
@@ -250,22 +264,24 @@ public class eIDLib{
 	 
 	 public boolean verifySignature(byte[] signature,String data) {
 		//Verificar assinature
-         try {
-			sig.update(data.getBytes(Charset.forName("UTF-8")));
-			System.out.println(data.getBytes(Charset.forName("UTF-8")));
-         
-	         if(sig.verify(signature)) {
-	        	 return true;
+//		 if(cardExist) {
+	         try {
+	        	
+				sig.update(data.getBytes(Charset.forName("UTF-8")));
+				
+		         if(sig.verify(signature)) {
+		        	 return true;
+		         }
+	         
+	         } catch (SignatureException  e) {
+	        	 // TODO Auto-generated catch block
+	        	 e.printStackTrace();
 	         }
-         
-         } catch (SignatureException e) {
-        	 // TODO Auto-generated catch block
-        	 e.printStackTrace();
-         }
-         return false;
+	         return false;
+//		 }else {
+//				return sign(cert,data).equals(signature);
+//		 }
 	 }
-	 
-	 
 	 
 	// public byte[] sign( p11_session, String text))
 	 

@@ -1,5 +1,6 @@
 pt\tecnico\sec\ILibrary.class
 pt\tecnico\sec\User.class
+pt\tecnico\sec\Library$RecordCert.class
 pt\tecnico\sec\Library$RecordSig.class
 pt\tecnico\sec\User$GoodState.class
 pt\tecnico\sec\P2PLib$1.class

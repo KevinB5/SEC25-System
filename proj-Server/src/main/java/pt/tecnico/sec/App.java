@@ -3,6 +3,7 @@ package pt.tecnico.sec;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -115,7 +116,10 @@ public class App
 	    									lock.writeLock().unlock();
 	    							}
 	    							//out.writeObject(res);
-	    						} catch (Exception e) {
+	    						} catch(SocketException e) {
+	    							System.out.println("can not contect client");
+	    						}
+	    				        catch (Exception e) {
 	    							e.printStackTrace();
 	    						}
 	    			        }
@@ -128,7 +132,7 @@ public class App
 	    	        } catch (Exception e) {
 	    				e.printStackTrace();
 	    				
-	    	        }
+	    	        }finally{
 	    	        
                 
     			
@@ -139,7 +143,7 @@ public class App
     	            } catch (IOException ex) {
     	                ex.printStackTrace();
     	            }
-    	        //}
+    	        }
                 
     	}
     }
