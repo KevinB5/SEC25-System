@@ -222,6 +222,7 @@ public enum GoodState {
 		counter = counters.get(goodID);
 		
 		Recorded result = new Recorded(state, counter, 0);
+		System.out.println("state verified");
 		return result;
 		// returns "<state , counter , challenge>"
 	}
@@ -296,6 +297,8 @@ public enum GoodState {
 	    	            }
 	    		}
 	    		delivered=false;
+	    		sentReady=false;
+
 
     			int counter = command.getRec().getCounter();
     			int ts = command.getRec().getTS();
@@ -396,7 +399,7 @@ public enum GoodState {
 	    		if(command.getRec().getCounter() == (counters.get(message[2]))){
 	    				//"buy <userID> <goodID> <goodCounter>
 	    			System.out.println("we in");
-	    			String rs=  this.transferGood(user,message[1],message[2],command.getSig().getBytes(),command.buyerSignature().getBytes());//seller, buyer, goodID
+	    			String rs=  this.transferGood(user,message[1],message[2],command.getSig(),command.buyerSignature());//seller, buyer, goodID
 		    		if(!rs.equals(NOK)) {
 		    			//eIDLib eid = new eIDLib();
 		    			System.out.println("okay, writing cert");
@@ -409,7 +412,14 @@ public enum GoodState {
 						sigs[0] = new signature(PKI.sign(mess,idNotary,PASS), mess);
 			    		Recorded rec = new Recorded("", counters.get(message[2]), Integer.parseInt(ts));
 
-			    		return new Message(this.idNotary, mess, sigs, rec,cert);
+			    		
+			    		Message mes = new Message(this.idNotary, mess, sigs, rec,cert);
+			    		
+			    		mes.setSignature(
+			    				new signature(
+			    						PKI.sign(mes.getHash(), idNotary, PASS), mes.getHash())
+			    				);
+			    		return mes;
 		    		}else
 		    			error = "notvalidtransfer "+ts;
 		    		sigs[0]=  new signature(PKI.sign(error,idNotary,PASS), error);
@@ -477,17 +487,17 @@ public enum GoodState {
 	 *)
 	 * @throws Exception 
 	 */
-	private String transferGood( String seller,String buyer , String goodID,byte[] sigSeller,byte[]sigBuyer) throws Exception {
+	private String transferGood( String seller,String buyer , String goodID,signature sigSeller,signature sigBuyer) throws Exception {
 		//for(String s: goods.keySet()) {System.out.println(s);}
 		//this.updateState();
 		if(goods.get(goodID).equals(seller)) {
 			System.out.println("SELLER OK "+ seller);
 			if(states.get(goodID).equals(GoodState.ONSALE)) {
-				String sigMsg = "intentionbuy "+goodID + " "+counters.get(goodID);
-				System.out.println("verifying signature for :"+"intentionbuy "+goodID + " "+counters.get(goodID));
-				if(PKI.verifySignature(sigMsg, sigBuyer, buyer)){
-					System.out.println("we in");
-					store.writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
+				//String sigMsg = "intentionbuy "+goodID + " "+counters.get(goodID);
+				System.out.println("verifying signature for :"+ buyer);
+				if(PKI.verifySignature(sigBuyer.getData(), sigBuyer.getBytes(), buyer)){
+					System.out.println("buyer intention verified");
+					//store.writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
 					store.updateFile(goodID, buyer);
 					goods.replace(goodID, buyer); 
 //				System.out.println("replacing " + goodID + " " + buyer);
@@ -512,6 +522,18 @@ public enum GoodState {
 		sigs[0]=sigt;
 		
 		Message mss= new Message(this.idNotary,ECH+" "+msg, sigs);
+		signature sig;
+		try {
+			sig = new signature(PKI.sign(mss.getHash(), mss.getID(), PASS), mss.getHash());
+			mss.setSignature(sig);
+
+		} catch (InvalidKeyException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		this.sentEcho=true;
 		for(String server: servers) {
 			try {
@@ -566,11 +588,13 @@ connect();
 					  //verifica consensus
 					  for(String serv : echos.keySet()) {
 							  if(echos.get(serv).equals(req)) {
+								  //verificar a ssinatura do seller e do notario
+								  msg.getSellSig() ; msg.getSig();//verificar com o pki 
 								  acks++;
 
 								  System.out.println("ack echo from: "+ serv+ " total acks: "+ acks);
 								  System.out.println(acks>(N+f)/2 );
-								  System.out.println((N+f)/2);
+								  System.out.println(sentReady);
 								  if(acks>(N+f)/2 & sentReady==false){
 									  //acks=0;
 									  sentReady = true;

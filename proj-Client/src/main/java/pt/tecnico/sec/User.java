@@ -308,40 +308,14 @@ public enum GoodState {
     		wts++;
     		ExecutorService executor = Executors.newWorkStealingPool();
     		
-    		executor.invokeAll(tasks)
-    	    .stream()
-    	    .map(new Function<Future<String>, Object>() {
-				@Override
-				public Object apply(Future<String> future) {
-				    try {
-				    	System.out.println(future.get());
-				        return future.get();
-				    }
-				    catch (Exception e) {
-				        throw new IllegalStateException(e);
-				    }
-				}
-			});
-    	    /*
-    		for(Sell task : tasks) {
-        		Future<String> future = executor.submit(task);
-        		fut.add(future);
-
+    		for(Future<String> answer : executor.invokeAll(tasks)) {
+    			System.out.println(answer.get());
+    			if(answer.get().equals(OK)) {
+    				System.out.println("Replacing state of good");
+    				goods.replace(good, GoodState.ONSALE);
+    			}
     		}
-    		Thread.sleep(1000*10);
-    		for(Future future: fut) {
-    			if(future.isDone()) {
-    				//System.out.println("waiting result");
-    				System.out.println("result"+future.get());
-
-
-    			}
-
-
-    			}
-    		*/
-		
-			//System.out.println("res is "+res);
+    		
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -355,32 +329,37 @@ public enum GoodState {
 		
 	}
 	
-	/**
-	 * Perguntar ao notary o estado de um good
-	 * 
-	 * @param good
-	 * @return estado do good
-	 */
-	/*
-	private void getStateOfGood(String good) {
+	private String intTransfer(String buyer, String good, byte[] buyerSig, String text) {
+		String res="";
 		try {
-			//Random string of 20 lowercase characters
-			challenge = generateRandomString(20);
-			String s = getStateOfGood(good,challenge);
-//			System.out.println("PUTTING COUNTER AT " + s);
-
-			//update counter
-			if(!counters.containsKey(good))
-				counters.put(good,s);
-			else
-				counters.replace(good,s);
-
+			ArrayList<Transfer> tasks = new ArrayList<Transfer>();
+			ArrayList<Future<String>>fut = new ArrayList<Future<String>>();
+			int i=0;
+			for(String not : servs) {
+				i++;
+				tasks.add(new Transfer( not,buyer, good, buyerSig, text));
+				}
+			
+    		wts++;
+    		ExecutorService executor = Executors.newWorkStealingPool();
+    		
+    		for(Future<String> answer : executor.invokeAll(tasks)) {
+    			System.out.println(answer.get());
+    			if(answer.get().equals(OK)) {
+    				System.out.println("Replacing state of good");
+    				//goods.replace(good, GoodState.ONSALE);
+    				res= answer.get();
+    			}
+    		}
+    		
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+
+		return res;
 	}
-	*/
 	
 	/**
 	 * Informar ao notary que quer comprar um dado good
@@ -407,9 +386,17 @@ public enum GoodState {
 			//manda 
 			System.out.println("Asking to buy "+good+ " from "+user);
 	    	signature[] sigs = new signature[3];//propria write buyer
-	    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
+//	    	assinatura de buy
+	    	sigs[2]= new signature(PKI.sign(msg,idUser,PASS), msg);
+	    	Message mss = new Message(idUser, msg,sigs , rec, null);
+	    	
+	    	mss.setSignature(
+	    			new signature(
+	    					PKI.sign(mss.getHash(), idUser, PASS), mss.getHash()
+	    					
+	    			));
 
-			res= lib.sendMessage(user,new Message(idUser, msg,sigs , rec, null));
+			res= lib.sendMessage(user,mss);
 //			buyGood(user, good,counter);
 
 			
@@ -512,11 +499,60 @@ public enum GoodState {
 	}
 	
 	private class Transfer implements Callable<String>{
+		String server;
+		String buyer;
+		String good;
+		byte[] buyerSig;
+		String text;
+		
+		
+		Transfer(String server, String buyer, String good, byte[] buyerSig, String text){
+			this.server = server;
+			this.buyer = buyer;
+			this.good = good;
+			this.buyerSig =buyerSig;
+			this.text = text;
+			
+		}
 
 		@Override
 		public String call() throws Exception {
-			// TODO Auto-generated method stub
-			return null;
+			String res= "";
+			try {
+				String msg=TRANSFER +" "+ buyer+" "+ good +" "+wts; 
+				signature[] sigs = new signature[3];//propria write buyer
+		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
+		    	sigs[1]=null;
+		    	sigs[2]=new signature(buyerSig, text);
+		    	System.out.println("transfering with counter: "+counters.get(good));
+
+	    		Recorded rec = new Recorded("", counters.get(good), wts);
+	    		
+	    		Message message =  new Message(idUser, msg,sigs , rec, null);
+	    		
+	    		message.setSignature(
+	    				new signature(
+		    				PKI.sign(
+		    						message.getHash(), idUser,PASS) , message.getHash()
+		    				
+	    				));
+				res= lib.write(server,message, wts);
+
+				//res= lib.write(server,new Message(idUser, msg,sigs , rec, null), wts);
+				//res=  lib.write( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),buyerSig, null, null),wts);
+
+				System.out.println("answer from notary: "+res);
+				if(res.equals(OK)) {
+//					System.out.println(res);
+					//TODO: Mandar resposta ao Buyer
+					goods.remove(good);
+					printgoods();
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return res;
 		}
 		
 	}
@@ -650,7 +686,7 @@ public enum GoodState {
 		System.out.println("Verifying signature of received message");
 
 
-    	if(!PKI.verifySignature(msg, command.getSig().getBytes(), command.getID())) {
+    	if(!PKI.verifySignature(command.getHash(), command.getSig().getBytes(), command.getID())) {
         	sigs[0]= new signature(PKI.sign(error,idUser,PASS), error);
         	sigs[1]=null;
         	sigs[2]=null;
@@ -675,7 +711,7 @@ public enum GoodState {
     			String good =res[1];
     			
     			System.out.println("Asking notary...");
-    			String rep = transferGood(command.getID(), good, command.getSig().getBytes(), command.getText());
+    			String rep = intTransfer(command.getID(), good, command.buyerSignature().getBytes(), command.getText());
 //	    		System.out.println(rep);
     			if(rep.equals("OK")) {
     				System.out.println(rep);

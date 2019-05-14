@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import pt.tecnico.sec.App.ConnectClient;
 
 public class SLibrary {
-	private HashMap<String,Socket> sockets = new HashMap<String, Socket>();
+	private HashMap<String,ObjectOutputStream> sockets = new HashMap<String, ObjectOutputStream>();
 	private Notary notary;
 	private static final String IP = "127.0.0.1";
 
@@ -27,7 +27,7 @@ public class SLibrary {
 		try {
 			Socket clientSocket = new Socket(IP, Uport);
 			System.out.println("connected to server at port: "+ Uport);
-			this.sockets.put(userID, clientSocket);
+			this.sockets.put(userID, new ObjectOutputStream(clientSocket.getOutputStream()));
 			
 		}catch(ConnectException cnn) {
 			System.out.println(userID + " is not connected");
@@ -65,16 +65,19 @@ public class SLibrary {
 		         
 		         
 			 	
-				 Socket clientSocket = sockets.get(uID);
-				 if(clientSocket == null)
+				 outU = sockets.get(uID);
+				 if(outU == null)
 					 throw new Exception("Must connect to user "+ uID+" first");
-					outU = new ObjectOutputStream(clientSocket.getOutputStream());
+				
+				 //outU = new ObjectOutputStream(clientSocket.getOutputStream());
 					//inU= new ObjectInputStream(clientSocket.getInputStream());
 				
 
 				    lock.writeLock().lock();
 				    try {
 					outU.writeObject(msg);
+			 		//outU.reset();
+
 					outU.flush();
 
 				    } catch (Exception e) {
@@ -85,23 +88,10 @@ public class SLibrary {
 					}
 			 		
 			 		//outU.writeObject(msg);
-			 		//outU.reset();
 			 		//
 			 		
 					//
 			 		//resp = (Message) inU.readObject();
-					//return execRequest(resp);
-					//this.stopConnectServer();
-//			 		Message temp = (Message) inU.readObject();
-//			 		if (temp.getClass().equals(String.class)) {
-//			 			System.out.println(temp);
-//			 			return ;
-//			 		}
-//			 		else {
-//			 			resp = (Message) temp;
-//			 		}
-//					//System.out.println("inU.readObject() " + inU.readObject());
-//					return ;
 
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

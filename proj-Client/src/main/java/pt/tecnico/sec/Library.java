@@ -208,13 +208,13 @@ public PublicKey getKey(String uid) throws InvalidKeyException, Exception {
 			ouSt.writeObject(intent);
 			res = (Message)inSt.readObject();
 			//System.out.println("message from notary: "+res.getText());
-			Thread.sleep(1000*3);
+			Thread.sleep(1000*2);
 			//int ts=res.getRec().getTS();
 			System.out.println("verifying answer");
 			if(res ==null)
 				return "NOT OK";	
 				
-			System.out.println(res.getSig().getBytes());
+			///System.out.println(res.getSig().getBytes());
 			if(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID())
 					&& res.getText().split(" ")[0].equals("ACK") 
 					/*&& ts==wts*/) {

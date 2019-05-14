@@ -45,7 +45,9 @@ private byte[] encodedhash;
      this.sellSig = signatures[0];
 //   this.key = key;
    this.writeSignature=signatures[1];
-	 this.buyerSignature=null;
+   this.buyerSignature=signatures[2];
+
+	 //this.buyerSignature=null;
 	 this.rec = null;
 
  }
