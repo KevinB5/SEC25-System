@@ -73,7 +73,8 @@ public enum GoodState {
 	private final String hashLimit = "0000";
 	private int responses=0;
 
-	
+	private	JSONGood json = JSONGood.getInstance();
+
 	
 	public Notary(int id, Storage store,int f) {
 		this.id=id;
@@ -85,8 +86,8 @@ public enum GoodState {
         N=3*f+1;
         this.lib=new SLibrary(this);
 
-        this.updateState();
-		System.out.println(goods);
+        //this.updateState();
+//		System.out.println(goods);
 
 		for(String goodID: goods.keySet()) {
 			counters.put(goodID, 0);
@@ -306,8 +307,9 @@ public enum GoodState {
     			
     			
 	    		if(ts>= timestamps.get(good) && correctCounter) {
-	    			
-		    		String rs=this.verifySelling(user, message[1]);//userID, goodID
+//		    		rs=this.verifySelling(user, message[1]);//userID, goodID
+		    		//JSON
+		    		String rs=json.verifySelling(user, message[1],idNotary);//userID, goodID
 		    		if(rs.equals("ACK")) {
 		    			timestamps.put(good,ts);
 		    			goods.put(good, user);
@@ -515,6 +517,10 @@ public enum GoodState {
 					System.out.println("we in");
 					store.writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
 					store.updateFile(goodID, buyer);
+					
+					//JSON ;confirmar o estado
+					json.updateFile(goodID,buyer,"notonsale",idNotary);
+					
 					goods.replace(goodID, buyer); 
 					states.replace(goodID, GoodState.NOTONSALE);
 					counters.replace(goodID,counters.get(goodID)+1);

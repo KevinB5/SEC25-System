@@ -14,8 +14,22 @@ import org.json.simple.parser.ParseException;
 public class JSONGood {
 	
 	private final String PATH = "goods";
-	
+	private static JSONGood instance = null;
 
+	/**
+	 * ATENÇÃO O ESTADO DOS GOODS É "onsale" OU "notonsale"
+	 */
+	
+	private JSONGood() {
+    }
+
+    public static JSONGood getInstance() {
+        if (instance == null) {
+            instance = new JSONGood();
+        }
+        return instance;
+    }
+    
 	//manipulatorID is the ID of the entity that is using this method (for example notary1)
 	public void updateFile(String goodID, String newOwner,String goodState, String manipulatorID) {
 		File myFile=null;
@@ -119,4 +133,35 @@ public class JSONGood {
 		return null;
 	}
 	
+	//manipulatorID is the ID of the entity that is using this method (for example notary1)
+		public String verifySelling(String sellerID, String goodID,String manipulatorID) {
+			try {
+				File myFile = new File(PATH+manipulatorID+".json");
+				if(myFile.createNewFile())
+					return "Not OK";
+				
+				JSONParser jsonParser = new JSONParser();
+				try ( FileReader reader = new FileReader(PATH+manipulatorID+".json")){
+					Object obj = jsonParser.parse(reader);
+					
+					JSONArray userList = (JSONArray) obj;
+					JSONArray newUserList = new JSONArray();
+					
+					for( Object userObject : userList) {
+						JSONObject user = (JSONObject)userObject;
+						JSONObject goods = (JSONObject)user.get("goods");
+						if(user.get("userID").equals(sellerID) && goods.get(goodID)=="onsale")
+							return "ACK";
+					}
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				    
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			return "Not OK";
+		}
 }
