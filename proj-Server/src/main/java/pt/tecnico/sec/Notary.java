@@ -73,7 +73,8 @@ public enum GoodState {
 	private final String hashLimit = "0000";
 	private int responses=0;
 
-	
+	private	JSONGood json = JSONGood.getInstance();
+
 	
 	public Notary(int id, Storage store,int f) {
 		this.id=id;
