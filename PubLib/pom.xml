@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>HDS</artifactId>
-    <groupId>pt.tecnico.sec</groupId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
-
+ 
   <groupId>pt.tecnico.sec</groupId>
   <artifactId>PubLib</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -36,14 +31,23 @@
     <artifactId>commons-io</artifactId>
     <version>2.4</version>
 </dependency>
-    
+ 
     <dependency>
 	    <groupId>pteidlibj</groupId>
 	    <artifactId>pteid</artifactId>
 	    <version>1.0</version>
 	    <scope>system</scope>
-    <systemPath>${project.basedir}/lib/eIDLib_PKCS11_test/lib/pteidlibj.jar</systemPath>
+    <systemPath>${project.basedir}/Temp/pteid_jni/pteidlibj.jar</systemPath>
     </dependency>
+    
+    <dependency>
+	   <groupId>com.googlecode.json-simple</groupId>
+    	<artifactId>json-simple</artifactId>
+	    <version>1.1.1</version>
+	    <scope>system</scope>
+    <systemPath>${project.basedir}/lib/json-simple-1.1.1.jar</systemPath>
+    </dependency>
+   
   </dependencies>
 
   <build>
