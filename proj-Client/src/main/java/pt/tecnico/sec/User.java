@@ -471,12 +471,12 @@ public enum GoodState {
 		public String call() throws Exception {
 			// TODO Auto-generated method stub
 			String ret ="";
-			String msg =SELL +  " " +goodID + " "+wts;
+			String msg =SELL +  " " +goodID + " " +counters.get(goodID) +" "+wts;
 			System.out.println("sending message:"+ msg);
 			try {
 				signature[] sigs = new signature[3];//propria write buyer
 		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);////important
-
+		    	sigs[1] = new signature(PKI.sign(msg,idUser,PASS), msg);
 
 	    		Recorded rec = new Recorded("", integer, wts);
 	    		Message message =  new Message(idUser, msg,sigs , rec, null);
@@ -557,12 +557,86 @@ public enum GoodState {
 		
 	}
 	
-	private class State implements Callable<String>{
+//	private class Transfer implements Callable<String>{
+//			String server;
+//			String buyer;
+//			String good;
+//			byte[] buyerSig;
+//			String text;
+//			
+//			
+//			Transfer(String server, String buyer, String good, byte[] buyerSig, String text){
+//				this.server = server;
+//				this.buyer = buyer;
+//				this.good = good;
+//				this.buyerSig =buyerSig;
+//				this.text = text;
+//				
+//			}
+//	
+//			@Override
+//			public String call() throws Exception {
+//				String res= "";
+//				try {
+//					String msg=TRANSFER +" "+ buyer+" "+ good +" "+wts; 
+//					signature[] sigs = new signature[3];//propria write buyer
+//			    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
+//			    	sigs[1]=null;
+//			    	sigs[2]=new signature(buyerSig, text);
+//			    	System.out.println("transfering with counter: "+counters.get(good));
+//	
+//		    		Recorded rec = new Recorded("", counters.get(good), wts);
+//		    		
+//		    		Message message =  new Message(idUser, msg,sigs , rec, null);
+//		    		
+//		    		message.setSignature(
+//		    				new signature(
+//			    				PKI.sign(
+//			    						message.getHash(), idUser,PASS) , message.getHash()
+//			    				
+//		    				));
+//					res= lib.write(server,message, wts);
+//	
+//					//res= lib.write(server,new Message(idUser, msg,sigs , rec, null), wts);
+//					//res=  lib.write( new Message(idUser, msg, PKI.sign(msg,idUser,PASS),buyerSig, null, null),wts);
+//	
+//					System.out.println("answer from notary: "+res);
+//					if(res.equals(OK)) {
+//	//					System.out.println(res);
+//						//TODO: Mandar resposta ao Buyer
+//						goods.remove(good);
+//						printgoods();
+//					}
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				return res;
+//			}
+//			
+//		}
+
+	private class WriteBack implements Callable<String>{
+		String server;
+		Message intent;
+		int timestamp;
+		boolean invisible;
+		String goodID;
+		
+		
+		WriteBack(String server,String goodID, Message intent, int timestamp,boolean invisible){
+			this.server=server;
+			this.intent=intent;
+			this.timestamp=timestamp;
+			this.invisible = invisible;
+			this.goodID= goodID;
+		}
 
 		@Override
 		public String call() throws Exception {
-			// TODO Auto-generated method stub
-			return null;
+			String WBResult = lib.write(server,intent, timestamp);
+			System.out.println("WBResult: "+WBResult);
+			return WBResult;
 		}
 		
 	}
@@ -625,7 +699,7 @@ public enum GoodState {
 	    	System.out.println(sigs[0]==null);
 
 
-	    	Recorded rec = new Recorded("", counter, counter);
+	//    	Recorded rec = new Recorded("", counter, counter);
 //    		
 //    		Message mess =  new Message(idUser, msg,sigs,rec,null);
 //    		
@@ -642,18 +716,23 @@ public enum GoodState {
 //			
 //    		
 //			result.setSignature(new signature(PKI.sign("", idUser, PASS), ""));
-    		//Recorded rec = new Recorded("", integer, 0);
-    		Message message =  new Message(idUser, msg,sigs , rec, null);
+			Recorded rec = new Recorded("", counter, -1);
     		
-    		message.setSignature(
+    		Message mess =  new Message(idUser, msg,sigs,rec,null);
+    		
+    		byte[] sig = PKI.sign(mess.getHash(), idUser, PASS);
+    		
+    		mess.setSignature(
     				new signature(
-	    				PKI.sign(
-	    						message.getHash(), idUser,PASS) , message.getHash()
-	    				
-    				));
-    		
-			Message result= lib.read(message,rid, challenge,goodID);
+    						sig, mess.getHash())
+    				);
+    		    		
+    		System.out.println("Sending read request");
+			Message result= lib.read(mess,rid, challenge,goodID);
+			
+			System.out.println("Read result: "+result.getText());
 
+			
 			/*  WRITE-BACK HERE   */
 			
 			if(result.getText().equals("zerocounter")) {
@@ -664,21 +743,41 @@ public enum GoodState {
 			
 			int wbts= result.getRec().timestamp;
 			
-			for(String serv: servs) {
-				String WBResult = lib.write(serv,result, wbts);
-				System.out.println("WBResult: "+WBResult);
-				if(WBResult.equals("OK")) {
-					if(!invisible)
-						System.out.println("STATE from notary:" +goodID+" "+result.getRec().state +" "+(result.getRec().counter+1));
-					
-					if(!counters.containsKey(goodID))
-						counters.put(goodID,result.getRec().counter);
-					else
-						counters.replace(goodID,result.getRec().counter);   
+			result.setSignature(new signature(PKI.sign(result.getText(), idUser, PASS), result.getText()));
+			
+			/***MULTI- THREADED WB*****/
+			
+			ArrayList<WriteBack> tasks = new ArrayList<WriteBack>();
+			ArrayList<Future<String>>fut = new ArrayList<Future<String>>();
+			int i=0;
+			for(String serv : servs) {
+				i++;
+				tasks.add(new WriteBack( serv,goodID, result, wbts, invisible));
 				}
+			
+    		wts++;
+    		ExecutorService executor = Executors.newWorkStealingPool();
+    		String res="";
+    		for(Future<String> answer : executor.invokeAll(tasks)) {
+    			System.out.println(answer.get());
+    			if(answer.get().equals(OK)) {
+    				System.out.println("Replacing state of good");
+    				//goods.replace(good, GoodState.ONSALE);
+    				res= answer.get();
+    			}
+    		}
+			
+	
+			
+			if(res.equals("OK")) {
+				if(!invisible)
+					//System.out.println("STATE from notary:" +goodID+" "+result.getRec().state +" "+(result.getRec().counter+1));
+				
+				if(!counters.containsKey(goodID))
+					counters.put(goodID,result.getRec().counter);
+				else
+					counters.replace(goodID,result.getRec().counter);   
 			}
-			
-			
 				
 			}
 

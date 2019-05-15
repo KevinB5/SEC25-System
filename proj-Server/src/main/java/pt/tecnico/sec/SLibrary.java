@@ -104,8 +104,6 @@ public class SLibrary {
 					e.printStackTrace();
 				}
 				//resp = pki.encrypt(,resp); falta buscar a chave privada do user
-		        return ;
-
 		    }
 		
 

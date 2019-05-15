@@ -152,8 +152,8 @@ public class Library {
 			int ts=res.getRec().getTS();
 
 				
-			if(!(res.getCertificate()==null))
-				certlist.put(serv,new RecordCert(res.getCertificate(),ts));
+			if(!(res.getCertSig()==null))
+				certlist.put(serv,new RecordCert(res.getCertSig(),ts));
 			//System.out.println("message from notary: "+res.getText());
 			//int ts=res.getRec().getTS();
 			System.out.println("verifying answer");
@@ -259,12 +259,15 @@ public class Library {
 						&& r==rid
 						&& split[3].equals(challenge)) {
 					System.out.println("heyyy");
+					
+					
+					///// nao é o writer q está verified mas sim o notario///////
 
 				System.out.println("Writer Verified: "+writerVerified);
 				
 				if(writerVerified)
-					writesignaturelist.put(serv, new RecordSig(res.getWriteSignature(),ts));
-
+					writesignaturelist.put(serv, new RecordSig(res.getWriteSignature(),ts));			
+				////// a verificar duas vezes a assinatura do notrio //////////
 				
 				if(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID())
 					&& r==rid

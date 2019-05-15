@@ -121,6 +121,7 @@ public enum GoodState {
 	void connect() {
 		HashMap<String, Integer> h = store.readServs();
 		servers= h.keySet();
+		servers.remove(idNotary);
 		for(String server:h.keySet()) {
 			if(!server.equals(this.idNotary)){
 				lib.connect(server, h.get(server));
