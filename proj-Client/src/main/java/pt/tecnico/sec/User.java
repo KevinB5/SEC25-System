@@ -625,23 +625,23 @@ public enum GoodState {
 	    	System.out.println(sigs[0]==null);
 
 
-			Recorded rec = new Recorded("", counter, -1);
-    		
-    		Message mess =  new Message(idUser, msg,sigs,rec,null);
-    		
-    		byte[] sig = PKI.sign(mess.getHash(), idUser, PASS);
-    		
-    		mess.setSignature(
-    				new signature(
-    						sig, mess.getHash())
-    				);
-    		    		
-    		System.out.println("Sending read request");
-			Message result= lib.read(mess,rid, challenge,goodID);
-			System.out.println("Read result: "+result.getText());
-			
-    		
-			result.setSignature(new signature(PKI.sign("", idUser, PASS), ""));
+	    	Recorded rec = new Recorded("", counter, counter);
+//    		
+//    		Message mess =  new Message(idUser, msg,sigs,rec,null);
+//    		
+//    		byte[] sig = PKI.sign(mess.getHash(), idUser, PASS);
+//    		
+//    		mess.setSignature(
+//    				new signature(
+//    						sig, mess.getHash())
+//    				);
+//    		    		
+//    		System.out.println("Sending read request with counter "+counter);
+//			Message result= lib.read(mess,rid, challenge,goodID);
+//			System.out.println("Read result: "+result.getText() + " counter "+result.getRec().getCounter());
+//			
+//    		
+//			result.setSignature(new signature(PKI.sign("", idUser, PASS), ""));
     		//Recorded rec = new Recorded("", integer, 0);
     		Message message =  new Message(idUser, msg,sigs , rec, null);
     		
@@ -651,7 +651,8 @@ public enum GoodState {
 	    						message.getHash(), idUser,PASS) , message.getHash()
 	    				
     				));
-			result= lib.read(message,rid, challenge,goodID);
+    		
+			Message result= lib.read(message,rid, challenge,goodID);
 
 			/*  WRITE-BACK HERE   */
 			

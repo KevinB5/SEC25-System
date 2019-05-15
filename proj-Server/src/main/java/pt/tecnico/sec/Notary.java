@@ -118,14 +118,21 @@ public enum GoodState {
 	
 	}
 	
-	public void connect() {
+	void connect() {
 		HashMap<String, Integer> h = store.readServs();
 		servers= h.keySet();
-
-		servers.remove(idNotary);
 		for(String server:h.keySet()) {
 			if(!server.equals(this.idNotary)){
 				lib.connect(server, h.get(server));
+				}
+			}
+		resetBRB();
+
+	}
+	
+	private void resetBRB() {
+		for(String server:servers) {
+			if(!server.equals(this.idNotary)){
 				this.echos.put(server,"");
 				this.readies.put(server,"");
 			}
@@ -589,7 +596,6 @@ public enum GoodState {
 		signature[] sigs = new signature[3];//propria write buyer
 
 		Message mss= new Message(this.idNotary,RDY+" "+msg, sigs);
-connect();
 		for(String server: servers) {
 			try {
 				lib.sendMessage(server, mss);
@@ -676,6 +682,7 @@ connect();
 								acks=0;
 								delivered=true;
 								notifyAll();
+								this.resetBRB();
 								break;
 								//System.out.println(Thread.activeCount());
 								//return to user
@@ -688,6 +695,7 @@ connect();
 						 Thread.currentThread().getThreadGroup().enumerate(list);
 						 for(Thread t:list) {
 							 if (t.getId()==waitID) {
+								 resetBRB();
 								 t.interrupt();
 							 }
 						 }
