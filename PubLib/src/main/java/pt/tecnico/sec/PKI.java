@@ -52,7 +52,7 @@ public class PKI {
 		//KEYSTORE.load(null, pwdArray);
 //		Storage st = new Storage();
 //		System.out.println(originPath()+line);
-		PATH = originPath()+line+ "KeyStoreFile.jks";
+		PATH = originPath()+line+ "KeyStoreFileTest.jks";
 
 		File keystorefile = new File(PATH);
 		

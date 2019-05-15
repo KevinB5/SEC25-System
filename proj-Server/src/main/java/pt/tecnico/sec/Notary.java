@@ -261,7 +261,11 @@ public enum GoodState {
     	signature[] sigs = new signature[3];//propria write buyer
     	String error ="";
     	//System.out.println("signature verification: "+this.verifySignature(command.getText(), command.getSig(), command.getID()));
-
+    	System.out.println(command.getHash());
+    	System.out.println(command.getSig());
+    	System.out.println(user);
+    	
+    	
     	if(PKI.verifySignature(command.getHash(), command.getSig().getBytes(), user)
     			|| PKI.verifySignature(command.getWriteSignature().getData(), command.getWriteSignature().getBytes(),user)) {
 			
@@ -557,7 +561,7 @@ public enum GoodState {
 		signature[] sigs = new signature[3];//propria write buyer
 		sigs[0]=sigt;
 		
-		Message mss= new Message(this.idNotary,ECH+" "+msg, sigs);
+		Message mss= new Message(this.idNotary,ECH+" "+msg, sigs, null);
 		signature sig;
 		try {
 			sig = new signature(PKI.sign(mss.getHash(), mss.getID(), PASS), mss.getHash());
@@ -588,7 +592,7 @@ public enum GoodState {
 		System.out.println("starting 2nd broadcast");
 		signature[] sigs = new signature[3];//propria write buyer
 
-		Message mss= new Message(this.idNotary,RDY+" "+msg, sigs);
+		Message mss= new Message(this.idNotary,RDY+" "+msg, sigs,null);
 connect();
 		for(String server: servers) {
 			try {

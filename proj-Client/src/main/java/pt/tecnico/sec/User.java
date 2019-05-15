@@ -471,12 +471,12 @@ public enum GoodState {
 		public String call() throws Exception {
 			// TODO Auto-generated method stub
 			String ret ="";
-			String msg =SELL +  " " +goodID + " "+wts;
+			String msg =SELL +  " " +goodID + " " +counters.get(goodID) +" "+wts;
 			System.out.println("sending message:"+ msg);
 			try {
 				signature[] sigs = new signature[3];//propria write buyer
 		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);////important
-
+		    	sigs[1] = new signature(PKI.sign(msg,idUser,PASS), msg);
 
 	    		Recorded rec = new Recorded("", integer, wts);
 	    		Message message =  new Message(idUser, msg,sigs , rec, null);
@@ -638,8 +638,9 @@ public enum GoodState {
     		    		
     		System.out.println("Sending read request");
 			Message result= lib.read(mess,rid, challenge,goodID);
-			System.out.println("Read result: "+result.getText());
 			
+			System.out.println("Read result: "+result.getText());
+			/*
     		
 			result.setSignature(new signature(PKI.sign("", idUser, PASS), ""));
     		//Recorded rec = new Recorded("", integer, 0);
@@ -652,7 +653,7 @@ public enum GoodState {
 	    				
     				));
 			result= lib.read(message,rid, challenge,goodID);
-
+			*/
 			/*  WRITE-BACK HERE   */
 			
 			if(result.getText().equals("zerocounter")) {
@@ -662,6 +663,8 @@ public enum GoodState {
 				
 			
 			int wbts= result.getRec().timestamp;
+			
+			result.setSignature(new signature(PKI.sign("", idUser, PASS), ""));
 			
 			for(String serv: servs) {
 				String WBResult = lib.write(serv,result, wbts);

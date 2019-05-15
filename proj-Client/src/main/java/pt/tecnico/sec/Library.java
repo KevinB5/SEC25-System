@@ -152,8 +152,8 @@ public class Library {
 			int ts=res.getRec().getTS();
 
 				
-			if(!(res.getCertificate()==null))
-				certlist.put(serv,new RecordCert(res.getCertificate(),ts));
+			if(!(res.getCertSig()==null))
+				certlist.put(serv,new RecordCert(res.getCertSig(),ts));
 			//System.out.println("message from notary: "+res.getText());
 			//int ts=res.getRec().getTS();
 			System.out.println("verifying answer");
