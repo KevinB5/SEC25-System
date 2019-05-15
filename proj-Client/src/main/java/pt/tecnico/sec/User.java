@@ -770,9 +770,14 @@ public enum GoodState {
 	
 			
 			if(res.equals("OK")) {
-				if(!invisible)
-					//System.out.println("STATE from notary:" +goodID+" "+result.getRec().state +" "+(result.getRec().counter+1));
-				
+				if(!invisible) {
+					int count;
+					if(result.getText().split(" ")[0].equals("sell"))
+						count=result.getRec().counter+1;
+					else
+						count = result.getRec().counter;
+					System.out.println("STATE from notary:" +goodID+" "+result.getRec().state +" "+count);
+				}
 				if(!counters.containsKey(goodID))
 					counters.put(goodID,result.getRec().counter);
 				else
