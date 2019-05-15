@@ -176,7 +176,7 @@ public class eIDLib{
 	         // initialize the signature method
 	         System.out.println("            //initialize the signature method");
 	         CK_MECHANISM mechanism = new CK_MECHANISM();
-	         mechanism.mechanism = PKCS11Constants.CKM_SHA256_RSA_PKCS;
+	         mechanism.mechanism = PKCS11Constants.CKM_SHA1_RSA_PKCS;
 	         mechanism.pParameter = null;
 	         pkcs11.C_SignInit(p11_session, mechanism, signatureKey);
 		        
