@@ -34,12 +34,21 @@ public class ClientApp
     public static void main( String[] args ) throws BindException
     {
         System.out.println("Select the user ID number");
-        String nu;
+        String nu= System.console().readLine();
+        
+        System.out.println("Are we using the Citizen Card? (Y/N)");
+        String cc = System.console().readLine(); //nu will be Y or N which we use to obtain keys for notaries 
+        
+        boolean citizencard= false;
+        if(cc.contentEquals("Y"))
+        	citizencard= true;
+        
+        
         int nUsr=-1;//not a valid user number to begin with
-        nu= System.console().readLine();
+//        nu= System.console().readLine();
         try {
         	nUsr = Integer.parseInt(nu);
-	        user = new User(ID + nUsr, IP);//recebe o ip e a porta 
+	        user = new User(ID + nUsr, IP,citizencard);//recebe o ip e a porta 
         	new Thread(new P2PLib(user, user.gtPort())).start();
 
 
@@ -54,7 +63,7 @@ public class ClientApp
         	nUsr =Integer.parseInt(System.console().readLine());
 	        try {
 	        	//cria novo user
-				user = new User(ID + nUsr, IP);
+				user = new User(ID + nUsr, IP,citizencard);
 			} catch (Exception e2) {
 				// TODO Auto-generated catch block
 				e2.printStackTrace();

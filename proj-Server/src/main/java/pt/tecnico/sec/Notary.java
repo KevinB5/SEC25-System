@@ -67,6 +67,7 @@ public enum GoodState {
 	private final int id;
 	private int f;
 	private int N;
+	private boolean citizencard;
 	
 
 	private KeyPair keypair = null;
@@ -76,8 +77,9 @@ public enum GoodState {
 	private	JSONGood json = JSONGood.getInstance();
 
 	
-	public Notary(int id, Storage store,int f) {
+	public Notary(int id, Storage store,int f,boolean citizencard) {
 		this.id=id;
+		this.citizencard = citizencard;
 		idNotary = "notary"+ id;
         this.store = store;
         store.setLog(String.valueOf(id));
@@ -310,6 +312,8 @@ public enum GoodState {
     			
     			boolean correctCounter = (counter==counters.get(good)) || (states.get(good).equals(GoodState.ONSALE)); 
     			
+    			System.out.println(command.getWriteSignature());
+    			
     			
 	    		if(ts>= timestamps.get(good) && correctCounter) {
 	    			
@@ -432,13 +436,16 @@ public enum GoodState {
 		    		if(!rs.equals(NOK)) {
 		    			//eIDLib eid = new eIDLib();
 		    			System.out.println("okay, writing cert");
-		    			int days = 7;
-						X509Certificate cert = null;
-			    		//cert = eid.getCert();
-		    			//cert= null;
-			    		//eid.sign(cert,rs);
-						String mess = ACK ;
-
+		    			signature certsig = null;	    			
+		    			if(citizencard) {
+		    				//"owner goodID buyer counter"
+		    				String certText = "owner "+message[2]+" "+message[1]+" "+counters.get(message[2]);
+		    				eIDLib eid = new eIDLib();
+		    				X509Certificate cert = eid.getCert();
+		    				certsig = new signature(eid.sign(cert, certText),certText);		    				
+		    			}
+		    			String mess = ACK ; 				
+		    			
 						sigs = new signature[3];
 			    		Recorded rec = new Recorded("", counters.get(message[2]), Integer.parseInt(ts));
 
@@ -452,7 +459,7 @@ public enum GoodState {
 //			    				);
 //			    		return mes;
 //=======
-			    		Message response = new Message(this.idNotary, mess, sigs, rec,cert);
+			    		Message response = new Message(this.idNotary, mess, sigs, rec,certsig);
 			    		response.setSignature(new signature(PKI.sign(response.getHash(),idNotary,PASS),response.getHash()));
 			    		return response;
 		    		}else
@@ -552,15 +559,21 @@ public enum GoodState {
 		return NOK;
 	}
 	
-	private void startBroadCast(String msg, signature sigt) {
+	private void startBroadCast(String msg, signature sigt) throws InvalidKeyException, Exception {
 		System.out.println("starting broadcast");
 		signature[] sigs = new signature[3];//propria write buyer
-		sigs[0]=sigt;
+		sigs[0]= new signature(PKI.sign(msg,this.idNotary,PASS), msg);
+		sigs[1]=sigt;
 		
-		Message mss= new Message(this.idNotary,ECH+" "+msg, sigs);
+		Message mss= new Message(this.idNotary,ECH+" "+msg, sigs, new Recorded("",-1,-1));
 		signature sig;
+		System.out.println("CHECKING WITH KEV");
+		System.out.println(mss.getText());
+		System.out.println(mss.getID());
+		System.out.println(mss.getHash());
+		
 		try {
-			sig = new signature(PKI.sign(mss.getHash(), mss.getID(), PASS), mss.getHash());
+			sig = new signature(PKI.sign(mss.getHash(), this.idNotary, PASS), mss.getHash());
 			mss.setSignature(sig);
 
 		} catch (InvalidKeyException e1) {
@@ -588,8 +601,8 @@ public enum GoodState {
 		System.out.println("starting 2nd broadcast");
 		signature[] sigs = new signature[3];//propria write buyer
 
-		Message mss= new Message(this.idNotary,RDY+" "+msg, sigs);
-connect();
+		Message mss= new Message(this.idNotary,RDY+" "+msg, sigs, new Recorded("",-1,-1));
+		connect();
 		for(String server: servers) {
 			try {
 				lib.sendMessage(server, mss);
@@ -612,23 +625,32 @@ connect();
 		String req="";
 		int acks=0;
 		
+		System.out.println("COMMAND IS: "+cmd + " from: "+uid);
 		
 		for(int i=1;i<spl.length;i++ ){req+=spl[i] +" ";}
 
 		switch(cmd) {
 			case(ECH):
-				if(this.echos.get(uid)=="") {
+				
+				for(String ech :echos.keySet()) {
+					System.out.println("CHECK ECHO KEVIN: "+ ech);
+				}
+				
+				if(this.echos.get(uid).equals("")) {
 					responses++;
 					System.out.println("new echo from: "+uid);
 					  echos.put(uid,req);
 					  //verifica consensus
 					  for(String serv : echos.keySet()) {
+						  System.out.println("KEVIN CHECK: "+echos.get(serv) + "; " + req);
 							  if(echos.get(serv).equals(req)) {
+
 								  //verificar a ssinatura do seller e do notario
 								  msg.getSellSig() ; msg.getSig();//verificar com o pki 
 								  acks++;
 
 								  System.out.println("ack echo from: "+ serv+ " total acks: "+ acks);
+								  System.out.println(((N+f)/2));
 								  System.out.println(acks>(N+f)/2 );
 								  System.out.println(sentReady);
 								  if(acks>(N+f)/2 & sentReady==false){

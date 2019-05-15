@@ -32,6 +32,8 @@ public class Library {
 	private ArrayList<Socket> servConnects = new ArrayList<Socket>();
 	private ServerSocket serverSocket;
 
+	
+	private boolean citizencard;
 	private int n;
 	private int f=1;
     private HashMap<String,ObjectOutputStream> out = new HashMap<String,ObjectOutputStream>();
@@ -55,16 +57,16 @@ public class Library {
 	
 	private HashMap<String,RecordSig> signaturelist = new HashMap<String,RecordSig>();
 	private HashMap<String,RecordSig> writesignaturelist = new HashMap<String,RecordSig>();
-	private HashMap<String,RecordCert> certlist = new HashMap<String,RecordCert>();
+	private HashMap<String,RecordSig> sigcertlist = new HashMap<String,RecordSig>();
 	
     
-    public Library(User user, String _ip, HashMap<String, Integer> servPorts) {
+    public Library(User user, String _ip, HashMap<String, Integer> servPorts,boolean citizencard) {
     	this.ip =_ip;
     	this.connectServer(_ip, servPorts);
     	this.idUser = user.getID();
     	this.PORT = user.gtPort();
     	this.user = user;
-    
+    	this.citizencard=citizencard;
     	
     }
     
@@ -152,8 +154,8 @@ public class Library {
 			int ts=res.getRec().getTS();
 
 				
-			if(!(res.getCertificate()==null))
-				certlist.put(serv,new RecordCert(res.getCertificate(),ts));
+			if(!(res.getCertSig()==null))
+				sigcertlist.put(serv,new RecordSig(res.getCertSig(),ts));
 			//System.out.println("message from notary: "+res.getText());
 			//int ts=res.getRec().getTS();
 			System.out.println("verifying answer");
@@ -170,8 +172,14 @@ public class Library {
 				System.out.println(acks);
 				if(acks> (n+f)/2) {
 					System.out.println("Achieved Quorum of Acks");
-					X509Certificate maxcert= maxCert(certlist);
-					System.out.println("Certificate Received:\n"+maxcert);
+					signature maxcertsig = maxSig(sigcertlist);
+					if(citizencard) {
+						eIDLib eid = new eIDLib();
+    					X509Certificate cert = eid.getCert();
+    					boolean goodcert = (eid.verifySignature(maxcertsig.getBytes(), maxcertsig.getData()));
+    					if(goodcert)
+    						System.out.println("Got correct signature for: "+maxcertsig.getData());
+					}
 					acks=0;
 					return "OK";
 				}
@@ -188,7 +196,7 @@ public class Library {
 		return "NOT OK";	
 	}
 	
-	public Message read(Message intent, int rid, String challenge, String good) throws Exception {
+	public Message read(Message intent, int rid, String challenge, String good,String PASS) throws Exception {
 		System.out.println("Sending ReadRequest...");
 		clearReadList();
 		int reads=0;
@@ -234,6 +242,8 @@ public class Library {
 				System.out.println(state + " "+ counter + " "+ts);
 				
 				
+				System.out.println("WriteSignature: "+res.getWriteSignature());
+				
 				/* checks if signature of writer is okay -- contains special case for counter = ts = 0  */
 				if(state.equals("NOTONSALE") && counter==0 && ts ==0)
 					writerVerified = true;
@@ -245,7 +255,7 @@ public class Library {
 
 
 					}else {
-						String msg ="owner " +good + " "+(counter-1)+" "+ts;
+						String msg ="owner " +good + " " +counter+ " "+ts;
 						System.out.println("testing with: "+msg);
 						writerVerified = PKI.verifySignature(msg, res.getWriteSignature().getBytes(), owner);
 					}
@@ -254,6 +264,11 @@ public class Library {
 //				signature[] sigs = new signature[3];
 //				sigs[0]= new signature(res.getWriteSignature().getBytes(), wb);	
 				byte[] hash = res.getHash();
+				
+				System.out.println(PKI.verifySignature(hash,res.getSig().getBytes(),res.getID()));
+				System.out.println(r==rid);
+				System.out.println(split[3].equals(challenge));
+				
 				
 				if(PKI.verifySignature(hash,res.getSig().getBytes(),res.getID())
 						&& r==rid
@@ -278,7 +293,7 @@ public class Library {
 						reads++;
 						
 					if(reads > (n+f)/2) {
-						System.out.println("Achieved Byzantine Quorum. Doing write-back...");
+						System.out.println("Achieved Byzantine Quorum.");
 						/* prepare message for write-back */
 						
 						Recorded WBRec = maximumValue(readlist);
@@ -288,7 +303,7 @@ public class Library {
 						int maxts = WBRec.getTS();
 						
 						if(maxts==0) {
-							System.out.println("ZERO COUNTER");
+							System.out.println("zero counter: no writeback");
 							signature[] zcsig = new signature[3];
 							Message zerocounter = new Message(owner,"zerocounter",zcsig,WBRec,null);
 //							System.out.println("message" + zerocounter.getText());
@@ -304,7 +319,7 @@ public class Library {
 						if(maxstate.equals("ONSALE")) {
 
 							// message was "sell goodID"
-							wb="sell "+good+ " " +maxcounter+" "+ maxts;
+							wb="sell "+good+ " " +(maxcounter-1)+" "+ maxts;
 						}else {
 
 							// message was "owner goodID"
@@ -314,7 +329,14 @@ public class Library {
 						
 						
 						WBSig[1]= maxWriteSig;
-						Message writeBack = new Message(maxowner, wb, WBSig,  WBRec, null);			
+						
+						Message writeBack = new Message(maxowner, wb, WBSig,  WBRec, null);
+						byte[] sig = PKI.sign(writeBack.getHash(), idUser, PASS);
+			    		
+			    		writeBack.setSignature(
+			    				new signature(
+			    						sig, writeBack.getHash())
+			    				);
 						
 						return writeBack;
 					}

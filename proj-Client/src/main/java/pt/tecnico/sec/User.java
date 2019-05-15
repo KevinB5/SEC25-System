@@ -83,6 +83,7 @@ public class User {
 	private int wts=0;
 	private int rid=0;
 	private Set<String> servs;
+	private boolean citizencard;
 
 
 	
@@ -98,10 +99,11 @@ public enum GoodState {
 }
 
 	
-	public User(String id, String ip) throws Exception {
+	public User(String id, String ip,boolean citizencard) throws Exception {
 		
 		idUser = id;
 		this.ip=ip;
+		this.citizencard = citizencard;
 		
 		this.getPort();
 		
@@ -110,7 +112,7 @@ public enum GoodState {
 			Storage store = new Storage(1);
 			HashMap<String, Integer> h = store.readServs();
 			servs= h.keySet(); 
-			lib = new Library(this, ip,h);
+			lib = new Library(this, ip,h,citizencard);
 			HashMap<String, String> res =store.getGoods(id);
 
 			for(String good : res.keySet()) {
@@ -471,12 +473,12 @@ public enum GoodState {
 		public String call() throws Exception {
 			// TODO Auto-generated method stub
 			String ret ="";
-			String msg =SELL +  " " +goodID + " "+wts;
+			String msg =SELL +  " " +goodID +" "+counters.get(goodID)+ " "+wts;
 			System.out.println("sending message:"+ msg);
 			try {
 				signature[] sigs = new signature[3];//propria write buyer
 		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);////important
-
+		    	sigs[1]=new signature(PKI.sign(msg,idUser,PASS), msg); //write signature, also important
 
 	    		Recorded rec = new Recorded("", integer, wts);
 	    		Message message =  new Message(idUser, msg,sigs , rec, null);
@@ -488,7 +490,7 @@ public enum GoodState {
 		    				
 	    				));
 				ret= lib.write(id,message, wts);
-				System.out.println("received: "+ret);
+				System.out.println("received from write("+id+"): "+ret);
 
 			}catch(Exception e) {
 				e.printStackTrace();;
@@ -637,7 +639,7 @@ public enum GoodState {
     				);
     		    		
     		System.out.println("Sending read request");
-			Message result= lib.read(mess,rid, challenge,goodID);
+			Message result= lib.read(mess,rid, challenge,goodID,PASS);
 			System.out.println("Read result: "+result.getText());
 			
     		
@@ -651,14 +653,16 @@ public enum GoodState {
 	    						message.getHash(), idUser,PASS) , message.getHash()
 	    				
     				));
-			result= lib.read(message,rid, challenge,goodID);
+			result= lib.read(message,rid, challenge,goodID,PASS);
 
 			/*  WRITE-BACK HERE   */
 			
 			if(result.getText().equals("zerocounter")) {
 				if(!invisible)
 					System.out.println("STATE from notary:" +goodID+" "+result.getRec().state +" "+(result.getRec().counter+1));
+				return;
 			}else {
+				System.out.println("Doing Write-Back.");
 				
 			
 			int wbts= result.getRec().timestamp;

@@ -37,10 +37,17 @@ public class App
         System.out.println("Are we using the Citizen Card? (Y/N)");
         nu = System.console().readLine(); //nu will be Y or N which we use to obtain keys for notaries 
         
+        
+        boolean citizencard = false;
+        
+        if(nu.equals("Y"))
+        	citizencard = true;        	    
+        
+        
         Storage store = new Storage(id);
         store.writeServ("notary"+id, PORT);
         
-    	notary= new Notary(id, store,f);//atribuir aqui a porta
+    	notary= new Notary(id, store,f,citizencard);//atribuir aqui a porta
         try {
 			serverSocket = new ServerSocket(PORT);
 	        System.out.println("Server accepting connections on port: "+ PORT);
