@@ -15,6 +15,7 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
 		<attributes>
+			<attribute name="module" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
@@ -30,5 +31,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="Temp/pteid_jni/pteidlibj.jar"/>
 	<classpathentry kind="lib" path="lib/eIDLib_PKCS11_test/lib/pteidlibj.jar"/>
+	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
