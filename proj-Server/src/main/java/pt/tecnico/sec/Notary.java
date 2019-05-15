@@ -586,6 +586,7 @@ public enum GoodState {
 		this.sentEcho=true;
 		for(String server: servers) {
 			try {
+				System.out.println("eu "+idNotary + " enviei echo para: "+ server);
 				//envia mensagem de echo
 				lib.sendMessage(server, mss);
 				
