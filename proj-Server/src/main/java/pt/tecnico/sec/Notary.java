@@ -564,7 +564,8 @@ public enum GoodState {
 		signature[] sigs = new signature[3];//propria write buyer
 		sigs[0]=sigt;
 		
-		Message mss= new Message(this.idNotary,ECH+" "+msg, sigs);
+		Recorded rec = new Recorded("", 0, 0);
+		Message mss= new Message(this.idNotary,ECH+" "+msg, sigs,rec,null);
 		signature sig;
 		try {
 			sig = new signature(PKI.sign(mss.getHash(), mss.getID(), PASS), mss.getHash());
@@ -591,11 +592,15 @@ public enum GoodState {
 		
 	}
 
-	private void start2ndPhase(String msg){
+	private void start2ndPhase(String msg) throws InvalidKeyException, Exception{
 		System.out.println("starting 2nd broadcast");
 		signature[] sigs = new signature[3];//propria write buyer
+		Recorded rec = new Recorded("", 0, 0);
+		Message mss= new Message(this.idNotary,RDY+" "+msg, sigs,rec,null);
 
-		Message mss= new Message(this.idNotary,RDY+" "+msg, sigs);
+		signature sig = new signature(PKI.sign(mss.getHash(), mss.getID(), PASS), mss.getHash());
+		mss.setSignature(sig);
+		
 		for(String server: servers) {
 			try {
 				lib.sendMessage(server, mss);
@@ -618,99 +623,110 @@ public enum GoodState {
 		String req="";
 		int acks=0;
 		
-		
-		for(int i=1;i<spl.length;i++ ){req+=spl[i] +" ";}
-
-		switch(cmd) {
-			case(ECH):
-				if(this.echos.get(uid)=="") {
-					responses++;
-					System.out.println("new echo from: "+uid);
-					  echos.put(uid,req);
-					  //verifica consensus
-					  for(String serv : echos.keySet()) {
-							  if(echos.get(serv).equals(req)) {
-								  //verificar a ssinatura do seller e do notario
-								  msg.getSellSig() ; msg.getSig();//verificar com o pki 
-								  acks++;
-
-								  System.out.println("ack echo from: "+ serv+ " total acks: "+ acks);
-								  System.out.println(acks>(N+f)/2 );
-								  System.out.println(sentReady);
-								  if(acks>(N+f)/2 & sentReady==false){
-									  //acks=0;
-									  sentReady = true;
-									  System.out.println("1stphase completed");
-									  /*return*/ start2ndPhase(req);
-									  responses=0;
-								  }
-							  } 
-						  
-						  
-					  }
-					  if(responses>(N+f)/2 & acks<2f) {
-							Thread[] list = new Thread[Thread.activeCount()];
-							 Thread.currentThread().getThreadGroup().enumerate(list);
-							 for(Thread t:list) {
-								 if (t.getId()==waitID) {
-									 t.interrupt();
-								 }
-							 }
-								
-							
-							}
-
-				}
-				break;
-			case(RDY):
-				if(this.readies.get(uid)=="") {
-					responses++;
-					//System.out.println("heyyyy 2nd time");
-					  System.out.println("new ready from: "+ uid);
-
-					readies.put(uid, req);
-					for(String serv: readies.keySet()) {
-						if(readies.get(serv).equals(req)) {
-							acks++;
-
-							  System.out.println("ack ready from: "+ serv + " total acks: "+ acks);
-
-							if(acks>f & this.sentReady==false) {
-								start2ndPhase(req);						}
-							if(acks>2f & this.delivered==false) {
-								responses=0;
-								acks=0;
-								delivered=true;
-								notifyAll();
-								this.resetBRB();
-								break;
-								//System.out.println(Thread.activeCount());
-								//return to user
-							}
-						}
-					}
-					if(responses>(N+f)/2 & acks<2f) {
-						System.out.println("no no no");
-						Thread[] list = new Thread[Thread.activeCount()];
-						 Thread.currentThread().getThreadGroup().enumerate(list);
-						 for(Thread t:list) {
-							 if (t.getId()==waitID) {
-								 resetBRB();
-								 t.interrupt();
-							 }
-						 }
-							
-						
-						}
-				}
-			break;
+		//
+		try {
+			if(PKI.verifySignature(msg.getHash(), msg.getSig().getBytes(), msg.getID())) {
+				System.out.println("notary verified");
 				
-			default:
-				break;
-			
-			
+				for(int i=1;i<spl.length;i++ ){req+=spl[i] +" ";}
+
+				switch(cmd) {
+					case(ECH):
+						if(this.echos.get(uid)=="") {
+							responses++;
+							System.out.println("new echo from: "+uid);
+							  echos.put(uid,req);
+							  //verifica consensus
+							  for(String serv : echos.keySet()) {
+									  if(echos.get(serv).equals(req)) {
+										  //verificar a ssinatura do seller e do notario
+										  msg.getSellSig() ; msg.getSig();//verificar com o pki 
+										  acks++;
+
+										  System.out.println("ack echo from: "+ serv+ " total acks: "+ acks);
+										  System.out.println(acks>(N+f)/2 );
+										  System.out.println(sentReady);
+										  if(acks>(N+f)/2 & sentReady==false){
+											  //acks=0;
+											  sentReady = true;
+											  System.out.println("1stphase completed");
+											  /*return*/ start2ndPhase(req);
+											  responses=0;
+										  }
+									  } 
+								  
+								  
+							  }
+							  if(responses>(N+f)/2 & acks<2f) {
+									Thread[] list = new Thread[Thread.activeCount()];
+									 Thread.currentThread().getThreadGroup().enumerate(list);
+									 for(Thread t:list) {
+										 if (t.getId()==waitID) {
+											 t.interrupt();
+										 }
+									 }
+										
+									
+									}
+
+						}
+						break;
+					case(RDY):
+						if(this.readies.get(uid)=="") {
+							responses++;
+							//System.out.println("heyyyy 2nd time");
+							  System.out.println("new ready from: "+ uid);
+
+							readies.put(uid, req);
+							for(String serv: readies.keySet()) {
+								if(readies.get(serv).equals(req)) {
+									acks++;
+
+									  System.out.println("ack ready from: "+ serv + " total acks: "+ acks);
+
+									if(acks>f & this.sentReady==false) {
+										start2ndPhase(req);						}
+									if(acks>2f & this.delivered==false) {
+										responses=0;
+										acks=0;
+										delivered=true;
+										notifyAll();
+										this.resetBRB();
+										break;
+										//System.out.println(Thread.activeCount());
+										//return to user
+									}
+								}
+							}
+							if(responses>(N+f)/2 & acks<2f) {
+								System.out.println("no no no");
+								Thread[] list = new Thread[Thread.activeCount()];
+								 Thread.currentThread().getThreadGroup().enumerate(list);
+								 for(Thread t:list) {
+									 if (t.getId()==waitID) {
+										 resetBRB();
+										 t.interrupt();
+									 }
+								 }
+									
+								
+								}
+						}
+					break;
+						
+					default:
+						break;
+					
+					
+				}
+				
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		return;
+		
+		
 	}
 	
 	
