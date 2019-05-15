@@ -4,4 +4,5 @@ Compile:
  javac -cp lib/pteidlibj.jar eIDLib_PKCS11_test.java
 
 Run:
- java -cp lib/pteidlibj.jar:. eIDLib_PKCS11_test
+java -cp lib/pteidlibj.jar:. -Djava.library.path=/usr/local/lib/  eIDLib_PKCS11_test
+
