@@ -79,7 +79,9 @@ public class User {
 	public static KeyStore KEYSTORE;
 	public PublicKey notarypublickey;
 	private String challenge;
-
+	private boolean citizencard;
+	
+	
 	private int wts=0;
 	private int rid=0;
 	private Set<String> servs;
@@ -99,10 +101,11 @@ public enum GoodState {
 }
 
 	
-	public User(String id, String ip) throws Exception {
+	public User(String id, String ip, boolean citizencard) throws Exception {
 		
 		idUser = id;
 		this.ip=ip;
+		this.citizencard = citizencard;
 		
 		this.getPort();
 		
@@ -111,10 +114,10 @@ public enum GoodState {
 			Storage store = new Storage(1);
 			HashMap<String, Integer> h = store.readServs();
 			servs= h.keySet(); 
-			lib = new Library(this, ip,h);
+			lib = new Library(this, ip,h,citizencard);
 			
 //			HashMap<String, String> res =store.getGoods(id);
-			List<String> res = json.getGoodList(id);
+			List<String> res = json.getGoodList(id.charAt(id.length()-1)+"");
 
 //			for(String good : res.keySet()) {
 //				counters.put(good, 0);
@@ -126,7 +129,7 @@ public enum GoodState {
 			System.out.println(res);
 			for(String good : res) {
 				counters.put(good, 0);
-				if(json.getGoodState(good,"").equals("NOTONSALE"))
+				if(json.getGoodState(good,"").equals("notonsale"))
 					goods.put(good, GoodState.NOTONSALE);
 				else 
 					goods.put(good, GoodState.ONSALE);
@@ -322,7 +325,7 @@ public enum GoodState {
 
 		return res;
 	}
-
+/*
 	private void ownerGood(String good) throws Exception {
 		
 //		getStateOfGood(good, true);
@@ -349,7 +352,7 @@ public enum GoodState {
 	}
 	
 	
-	
+	*/
 	
 	
 	
@@ -405,7 +408,7 @@ public enum GoodState {
 				printgoods();
 				if(counters.get(good)>wts)
 					wts=counters.get(good);
-				ownerGood(good);
+//				ownerGood(good);
 			}else {
 				System.out.println("Not OK");
 			}
@@ -530,11 +533,13 @@ public enum GoodState {
 			String res= "";
 			try {
 				String msg=TRANSFER +" "+ buyer+" "+ good+" "+counters.get(good) +" "+wts; 
+				System.out.println("MESSAGE HERE: "+msg);
+				
 				signature[] sigs = new signature[3];//propria write buyer
 		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
 		    	sigs[1]=null;
 		    	sigs[2]=new signature(buyerSig, text);
-		    	System.out.println("transfering with counter: "+counters.get(good));
+//		    	System.out.println("transfering with counter: "+counters.get(good));
 
 	    		Recorded rec = new Recorded("", counters.get(good), wts);
 	    		

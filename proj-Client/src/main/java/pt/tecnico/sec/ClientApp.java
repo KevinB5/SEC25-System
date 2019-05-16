@@ -33,8 +33,15 @@ public class ClientApp
 
     public static void main( String[] args ) throws BindException
     {
-    	System.out.println("Running tests? (Y/N)");
-    	String tests = System.console().readLine();
+    	System.out.println("Using citizencard? (Y/N)");
+    	String cc = System.console().readLine();
+    	
+    	boolean citizencard = false;
+    	if(cc.equals("Y")||cc.equals("y"))
+    		citizencard = true;
+    	
+    	
+    	String tests ="n";
     	   	
         System.out.println("Select the user ID number");
         String nu;
@@ -46,7 +53,7 @@ public class ClientApp
         		user2= new UserByzantine(ID + nUsr, IP);
         		new Thread(new P2PLibByzantine(user2, user2.gtPort())).start();
         	}else {
-        		user = new User(ID + nUsr, IP);//recebe o ip e a porta 
+        		user = new User(ID + nUsr, IP,citizencard);//recebe o ip e a porta 
         		new Thread(new P2PLib(user, user.gtPort())).start();
         	}
         }catch(NumberFormatException nef) {
@@ -60,7 +67,7 @@ public class ClientApp
         	nUsr =Integer.parseInt(System.console().readLine());
 	        try {
 	        	//cria novo user
-				user = new User(ID + nUsr, IP);
+				user = new User(ID + nUsr, IP,citizencard);
 			} catch (Exception e2) {
 				// TODO Auto-generated catch block
 				e2.printStackTrace();

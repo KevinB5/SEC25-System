@@ -338,7 +338,7 @@ public class Storage {
 		      ex.printStackTrace();
 		    }
 //		goods.replace(goodID, newOwner);
-		json.updateFile(goodID,newOwner,"NOTONSALE",writerID);
+		json.updateFile(goodID,newOwner,"notonsale",writerID);
 	}
 
 	public void writeLog(String goodId, String seller, String buyer,String counter , byte[] sigSeller,byte[] sigBuyer) {

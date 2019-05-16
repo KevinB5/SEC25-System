@@ -21,7 +21,7 @@ public class JSONGood {
 	private String filename = "goods";
 
 	/**
-	 * ATENÇÃO O ESTADO DOS GOODS É "onsale" OU "NOTONSALE"
+	 * ATENÇÃO O ESTADO DOS GOODS É "onsale" OU "notonsale"
 	 */
 	
 	public JSONGood() {
@@ -281,7 +281,7 @@ public class JSONGood {
 			try {
 				File myFile = new File(PATH+manipulatorID+".json");
 				if(myFile.createNewFile())
-					return "NOTONSALE";
+					return "notonsale";
 				
 				JSONParser jsonParser = new JSONParser();
 				try ( FileReader reader = new FileReader(PATH+manipulatorID+".json")){
@@ -307,7 +307,7 @@ public class JSONGood {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			return "NOTONSALE";
+			return "notonsale";
 		}
 		
 		public String getGoodUser(String goodID,String manipulatorID) {
