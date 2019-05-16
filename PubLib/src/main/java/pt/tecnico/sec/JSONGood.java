@@ -22,6 +22,7 @@ public class JSONGood {
 	 */
 	
 	public JSONGood() {
+		
     }
 
     
