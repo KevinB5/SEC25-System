@@ -188,6 +188,8 @@ public class JSONGood {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+			if(goodList.size()==0)
+				return getGoodList("");
 			return goodList;
 		}
 		
