@@ -159,7 +159,7 @@ public class JSONGood {
 		}
 
 
-		public List<String> getListOfGoods(String manipulatorID) {
+		public List<String> getGoodList(String manipulatorID) {
 			List<String> goodList = new ArrayList<String>();
 			try {
 				File myFile = new File(PATH+manipulatorID+".json");

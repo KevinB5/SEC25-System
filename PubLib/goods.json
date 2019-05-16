@@ -1,2 +1,2 @@
-[{"userID":"user1","goods":{"good3":"n","good1":"n"}},{"userID":"user2","goods":{"good2":"n"}}]
+[{"userID":"user1","goods":{"good3":"notonsale","good5":"notonsale","good7":"notonsale"}},{"userID":"user2","goods":{"good2":"notonsale","good1":"notonsale","good6":"notonsale"}}]
 

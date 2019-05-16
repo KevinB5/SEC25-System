@@ -1,6 +1,6 @@
 package pt.tecnico.sec;
 
-import java.awt.List;
+import java.util.List;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -111,18 +111,26 @@ public enum GoodState {
 			HashMap<String, Integer> h = store.readServs();
 			servs= h.keySet(); 
 			lib = new Library(this, ip,h);
-			HashMap<String, String> res =store.getGoods(id);
+			
+			JSONGood json = new JSONGood();
+//			HashMap<String, String> res =store.getGoods(id);
+			List<String> res = json.getGoodList("");
 
-			for(String good : res.keySet()) {
+//			for(String good : res.keySet()) {
+//				counters.put(good, 0);
+//				if(res.get(good).equals("n"))
+//					goods.put(good, GoodState.NOTONSALE);
+//				else 
+//					goods.put(good, GoodState.ONSALE);
+//			}
+			for(String good : res) {
 				counters.put(good, 0);
-				if(res.get(good).equals("n"))
+				if(json.getGoodState(good,"").equals("notonsale"))
 					goods.put(good, GoodState.NOTONSALE);
 				else 
 					goods.put(good, GoodState.ONSALE);
-
-
-
-			};
+			}
+			
 			printgoods();
 			
 			PASS = idUser;

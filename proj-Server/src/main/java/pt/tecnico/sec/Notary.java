@@ -89,7 +89,7 @@ public enum GoodState {
 //        this.updateState();
 //		System.out.println(goods);
 
-		for(String goodID: json.getListOfGoods(idNotary)) {
+		for(String goodID: json.getGoodList(idNotary)) {
 			counters.put(goodID, 0);
 			timestamps.put(goodID, 0);
 		}
