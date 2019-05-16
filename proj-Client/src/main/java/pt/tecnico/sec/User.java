@@ -114,7 +114,7 @@ public enum GoodState {
 			lib = new Library(this, ip,h);
 			
 //			HashMap<String, String> res =store.getGoods(id);
-			List<String> res = json.getGoodList(id);
+			List<String> res = json.getGoodList(id.charAt(id.length()-1)+"");
 
 //			for(String good : res.keySet()) {
 //				counters.put(good, 0);
