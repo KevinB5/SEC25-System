@@ -55,6 +55,8 @@ public class Library {
 	
 	private HashMap<String,RecordSig> signaturelist = new HashMap<String,RecordSig>();
 	private HashMap<String,RecordSig> writesignaturelist = new HashMap<String,RecordSig>();
+	private HashMap<String, RecordSig> buyersignaturelist = new HashMap<String,RecordSig>();
+	private HashMap<String, RecordString> textlist = new HashMap<String,RecordString>();
 	private HashMap<String,RecordCert> certlist = new HashMap<String,RecordCert>();
 	
     
@@ -67,6 +69,13 @@ public class Library {
     
     	
     }
+    
+
+    class RecordString {
+    	  String s;
+    	  int timestamp;
+    	  RecordString(String s, int t) {this.s=s;this.timestamp=t;}
+    	}
     
     
     class RecordCert {
@@ -156,11 +165,11 @@ public class Library {
 				certlist.put(serv,new RecordCert(res.getCertSig(),ts));
 			//System.out.println("message from notary: "+res.getText());
 			//int ts=res.getRec().getTS();
-			System.out.println("verifying answer");
-			System.out.println(ts + " " + wts);
-
-	
-			System.out.println(res.getSig().getBytes());
+//			System.out.println("verifying answer");
+//			System.out.println(ts + " " + wts);
+//
+//	
+//			System.out.println(res.getSig().getBytes());
 			if(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID())
 					&& res.getText().split(" ")[0].equals("ACK") 
 					&& ts==wts) {
@@ -193,6 +202,7 @@ public class Library {
 		clearReadList();
 		int reads=0;
 		Message res=null;
+		String msg=null;
 		ObjectOutputStream ouSt;
 		ObjectInputStream inSt;
 
@@ -215,8 +225,9 @@ public class Library {
 				
 				/* Values for comparison */
 				String owner = split[1];
-				String state = split[2];
+				String state = split[2].toLowerCase() ;
 				String challnge = split[3];
+//				String[] writeText = res.getWriteSignature().getData().split(" ");
 				
 				int counter = rec.getCounter();
 				int ts = rec.getTS();
@@ -235,17 +246,17 @@ public class Library {
 				
 				
 				/* checks if signature of writer is okay -- contains special case for counter = ts = 0  */
-				if(state.equals("NOTONSALE") && counter==0 && ts ==0)
+				if(state.equals("notonsale") && counter==0 && ts ==0)
 					writerVerified = true;
 				else{
-					if(state.equals("ONSALE")) {
-					String msg ="sell " +good + " "+(counter-1)+" "+ts;
+					if(state.equals("onsale")) {
+					msg ="sell " +good + " "+(counter-1)+" "+ts;
 					System.out.println("testing with: "+msg);
 					writerVerified = PKI.verifySignature(msg, res.getWriteSignature().getBytes(), owner);
 
 
 					}else {
-						String msg ="owner " +good + " "+(counter-1)+" "+ts;
+						msg ="transfer " +owner +" "+ good + " "+(counter-1)+" "+ts;
 						System.out.println("testing with: "+msg);
 						writerVerified = PKI.verifySignature(msg, res.getWriteSignature().getBytes(), owner);
 					}
@@ -266,7 +277,8 @@ public class Library {
 				System.out.println("Writer Verified: "+writerVerified);
 				
 				if(writerVerified)
-					writesignaturelist.put(serv, new RecordSig(res.getWriteSignature(),ts));			
+					writesignaturelist.put(serv, new RecordSig(res.getWriteSignature(),ts));
+					
 				////// a verificar duas vezes a assinatura do notrio //////////
 				
 				if(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID())
@@ -275,9 +287,9 @@ public class Library {
 					&& writerVerified) {
 
 
-						
+						textlist.put(serv,new RecordString(res.getText(),ts));
 						readlist.put(serv,res.getRec());
-						signaturelist.put(serv, new RecordSig(res.buyerSignature(),ts));
+						buyersignaturelist.put(serv, new RecordSig(res.buyerSignature(),ts));
 						reads++;
 						
 					if(reads > (n+f)/2) {
@@ -287,6 +299,7 @@ public class Library {
 						Recorded WBRec = maximumValue(readlist);
 						signature maxSig = maxSig(signaturelist);
 						signature maxWriteSig = maxSig(writesignaturelist);
+						String maxseller = maxString(textlist);
 						
 						int maxts = WBRec.getTS();
 						
@@ -304,14 +317,15 @@ public class Library {
 						String maxowner = maxownerstate[0];
 						String wb = null; //Write-Back message
 
-						if(maxstate.equals("ONSALE")) {
+						/* Creating winner message */
+						if(maxstate.toLowerCase().equals("onsale")) {
 
 							// message was "sell goodID"
-							wb="sell "+good+ " " +maxcounter+" "+ maxts;
+							wb="sell "+good+ " " +(maxcounter-1)+" "+ maxts;
 						}else {
 
 							// message was "owner goodID"
-							wb= "owner "+good+" "+ maxcounter +" "+ maxts;
+							wb= "transfer "+good+" "+ (maxcounter-1) +" "+ maxts;
 						}
 						signature[] WBSig = new signature[3];
 						
@@ -371,16 +385,28 @@ public class Library {
 		return ret;		
 	}
 	
+
+	private String maxString(HashMap<String, RecordString> statelist2) {
+		int max = 0;
+		String ret ="";
+		//TODO: maxsig not being returned!
+		for(String serv : statelist2.keySet()) {
+			int ts = statelist2.get(serv).timestamp;
+			if(ts>=max) {
+				ret = statelist2.get(serv).s;
+				max = ts;
+			}
+		}
+		return ret;		
+	}
+	
 	
 	private signature maxSig( HashMap<String,RecordSig> siglist) {
 		int max = 0;
 		signature maxsig = null;
 		for(String serv : siglist.keySet()) {
-			if(siglist.get(serv).timestamp>=max) {
-				
-				maxsig=siglist.get(serv).sig;
+			maxsig=siglist.get(serv).sig;
 			}
-		}
 		return maxsig;
 	}
 	

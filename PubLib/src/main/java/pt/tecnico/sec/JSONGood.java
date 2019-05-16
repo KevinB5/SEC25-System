@@ -155,7 +155,7 @@ public class JSONGood {
 					for( Object userObject : userList) {
 						JSONObject user = (JSONObject)userObject;
 						JSONObject goods = (JSONObject)user.get("goods");
-						if(user.get("userID").equals(sellerID) && goods.get(goodID)=="onsale")
+						if(user.get("userID").equals(sellerID))
 							return "ACK";
 					}
 				} catch (ParseException e) {
@@ -206,6 +206,42 @@ public class JSONGood {
 			return goodList;
 		}
 		
+		public List<String> getMyGoodList(String manipulatorID) {
+			List<String> goodList = new ArrayList<String>();
+			
+			try {
+				File myFile = new File(PATH+manipulatorID+".json");
+				if(myFile.createNewFile())
+					return goodList;
+				
+				JSONParser jsonParser = new JSONParser();
+				try ( FileReader reader = new FileReader(PATH+manipulatorID+".json")){
+					Object obj = jsonParser.parse(reader);
+					
+					JSONArray userList = (JSONArray) obj;
+					
+					for( Object userObject : userList) {
+						JSONObject user = (JSONObject)userObject;
+						JSONObject goods = (JSONObject)user.get("goods");
+						String userID = (String)user.get("userID");
+						for(Object good : goods.keySet() ) {
+							if(userID.equals("user"+manipulatorID)) 
+								goodList.add((String) good);
+						}
+					}
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				    
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			if(goodList.size()==0)
+				return getGoodList("");
+			return goodList;
+		}
 		
 		public boolean existGood(String goodID,String manipulatorID) {
 			try {

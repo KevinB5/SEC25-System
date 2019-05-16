@@ -83,6 +83,7 @@ public class User {
 	private int wts=0;
 	private int rid=0;
 	private Set<String> servs;
+	JSONGood json = new JSONGood();
 
 
 	
@@ -112,9 +113,8 @@ public enum GoodState {
 			servs= h.keySet(); 
 			lib = new Library(this, ip,h);
 			
-			JSONGood json = new JSONGood();
 //			HashMap<String, String> res =store.getGoods(id);
-			List<String> res = json.getGoodList("");
+			List<String> res = json.getGoodList(id);
 
 //			for(String good : res.keySet()) {
 //				counters.put(good, 0);
@@ -123,6 +123,7 @@ public enum GoodState {
 //				else 
 //					goods.put(good, GoodState.ONSALE);
 //			}
+			System.out.println(res);
 			for(String good : res) {
 				counters.put(good, 0);
 				if(json.getGoodState(good,"").equals("NOTONSALE"))
@@ -218,7 +219,7 @@ public enum GoodState {
     	String op =  res[0];
     	
     	if(op.equals("mygoods")) {
-    		printgoods();
+    		System.out.println(json.getMyGoodList(idUser.substring(-1, 0)));
     	}
     	
     	if(op.equals("sell")) {
@@ -274,7 +275,7 @@ public enum GoodState {
     		for(Future<String> answer : executor.invokeAll(tasks)) {
     			System.out.println(answer.get());
     			if(answer.get().equals(OK)) {
-    				System.out.println("Replacing state of good");
+    				System.out.println(good+" is on sale");
     				goods.replace(good, GoodState.ONSALE);
     			}
 
@@ -424,11 +425,12 @@ public enum GoodState {
 	 * @throws Exception 
 	 * @throws InvalidKeyException 
 	 */
+	/*
 	private String transferGood(String buyer, String good, byte[] buyerSig, String text) throws InvalidKeyException, Exception {
 		this.getStateOfGoodInvisible(good);
 		wts++;
 		String res= "";
-		String msg=TRANSFER +" "+ buyer+" "+ good +" "+wts; 
+		String msg=TRANSFER +" "+idUser+" "+ buyer+" "+ good +" "+counters.get(good)+" "+wts; 
 		try {
 			int counter=0;
 			
@@ -447,7 +449,7 @@ public enum GoodState {
     						PKI.sign(result.getHash(), idUser, PASS), result.getHash())
     				);
 			
-	    	System.out.println("transfering with counter: "+counter);
+//	    	System.out.println("transfering with counter: "+counter);
 
 
 //			res= lib.write(new Message(idUser, msg,sigs , rec, null), wts);
@@ -463,7 +465,7 @@ public enum GoodState {
 		return res;
 		
 	}
-
+*/
 
 	private class Sell implements Callable<String>{
 		//private PKI pki;
@@ -496,7 +498,7 @@ public enum GoodState {
 		    				
 	    				));
 				ret= lib.write(id,message, wts);
-				System.out.println("received: "+ret);
+				//System.out.println("received: "+ret);
 
 			}catch(Exception e) {
 				e.printStackTrace();;
@@ -527,7 +529,7 @@ public enum GoodState {
 		public String call() throws Exception {
 			String res= "";
 			try {
-				String msg=TRANSFER +" "+ buyer+" "+ good +" "+wts; 
+				String msg=TRANSFER +" "+ buyer+" "+ good+" "+counters.get(good) +" "+wts; 
 				signature[] sigs = new signature[3];//propria write buyer
 		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
 		    	sigs[1]=null;

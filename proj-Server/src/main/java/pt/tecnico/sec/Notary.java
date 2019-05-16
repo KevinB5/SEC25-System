@@ -49,6 +49,7 @@ public enum GoodState {
 	private HashMap<String, Integer> counters = new HashMap<String, Integer>(); // <goodID,counter>
 	private HashMap<String,Integer> timestamps = new HashMap<String, Integer>();
 	private HashMap<String,signature> writesignatures = new HashMap<String, signature>(); //<goodID,signature>
+	private HashMap<String, signature> buyersignatures = new HashMap<String,signature>();
 	private HashMap<String,byte[]> signatures = new HashMap<String, byte[]>(); //<goodID,signature>
 //	private static final String path = ".\\src\\main\\java\\pt\\tecnico\\state\\goods.txt";
 	private boolean sentEcho = false;
@@ -317,7 +318,7 @@ public enum GoodState {
 
     			System.out.println("COUNTERS: "+counter+" "+counters.get(good) );
     			
-    			boolean correctCounter = (counter==counters.get(good)) || (json.getGoodState(good,idNotary).equals(GoodState.ONSALE)); 
+    			boolean correctCounter = (counter==counters.get(good)) || (json.getGoodState(good,idNotary).equals("onsale")); 
     			
     			
 	    		if(ts>= timestamps.get(good) && correctCounter) {
@@ -327,8 +328,11 @@ public enum GoodState {
 		    		if(rs.equals("ACK")) {
 		    			timestamps.put(good,ts);
 //		    			goods.put(good, user);
-		    			json.updateFile(good,user,json.getGoodState(good,idNotary),idNotary);
-		    			System.out.println("SIGNATURE2: "+signatures.get(good));
+		    			if(json.getGoodState(good,idNotary).equals("notonsale")) {
+		    				json.updateFile(good,user,"onsale",idNotary);
+		    				counters.put(good,counter+1);		    				
+		    			}
+//		    			System.out.println("SIGNATURE2: "+signatures.get(good));
 		    			if(command.getWriteSignature()!=null)
 		    				writesignatures.put(good,command.getWriteSignature());
 		    		}
@@ -404,7 +408,8 @@ public enum GoodState {
 	    			System.out.println(idNotary+ ": sending state ");
 	    			//cria um recorded para enviar o estado
 	    			Recorded rec=  this.verifiyStateOfGood(message[1],message[2]);//goodID, userID , counter , challenge
-	    			
+	    			System.out.println(timestamps);
+	    			System.out.println(message[1]);
 	    			rec.setTS(timestamps.get(message[1])); 
 	    			String mess ="state "+ rec.getState() + " "+ message[2] +  " "+ message[3];
 	    			System.out.println(mess+", counter:"+rec.getCounter());
@@ -454,16 +459,9 @@ public enum GoodState {
 						sigs = new signature[3];
 			    		Recorded rec = new Recorded("", counters.get(message[2]), Integer.parseInt(ts));
 
-//<<<<<<< HEAD
-//			    		
-//			    		Message mes = new Message(this.idNotary, mess, sigs, rec,cert);
-//			    		
-//			    		mes.setSignature(
-//			    				new signature(
-//			    						PKI.sign(mes.getHash(), idNotary, PASS), mes.getHash())
-//			    				);
-//			    		return mes;
-//=======
+
+			    		sigs[2]= buyersignatures.get(good);
+			    		sigs[1]= writesignatures.get(good);
 			    		Message response = new Message(this.idNotary, mess, sigs, rec,cert);
 			    		response.setSignature(new signature(PKI.sign(response.getHash(),idNotary,PASS),response.getHash()));
 			    		return response;
@@ -534,23 +532,17 @@ public enum GoodState {
 	 * @throws Exception 
 	 */
 	private String transferGood( String seller,String buyer , String goodID,signature sigSeller,signature sigBuyer) throws Exception {
-		//for(String s: goods.keySet()) {System.out.println(s);}
-		//this.updateState();
-//=======
-//	private String transferGood( String seller,String buyer , String goodID,byte[] sigSeller,byte[]sigBuyer) throws Exception {
-//>>>>>>> c470555684bd38333b6e32f799da95dafbbc8e65
 		if(json.getGoodUser(goodID,idNotary).equals(seller)) {
 			System.out.println("SELLER OK "+ seller);
-			if(json.getGoodState(goodID,idNotary).equals(GoodState.ONSALE)) {
+			if(json.getGoodState(goodID,idNotary).equals("onsale")) {
 				//String sigMsg = "intentionbuy "+goodID + " "+counters.get(goodID);
 				System.out.println("verifying signature for :"+ buyer);
 				if(PKI.verifySignature(sigBuyer.getData(), sigBuyer.getBytes(), buyer)){
+					writesignatures.put(goodID, sigSeller);
+					buyersignatures.put(goodID,sigBuyer);
 					System.out.println("buyer intention verified");
 					//store.writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
-					json.updateFile(goodID,buyer,"NOTONSALE",idNotary);
-//					store.updateFile(goodID, buyer,idNotary);
-//					goods.replace(goodID, buyer); 
-//					states.replace(goodID, GoodState.NOTONSALE);
+					json.updateFile(goodID,buyer,"notonsale",idNotary);
 					counters.replace(goodID,counters.get(goodID)+1);
 					System.out.println("good counter: "+counters.get(goodID));
 
@@ -635,11 +627,13 @@ public enum GoodState {
 				System.out.println("notary verified");
 				
 				for(int i=1;i<spl.length;i++ ){req+=spl[i] +" ";}
-
+				
+				System.out.println("Req: "+req);
+				System.out.println("CMD: "+cmd);
 				switch(cmd) {
 					case(ECH):
 						if(this.echos.get(uid)=="") {
-							responses++;
+							//responses++;
 							System.out.println("new echo from: "+uid);
 							  echos.put(uid,req);
 							  //verifica consensus
@@ -657,23 +651,23 @@ public enum GoodState {
 											  sentReady = true;
 											  System.out.println("1stphase completed");
 											  /*return*/ start2ndPhase(req);
-											  responses=0;
+											  //responses=0;
 										  }
 									  } 
 								  
 								  
 							  }
-							  if(responses>(N+f)/2 & acks<2f) {
-									Thread[] list = new Thread[Thread.activeCount()];
-									 Thread.currentThread().getThreadGroup().enumerate(list);
-									 for(Thread t:list) {
-										 if (t.getId()==waitID) {
-											 t.interrupt();
-										 }
-									 }
-										
-									
-									}
+//							  if(responses>(N+f)/2 & acks<2f) {
+//									Thread[] list = new Thread[Thread.activeCount()];
+//									 Thread.currentThread().getThreadGroup().enumerate(list);
+//									 for(Thread t:list) {
+//										 if (t.getId()==waitID) {
+//											 t.interrupt();
+//										 }
+//									 }
+//										
+//									
+//									}
 
 						}
 						break;
