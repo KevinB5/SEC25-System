@@ -15,14 +15,25 @@ import org.json.simple.parser.ParseException;
 
 public class JSONGood {
 	
-	private final String PATH = "goods";
+	private String origin;
+	private  String line = System.getProperty("file.separator");
+	private String PATH ;
+	private String filename = "goods";
 
 	/**
 	 * ATENÇÃO O ESTADO DOS GOODS É "onsale" OU "NOTONSALE"
 	 */
 	
 	public JSONGood() {
-		
+			origin = System.getProperty("user.dir");
+			int lastBar = 0;
+			for(int i=0; i < origin.length() ; i++) {
+				if(origin.charAt(i)==line.charAt(0))
+					lastBar=i;
+			}
+			origin = origin.substring(0,lastBar);
+			PATH = origin+line+filename;
+			System.out.println(PATH);
     }
 
     

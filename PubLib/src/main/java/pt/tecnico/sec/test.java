@@ -7,8 +7,8 @@ import java.security.cert.X509Certificate;
 public class test {
 
 	public static void main(String[] args) {
-		JSONGood json = new JSONGood();
-		System.out.println(json.getGoodList("notary4"));
+//		JSONGood json = new JSONGood();
+//		System.out.println(json.getGoodList("notary4"));
 //		eIDLib eid = new eIDLib();
 //		//eid.start();
 //		X509Certificate cert = null;
