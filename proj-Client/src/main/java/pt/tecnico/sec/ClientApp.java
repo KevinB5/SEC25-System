@@ -16,7 +16,7 @@ public class ClientApp
 	private static HashMap <String, Socket> sockets = new HashMap<String, Socket>();
 	
 	private static User user = null;
-	private static User user2;
+	private static UserByzantine user2=null;
 	//Streams for Users
 	private static ObjectOutputStream outU;
 	private static ObjectInputStream inU;
@@ -33,16 +33,22 @@ public class ClientApp
 
     public static void main( String[] args ) throws BindException
     {
+    	System.out.println("Running tests? (Y/N)");
+    	String tests = System.console().readLine();
+    	   	
         System.out.println("Select the user ID number");
         String nu;
         int nUsr=-1;//not a valid user number to begin with
         nu= System.console().readLine();
         try {
         	nUsr = Integer.parseInt(nu);
-	        user = new User(ID + nUsr, IP);//recebe o ip e a porta 
-        	new Thread(new P2PLib(user, user.gtPort())).start();
-
-
+        	if(tests.equals("Y")||tests.equals("y")) {
+        		user2= new UserByzantine(ID + nUsr, IP);
+        		new Thread(new P2PLibByzantine(user2, user2.gtPort())).start();
+        	}else {
+        		user = new User(ID + nUsr, IP);//recebe o ip e a porta 
+        		new Thread(new P2PLib(user, user.gtPort())).start();
+        	}
         }catch(NumberFormatException nef) {
         	System.out.println("Number must be an integer");
  
