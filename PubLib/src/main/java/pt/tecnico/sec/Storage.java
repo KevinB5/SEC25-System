@@ -30,8 +30,8 @@ public class Storage {
 	private  String path = originPath() + filename;
 	private  String path2 = originPath() + Sfilename;
 
-	private static HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
-	private static HashMap<String, String> states = new HashMap<String, String>(); // <goodID,userID>
+//	private static HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
+//	private static HashMap<String, String> states = new HashMap<String, String>(); // <goodID,userID>
 
 	private final String pathLog= System.getProperty("user.dir")+"\\src\\main\\java\\pt\\tecnico\\state\\";
 	private String logName = "";
@@ -41,6 +41,7 @@ public class Storage {
 	private File systemFile;
 	private File servFile;
 	private FileOutputStream out ;
+	private JSONGood json = new JSONGood();
 		
 	public String originPath() {
 		String origin = System.getProperty("user.dir");
@@ -139,8 +140,9 @@ public class Storage {
 					goodID = temp[0];
 					state = temp[1];
 					System.out.println("state: "+ state);
-					goods.put(goodID, user);
-					states.put(goodID, state);
+//					goods.put(goodID, user);
+//					states.put(goodID, state);
+					json.updateFile(goodID,user,state,id+"");
 				}
 				//pwriter.println(line);
 			}
@@ -182,15 +184,15 @@ public class Storage {
 		
 	}
 	
-	public HashMap<String, String> getGoods(int id) {
-		refresh(id);
-		return goods;//goodID, userID
-	}
+//	public HashMap<String, String> getGoods(int id) {
+//		refresh(id);
+//		return goods;//goodID, userID
+//	}
 	
-	public HashMap<String, String> getNStates(int id) {
-		refresh(id);
-		return states;//goodID, userID
-	}
+//	public HashMap<String, String> getNStates(int id) {
+//		refresh(id);
+//		return states;//goodID, userID
+//	}
 	
 	public void setLog(String name) {
 		this.logName = "tf"+name+".txt";
@@ -260,19 +262,19 @@ public class Storage {
 	
 	
 	
-	public HashMap<String, String> getGoods(String userID) {
-		HashMap<String, String> res = new HashMap<String, String>();
-
-		for(String good: goods.keySet() ) {
-			if(userID.equals(goods.get(good)))
-				res.put(good, states.get(good));
-				}
-		return res;
-	}
+//	public HashMap<String, String> getGoods(String userID) {
+//		HashMap<String, String> res = new HashMap<String, String>();
+//
+//		for(String good: goods.keySet() ) {
+//			if(userID.equals(goods.get(good)))
+//				res.put(good, states.get(good));
+//				}
+//		return res;
+//	}
 	
 	
 	
-	public void updateFile(String goodID, String newOwner) {
+	public void updateFile(String goodID, String newOwner,String writerID) {
 		try {
 			//systemFile = new File(path+id+".txt");
 
@@ -335,7 +337,8 @@ public class Storage {
 		    catch (IOException ex) {
 		      ex.printStackTrace();
 		    }
-		goods.replace(goodID, newOwner);
+//		goods.replace(goodID, newOwner);
+		json.updateFile(goodID,newOwner,"notonsale",writerID);
 	}
 
 	public void writeLog(String goodId, String seller, String buyer,String counter , byte[] sigSeller,byte[] sigBuyer) {

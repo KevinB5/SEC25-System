@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -14,21 +16,14 @@ import org.json.simple.parser.ParseException;
 public class JSONGood {
 	
 	private final String PATH = "goods";
-	private static JSONGood instance = null;
 
 	/**
 	 * ATENÇÃO O ESTADO DOS GOODS É "onsale" OU "notonsale"
 	 */
 	
-	private JSONGood() {
+	public JSONGood() {
     }
 
-    public static JSONGood getInstance() {
-        if (instance == null) {
-            instance = new JSONGood();
-        }
-        return instance;
-    }
     
 	//manipulatorID is the ID of the entity that is using this method (for example notary1)
 	public void updateFile(String goodID, String newOwner,String goodState, String manipulatorID) {
@@ -113,7 +108,6 @@ public class JSONGood {
 				Object obj = jsonParser.parse(reader);
 				
 				JSONArray userList = (JSONArray) obj;
-				JSONArray newUserList = new JSONArray();
 				
 				for( Object userObject : userList) {
 					JSONObject user = (JSONObject)userObject;
@@ -145,7 +139,6 @@ public class JSONGood {
 					Object obj = jsonParser.parse(reader);
 					
 					JSONArray userList = (JSONArray) obj;
-					JSONArray newUserList = new JSONArray();
 					
 					for( Object userObject : userList) {
 						JSONObject user = (JSONObject)userObject;
@@ -163,5 +156,139 @@ public class JSONGood {
 				e1.printStackTrace();
 			}
 			return "Not OK";
+		}
+
+
+		public List<String> getListOfGoods(String manipulatorID) {
+			List<String> goodList = new ArrayList<String>();
+			try {
+				File myFile = new File(PATH+manipulatorID+".json");
+				if(myFile.createNewFile())
+					return null;
+				
+				JSONParser jsonParser = new JSONParser();
+				try ( FileReader reader = new FileReader(PATH+manipulatorID+".json")){
+					Object obj = jsonParser.parse(reader);
+					
+					JSONArray userList = (JSONArray) obj;
+					
+					for( Object userObject : userList) {
+						JSONObject user = (JSONObject)userObject;
+						JSONObject goods = (JSONObject)user.get("goods");
+						for(Object good : goods.values()) {
+							goodList.add((String) good);
+						}
+					}
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				    
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			return goodList;
+		}
+		
+		
+		public boolean existGood(String goodID,String manipulatorID) {
+			try {
+				File myFile = new File(PATH+manipulatorID+".json");
+				if(myFile.createNewFile())
+					return false;
+				
+				JSONParser jsonParser = new JSONParser();
+				try ( FileReader reader = new FileReader(PATH+manipulatorID+".json")){
+					Object obj = jsonParser.parse(reader);
+					
+					JSONArray userList = (JSONArray) obj;
+					
+					for( Object userObject : userList) {
+						JSONObject user = (JSONObject)userObject;
+						JSONObject goods = (JSONObject)user.get("goods");
+						for(Object good : goods.keySet()) {
+							String compareGood = (String)good;
+							if(compareGood.equals(goodID))
+								return true;
+						}
+					}
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				    
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			return false;
+		}
+		
+		
+		public String getGoodState(String goodID,String manipulatorID) {
+			try {
+				File myFile = new File(PATH+manipulatorID+".json");
+				if(myFile.createNewFile())
+					return "notonsale";
+				
+				JSONParser jsonParser = new JSONParser();
+				try ( FileReader reader = new FileReader(PATH+manipulatorID+".json")){
+					Object obj = jsonParser.parse(reader);
+					
+					JSONArray userList = (JSONArray) obj;
+					
+					for( Object userObject : userList) {
+						JSONObject user = (JSONObject)userObject;
+						JSONObject goods = (JSONObject)user.get("goods");
+						for(Object good : goods.keySet()) {
+							String compareGood = (String)good;
+							if(compareGood.equals(goodID))
+								return (String)goods.get(good);
+						}
+					}
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				    
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			return "notonsale";
+		}
+		
+		public String getGoodUser(String goodID,String manipulatorID) {
+			try {
+				File myFile = new File(PATH+manipulatorID+".json");
+				if(myFile.createNewFile())
+					return "notonsale";
+				
+				JSONParser jsonParser = new JSONParser();
+				try ( FileReader reader = new FileReader(PATH+manipulatorID+".json")){
+					Object obj = jsonParser.parse(reader);
+					
+					JSONArray userList = (JSONArray) obj;
+					
+					for( Object userObject : userList) {
+						JSONObject user = (JSONObject)userObject;
+						JSONObject goods = (JSONObject)user.get("goods");
+						for(Object good : goods.keySet()) {
+							String compareGood = (String)good;
+							if(compareGood.equals(goodID))
+								return (String)user.get("userID");
+						}
+					}
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				    
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			return "notonsale";
 		}
 }

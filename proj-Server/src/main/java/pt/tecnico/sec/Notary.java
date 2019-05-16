@@ -44,8 +44,8 @@ public enum GoodState {
 	private static final String RDY = "Ready";
 	private long waitID;
 
-	private HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
-	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,state>
+//	private HashMap<String, String> goods = new HashMap<String, String>(); // <goodID,userID>
+//	private HashMap<String, GoodState> states = new HashMap<String, GoodState>(); // <goodID,state>
 	private HashMap<String, Integer> counters = new HashMap<String, Integer>(); // <goodID,counter>
 	private HashMap<String,Integer> timestamps = new HashMap<String, Integer>();
 	private HashMap<String,signature> writesignatures = new HashMap<String, signature>(); //<goodID,signature>
@@ -73,7 +73,7 @@ public enum GoodState {
 	private final String hashLimit = "0000";
 	private int responses=0;
 
-	private	JSONGood json = JSONGood.getInstance();
+	private	JSONGood json = new JSONGood();
 
 	
 	public Notary(int id, Storage store,int f) {
@@ -86,10 +86,10 @@ public enum GoodState {
         N=3*f+1;
         this.lib=new SLibrary(this);
 
-        this.updateState();
-		System.out.println(goods);
+//        this.updateState();
+//		System.out.println(goods);
 
-		for(String goodID: goods.keySet()) {
+		for(String goodID: json.getListOfGoods(idNotary)) {
 			counters.put(goodID, 0);
 			timestamps.put(goodID, 0);
 		}
@@ -140,19 +140,19 @@ public enum GoodState {
 		}
 	}
 	
-	private void updateState(){
-		goods = store.getGoods(id);
-
-		HashMap<String, String> cs = store.getNStates(id);
-		
-		for(String good: cs.keySet()) {
-			System.out.println("getting state for good: "+ good + " "+cs.get(good));
-			if(cs.get(good).equals("n"))
-				states.put(good, GoodState.NOTONSALE);
-			else 
-				states.put(good, GoodState.ONSALE);
-		}
-	}
+//	private void updateState(){
+//		goods = store.getGoods(id);
+//
+//		HashMap<String, String> cs = store.getNStates(id);
+//		
+//		for(String good: cs.keySet()) {
+//			System.out.println("getting state for good: "+ good + " "+cs.get(good));
+//			if(cs.get(good).equals("n"))
+//				states.put(good, GoodState.NOTONSALE);
+//			else 
+//				states.put(good, GoodState.ONSALE);
+//		}
+//	}
 	
 	String getID() {
 		return this.idNotary;
@@ -191,23 +191,23 @@ public enum GoodState {
 	 * Verificar o pedido de venda do user 
 	 * @throws Exception 
 	 */
-	private String verifySelling(String userID, String goodID) throws Exception {
-		System.out.println("Verifying "+goodID);
-		if(!goods.containsKey(goodID))
-			return "No such good";
-		int novo = counters.get(goodID);
-		System.out.println(goods.get(goodID));
-		if(goods.get(goodID).equals(userID)) {
-			if(!states.get(goodID).equals(GoodState.ONSALE)) {
-				novo++;
-				System.out.println("replacing counter"+counters.get(goodID)+" for "+novo);
-				counters.replace(goodID,novo );				
-				states.replace(goodID, GoodState.ONSALE);
-			}			
-			return ACK;
-		}
-		return NOK;
-	}
+//	private String verifySelling(String userID, String goodID) throws Exception {
+//		System.out.println("Verifying "+goodID);
+//		if(!goods.containsKey(goodID))
+//			return "No such good";
+//		int novo = counters.get(goodID);
+//		System.out.println(goods.get(goodID));
+//		if(goods.get(goodID).equals(userID)) {
+//			if(!states.get(goodID).equals(GoodState.ONSALE)) {
+//				novo++;
+//				System.out.println("replacing counter"+counters.get(goodID)+" for "+novo);
+//				counters.replace(goodID,novo );				
+//				states.replace(goodID, GoodState.ONSALE);
+//			}			
+//			return ACK;
+//		}
+//		return NOK;
+//	}
 	
 	/**
 	 * Verificar o estado de um good e retornar ao user
@@ -217,12 +217,13 @@ public enum GoodState {
 	 */
 	private Recorded verifiyStateOfGood(String goodID, String challenge) {
 		/*Returns "<goodID , ONSALE/NOTONSALE , goodcounter , challenge>"  */
-		if(!goods.containsKey(goodID)) {
+		if(json.existGood(goodID,idNotary)) {
 			return null;
 			}
 		
 		int counter;
-		String ownerstate = goods.get(goodID) + " " + states.get(goodID).toString();
+//		String ownerstate = goods.get(goodID) + " " + states.get(goodID).toString();
+		String ownerstate = json.getGoodUser(goodID,idNotary) + " " + json.getGoodState(goodID,idNotary) ;
 		counter = counters.get(goodID);
 		
 //		Recorded result = new Recorded(state, counter, 0);
@@ -316,15 +317,17 @@ public enum GoodState {
 
     			System.out.println("COUNTERS: "+counter+" "+counters.get(good) );
     			
-    			boolean correctCounter = (counter==counters.get(good)) || (states.get(good).equals(GoodState.ONSALE)); 
+    			boolean correctCounter = (counter==counters.get(good)) || (json.getGoodState(good,idNotary).equals(GoodState.ONSALE)); 
     			
     			
 	    		if(ts>= timestamps.get(good) && correctCounter) {
 	    			
-		    		String rs=this.verifySelling(user, message[1]);//userID, goodID
+//		    		String rs=this.verifySelling(user, message[1]);//userID, goodID
+		    		String rs = json.verifySelling(user,message[1],idNotary);
 		    		if(rs.equals("ACK")) {
 		    			timestamps.put(good,ts);
-		    			goods.put(good, user);
+//		    			goods.put(good, user);
+		    			json.updateFile(good,user,json.getGoodState(good,idNotary),idNotary);
 		    			System.out.println("SIGNATURE2: "+signatures.get(good));
 		    			if(command.getWriteSignature()!=null)
 		    				writesignatures.put(good,command.getWriteSignature());
@@ -349,7 +352,7 @@ public enum GoodState {
 	    	if(op.equals("owner")) {
 	    		String[] info = command.getWriteSignature().getData().split(" ");
 	    		int ts =Integer.parseInt(info[3]);
-	    		if(ts>=timestamps.get(good) && user.equals(goods.get(good))) {
+	    		if(ts>=timestamps.get(good) && user.equals(json.getGoodUser(good,idNotary))) {
 	    			if(command.getWriteSignature()!=null)
 	    				writesignatures.put(good,command.getWriteSignature());
 	    			
@@ -535,17 +538,18 @@ public enum GoodState {
 //=======
 //	private String transferGood( String seller,String buyer , String goodID,byte[] sigSeller,byte[]sigBuyer) throws Exception {
 //>>>>>>> c470555684bd38333b6e32f799da95dafbbc8e65
-		if(goods.get(goodID).equals(seller)) {
+		if(json.getGoodUser(goodID,idNotary).equals(seller)) {
 			System.out.println("SELLER OK "+ seller);
-			if(states.get(goodID).equals(GoodState.ONSALE)) {
+			if(json.getGoodState(goodID,idNotary).equals(GoodState.ONSALE)) {
 				//String sigMsg = "intentionbuy "+goodID + " "+counters.get(goodID);
 				System.out.println("verifying signature for :"+ buyer);
 				if(PKI.verifySignature(sigBuyer.getData(), sigBuyer.getBytes(), buyer)){
 					System.out.println("buyer intention verified");
 					//store.writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
-					store.updateFile(goodID, buyer);
-					goods.replace(goodID, buyer); 
-					states.replace(goodID, GoodState.NOTONSALE);
+					json.updateFile(goodID,buyer,"notonsale",idNotary);
+//					store.updateFile(goodID, buyer,idNotary);
+//					goods.replace(goodID, buyer); 
+//					states.replace(goodID, GoodState.NOTONSALE);
 					counters.replace(goodID,counters.get(goodID)+1);
 					System.out.println("good counter: "+counters.get(goodID));
 
