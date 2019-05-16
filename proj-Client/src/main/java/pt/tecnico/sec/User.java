@@ -125,7 +125,7 @@ public enum GoodState {
 //			}
 			for(String good : res) {
 				counters.put(good, 0);
-				if(json.getGoodState(good,"").equals("notonsale"))
+				if(json.getGoodState(good,"").equals("NOTONSALE"))
 					goods.put(good, GoodState.NOTONSALE);
 				else 
 					goods.put(good, GoodState.ONSALE);

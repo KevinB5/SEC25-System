@@ -18,7 +18,7 @@ public class JSONGood {
 	private final String PATH = "goods";
 
 	/**
-	 * ATENÇÃO O ESTADO DOS GOODS É "onsale" OU "notonsale"
+	 * ATENÇÃO O ESTADO DOS GOODS É "onsale" OU "NOTONSALE"
 	 */
 	
 	public JSONGood() {
@@ -162,10 +162,11 @@ public class JSONGood {
 
 		public List<String> getGoodList(String manipulatorID) {
 			List<String> goodList = new ArrayList<String>();
+			
 			try {
 				File myFile = new File(PATH+manipulatorID+".json");
 				if(myFile.createNewFile())
-					return null;
+					return goodList;
 				
 				JSONParser jsonParser = new JSONParser();
 				try ( FileReader reader = new FileReader(PATH+manipulatorID+".json")){
@@ -176,7 +177,7 @@ public class JSONGood {
 					for( Object userObject : userList) {
 						JSONObject user = (JSONObject)userObject;
 						JSONObject goods = (JSONObject)user.get("goods");
-						for(Object good : goods.values()) {
+						for(Object good : goods.keySet()) {
 							goodList.add((String) good);
 						}
 					}
@@ -233,7 +234,7 @@ public class JSONGood {
 			try {
 				File myFile = new File(PATH+manipulatorID+".json");
 				if(myFile.createNewFile())
-					return "notonsale";
+					return "NOTONSALE";
 				
 				JSONParser jsonParser = new JSONParser();
 				try ( FileReader reader = new FileReader(PATH+manipulatorID+".json")){
@@ -259,14 +260,14 @@ public class JSONGood {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			return "notonsale";
+			return "NOTONSALE";
 		}
 		
 		public String getGoodUser(String goodID,String manipulatorID) {
 			try {
 				File myFile = new File(PATH+manipulatorID+".json");
 				if(myFile.createNewFile())
-					return "notonsale";
+					return null;
 				
 				JSONParser jsonParser = new JSONParser();
 				try ( FileReader reader = new FileReader(PATH+manipulatorID+".json")){
@@ -292,6 +293,6 @@ public class JSONGood {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			return "notonsale";
+			return null;
 		}
 }
