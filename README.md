@@ -73,3 +73,7 @@ Fake Sell:
 	(cliente: user1)
 		$ sell good1
 
+Server Crash:
+	(after all servers started)
+	(crash one server)
+	(send any message with client)
