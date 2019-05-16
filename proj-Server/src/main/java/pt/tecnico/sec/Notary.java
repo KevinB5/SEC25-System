@@ -274,8 +274,8 @@ public enum GoodState {
     	String error ="";
     	//System.out.println("signature verification: "+this.verifySignature(command.getText(), command.getSig(), command.getID()));
 
-    	if(PKI.verifySignature(command.getHash(), command.getSig().getBytes(), user)
-    			|| PKI.verifySignature(command.getWriteSignature().getData(), command.getWriteSignature().getBytes(),user)) {
+    	if(verifyHash(command.getText(),command.getNonce()) && (PKI.verifySignature(command.getHash(), command.getSig().getBytes(), user)
+    			|| PKI.verifySignature(command.getWriteSignature().getData(), command.getWriteSignature().getBytes(),user))) {
 			
 			System.out.println("user's "+ user + " signature validated");
 //			System.out.println("received: "+command.getText());

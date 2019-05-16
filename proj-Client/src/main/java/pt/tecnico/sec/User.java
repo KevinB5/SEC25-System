@@ -492,7 +492,7 @@ public enum GoodState {
 		    	sigs[1] = new signature(PKI.sign(msg,idUser,PASS), msg);
 
 	    		Recorded rec = new Recorded("", integer, wts);
-	    		Message message =  new Message(idUser, msg,sigs , rec, null);
+	    		Message message =  new Message(idUser, msg,sigs , rec, null,lib.powHash(msg));
 	    		
 	    		message.setSignature(
 	    				new signature(
@@ -543,7 +543,7 @@ public enum GoodState {
 
 	    		Recorded rec = new Recorded("", counters.get(good), wts);
 	    		
-	    		Message message =  new Message(idUser, msg,sigs , rec, null);
+	    		Message message =  new Message(idUser, msg,sigs , rec, null,lib.powHash(msg));
 	    		
 	    		message.setSignature(
 	    				new signature(
@@ -733,7 +733,7 @@ public enum GoodState {
 //			result.setSignature(new signature(PKI.sign("", idUser, PASS), ""));
 			Recorded rec = new Recorded("", counter, -1);
     		
-    		Message mess =  new Message(idUser, msg,sigs,rec,null);
+    		Message mess =  new Message(idUser, msg,sigs,rec,null,lib.powHash(msg));
     		
     		byte[] sig = PKI.sign(mess.getHash(), idUser, PASS);
     		
@@ -846,7 +846,7 @@ public enum GoodState {
         	sigs[1]=null;
         	sigs[2]=null;
     		Recorded rec = new Recorded("", -1, -1);
-    		Message message =  new Message(idUser, error,sigs , rec, null);
+    		Message message =  new Message(idUser, error,sigs , rec, null,lib.powHash(error));
     		
     		message.setSignature(
     				new signature(
@@ -879,7 +879,7 @@ public enum GoodState {
 	        	sigs[2]=null;
 	    		int counter=counters.get(good);
 	    		Recorded rec = new Recorded("", counter, 0);
-	    		Message message =  new Message(idUser, rep,sigs , rec, null);
+	    		Message message =  new Message(idUser, rep,sigs , rec, null,lib.powHash(rep));
 	    		
 	    		message.setSignature(
 	    				new signature(

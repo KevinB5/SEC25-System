@@ -352,7 +352,7 @@ public class Library {
 						
 						WBSig[1]= maxWriteSig;
 						WBSig[2]=maxBuySig;
-						Message writeBack = new Message(maxowner, wb, WBSig,  WBRec, null);			
+						Message writeBack = new Message(maxowner, wb, WBSig,  WBRec, null,powHash(wb));			
 						
 						return writeBack;
 					}
