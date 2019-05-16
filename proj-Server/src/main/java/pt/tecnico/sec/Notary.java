@@ -88,7 +88,7 @@ public enum GoodState {
 
 //        this.updateState();
 //		System.out.println(goods);
-
+        System.out.println(json.getGoodList(idNotary));
 		for(String goodID: json.getGoodList(idNotary)) {
 			counters.put(goodID, 0);
 			timestamps.put(goodID, 0);
@@ -217,7 +217,7 @@ public enum GoodState {
 	 */
 	private Recorded verifiyStateOfGood(String goodID, String challenge) {
 		/*Returns "<goodID , ONSALE/NOTONSALE , goodcounter , challenge>"  */
-		if(json.existGood(goodID,idNotary)) {
+		if(!json.existGood(goodID,idNotary)) {
 			return null;
 			}
 		
@@ -382,7 +382,7 @@ public enum GoodState {
 //	    			//lançar um timer
 //	    			//caso passe o timer mensagem é descartada
 //	    			//o que acontece caso o atraso se deva à rede ou assim?
-//	    			//períodos de espera muito longos will fuck up the system
+//	    			//períodos de espera muito longos will crash the system
 //	    		}
 	    		if(message.length!=4) {
 	    			System.out.println(idNotary+ ": request is wrong");
@@ -404,6 +404,7 @@ public enum GoodState {
 	    			System.out.println(idNotary+ ": sending state ");
 	    			//cria um recorded para enviar o estado
 	    			Recorded rec=  this.verifiyStateOfGood(message[1],message[2]);//goodID, userID , counter , challenge
+	    			
 	    			rec.setTS(timestamps.get(message[1])); 
 	    			String mess ="state "+ rec.getState() + " "+ message[2] +  " "+ message[3];
 	    			System.out.println(mess+", counter:"+rec.getCounter());
@@ -546,7 +547,7 @@ public enum GoodState {
 				if(PKI.verifySignature(sigBuyer.getData(), sigBuyer.getBytes(), buyer)){
 					System.out.println("buyer intention verified");
 					//store.writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
-					json.updateFile(goodID,buyer,"notonsale",idNotary);
+					json.updateFile(goodID,buyer,"NOTONSALE",idNotary);
 //					store.updateFile(goodID, buyer,idNotary);
 //					goods.replace(goodID, buyer); 
 //					states.replace(goodID, GoodState.NOTONSALE);

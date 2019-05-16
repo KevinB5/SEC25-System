@@ -142,7 +142,7 @@ public class Storage {
 					System.out.println("state: "+ state);
 //					goods.put(goodID, user);
 //					states.put(goodID, state);
-					json.updateFile(goodID,user,state,"notary"+id);
+					json.updateFile(goodID,user,state,id+"");
 				}
 				//pwriter.println(line);
 			}
@@ -338,7 +338,7 @@ public class Storage {
 		      ex.printStackTrace();
 		    }
 //		goods.replace(goodID, newOwner);
-		json.updateFile(goodID,newOwner,"notonsale","notary"+writerID);
+		json.updateFile(goodID,newOwner,"NOTONSALE",writerID);
 	}
 
 	public void writeLog(String goodId, String seller, String buyer,String counter , byte[] sigSeller,byte[] sigBuyer) {
