@@ -1,5 +1,56 @@
 package pt.tecnico.sec;
 
+
+import pteidlib.PTEID_ADDR;
+import pteidlib.PTEID_Certif;
+import pteidlib.PTEID_ID;
+import pteidlib.PTEID_PIC;
+import pteidlib.PTEID_Pin;
+import pteidlib.PTEID_TokenInfo;
+import pteidlib.PteidException;
+import pteidlib.pteid;
+
+import sun.security.pkcs11.wrapper.CK_ATTRIBUTE;
+import sun.security.pkcs11.wrapper.CK_C_INITIALIZE_ARGS;
+import sun.security.pkcs11.wrapper.CK_MECHANISM;
+import sun.security.pkcs11.wrapper.CK_SESSION_INFO;
+import sun.security.pkcs11.wrapper.PKCS11;
+import sun.security.pkcs11.wrapper.PKCS11Constants;
+import sun.security.pkcs11.wrapper.PKCS11Exception;
+import sun.security.x509.AlgorithmId;
+import sun.security.x509.CertificateAlgorithmId;
+import sun.security.x509.CertificateSerialNumber;
+import sun.security.x509.CertificateValidity;
+import sun.security.x509.CertificateVersion;
+import sun.security.x509.CertificateX509Key;
+import sun.security.x509.X500Name;
+import sun.security.x509.X509CertImpl;
+import sun.security.x509.X509CertInfo;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,6 +63,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import pteidlib.PteidException;	
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -89,6 +141,7 @@ public enum GoodState {
         N=3*f+1;
         this.lib=new SLibrary(this);
         this.citizencard = citizencard;
+        System.out.println("CitizenCar = "+citizencard);
 //        this.updateState();
 //		System.out.println(goods);
         System.out.println(json.getGoodList(idNotary));
@@ -475,7 +528,7 @@ public enum GoodState {
 						buyersignatures.put(good,command.buyerSignature());
 						if(citizencard) {
 							eIDLib eid = new eIDLib();
-				    		X509Certificate cert = eid.getCert();
+				    		X509Certificate cert = eIDLib.getCert();
 				    		certsig = new signature(eid.sign(cert,rs),rs);
 						}
 						

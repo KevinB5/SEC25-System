@@ -1,1 +1,1 @@
-[{"goods":{"good5":"NOTONSALE","good4":"NOTONSALE"},"userID":"user1"},{"goods":{"good7":"NOTONSALE","good6":"NOTONSALE","good1":"NOTONSALE"},"userID":"user2"}]
+[{"goods":{"good7":"onsale","good6":"notonsale","good5":"notonsale","good3":"notonsale","good1":"notonsale"},"userID":"user1"},{"goods":{"good2":"notonsale"},"userID":"user2"}]

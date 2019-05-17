@@ -14,36 +14,36 @@ public class test {
 	public static void main(String[] args) {
 //		JSONGood json = new JSONGood();
 //		System.out.println(json.getGoodList("notary4"));
-//		eIDLib eid = new eIDLib();
-//		//eid.start();
-//		X509Certificate cert = null;
-//		
-//		cert = eid.getCert();
-//		
-//		System.out.println("OLA "+cert);
-//		
-//		if(eid.verifySignature(eid.sign(cert,"teste"),"teste"))
-//			System.out.println("VALIDOU");
-//		else
-//			System.out.println("MATEMATICO");
+		eIDLib eid = new eIDLib();
+		//eid.start();
+		X509Certificate cert = null;
 		
-	try {
-		digest = MessageDigest.getInstance("SHA-1");
-	} catch (NoSuchAlgorithmException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-	String text= "Hello World!";
-	
-	try {
-		digest2 = MessageDigest.getInstance("SHA-1");
-	} catch (NoSuchAlgorithmException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-	
-	
-	System.out.println(verifyHash(powHash(text),text));
+		cert = eid.getCert();
+		
+		System.out.println("OLA "+cert);
+		
+		if(eid.verifySignature(eid.sign(cert,"teste"),"teste"))
+			System.out.println("VALIDOU");
+		else
+			System.out.println("MATEMATICO");
+		
+//	try {
+//		digest = MessageDigest.getInstance("SHA-1");
+//	} catch (NoSuchAlgorithmException e) {
+//		// TODO Auto-generated catch block
+//		e.printStackTrace();
+//	}
+//	String text= "Hello World!";
+//	
+//	try {
+//		digest2 = MessageDigest.getInstance("SHA-1");
+//	} catch (NoSuchAlgorithmException e) {
+//		// TODO Auto-generated catch block
+//		e.printStackTrace();
+//	}
+//	
+//	
+//	System.out.println(verifyHash(powHash(text),text));
 		
 	}
 	static MessageDigest digest;

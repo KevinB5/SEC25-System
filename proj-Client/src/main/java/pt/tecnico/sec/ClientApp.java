@@ -16,7 +16,7 @@ public class ClientApp
 	private static HashMap <String, Socket> sockets = new HashMap<String, Socket>();
 	
 	private static User user = null;
-	private static UserByzantine user2=null;
+//	private static UserByzantine user2=null;
 	//Streams for Users
 	private static ObjectOutputStream outU;
 	private static ObjectInputStream inU;
@@ -50,8 +50,8 @@ public class ClientApp
         try {
         	nUsr = Integer.parseInt(nu);
         	if(tests.equals("Y")||tests.equals("y")) {
-        		user2= new UserByzantine(ID + nUsr, IP);
-        		new Thread(new P2PLibByzantine(user2, user2.gtPort())).start();
+//        		user2= new UserByzantine(ID + nUsr, IP);
+//        		new Thread(new P2PLibByzantine(user2, user2.gtPort())).start();
         	}else {
         		user = new User(ID + nUsr, IP,citizencard);//recebe o ip e a porta 
         		new Thread(new P2PLib(user, user.gtPort())).start();
