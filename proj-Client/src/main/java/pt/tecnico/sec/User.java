@@ -311,7 +311,7 @@ public enum GoodState {
     		for(Future<String> answer : executor.invokeAll(tasks)) {
     			System.out.println(answer.get());
     			if(answer.get().equals(OK)) {
-    				System.out.println("Replacing state of good");
+    				System.out.println("Transfer done. Replacing state of good");
     				//goods.replace(good, GoodState.ONSALE);
     				res= answer.get();
     			}
@@ -403,7 +403,7 @@ public enum GoodState {
 
 			
 			if(res.getText().equals(OK)) {
-				System.out.println("yeeeyeee");
+//				System.out.println("yeeeyeee");
 				goods.put(good, GoodState.NOTONSALE);
 				printgoods();
 				if(counters.get(good)>wts)
@@ -533,11 +533,11 @@ public enum GoodState {
 			String res= "";
 			try {
 				String msg=TRANSFER +" "+ buyer+" "+ good+" "+counters.get(good) +" "+wts; 
-				System.out.println("MESSAGE HERE: "+msg);
+//				System.out.println("MESSAGE HERE: "+msg);
 				
 				signature[] sigs = new signature[3];//propria write buyer
 		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
-		    	sigs[1]=null;
+		    	sigs[1]=new signature(PKI.sign(msg,idUser,PASS), msg);
 		    	sigs[2]=new signature(buyerSig, text);
 //		    	System.out.println("transfering with counter: "+counters.get(good));
 
@@ -650,7 +650,7 @@ public enum GoodState {
 		@Override
 		public String call() throws Exception {
 			String WBResult = lib.write(server,intent, timestamp);
-			System.out.println("WBResult: "+WBResult);
+//			System.out.println("WBResult: "+WBResult);
 			return WBResult;
 		}
 		
@@ -696,7 +696,7 @@ public enum GoodState {
 */
 	
 	public void getStateOfGood(String goodID, boolean invisible) throws InvalidKeyException, Exception {
-		System.out.println("Entering getStateOfGood");
+//		System.out.println("Entering getStateOfGood");
 		rid++;
 		challenge= generateRandomString(20);
 		String msg= STATE + " " + goodID + " "+challenge + " "+ rid;
@@ -711,7 +711,7 @@ public enum GoodState {
 
 	    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
 	    	
-	    	System.out.println(sigs[0]==null);
+//	    	System.out.println(sigs[0]==null);
 
 
 	//    	Recorded rec = new Recorded("", counter, counter);
@@ -742,10 +742,10 @@ public enum GoodState {
     						sig, mess.getHash())
     				);
     		    		
-    		System.out.println("Sending read request");
+//    		System.out.println("Sending read request");
 			Message result= lib.read(mess,rid, challenge,goodID);
 			
-			System.out.println("Read result: "+result.getText());
+//			System.out.println("Read result: "+result.getText());
 
 			
 			/*  WRITE-BACK HERE   */
@@ -774,9 +774,9 @@ public enum GoodState {
     		ExecutorService executor = Executors.newWorkStealingPool();
     		String res="";
     		for(Future<String> answer : executor.invokeAll(tasks)) {
-    			System.out.println(answer.get());
+//    			System.out.println(answer.get());
     			if(answer.get().equals(OK)) {
-    				System.out.println("Replacing state of good");
+//    				System.out.println("Replacing state of good");
     				//goods.replace(good, GoodState.ONSALE);
     				res= answer.get();
     			}
@@ -786,12 +786,16 @@ public enum GoodState {
 			
 			if(res.equals("OK")) {
 				if(!invisible) {
+					String state =result.getRec().state;
 					int count;
 					if(result.getText().split(" ")[0].equals("sell"))
 						count=result.getRec().counter+1;
 					else
 						count = result.getRec().counter;
-					System.out.println("STATE from notary:" +goodID+" "+result.getRec().state +" "+count);
+					if(state.equals(""))
+						state=result.getText().split(" ")[1] + " notonsale";
+					
+					System.out.println("STATE from notary:" +goodID+" "+state +" "+count);
 				}
 				if(!counters.containsKey(goodID))
 					counters.put(goodID,result.getRec().counter);

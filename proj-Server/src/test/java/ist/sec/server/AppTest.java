@@ -24,11 +24,11 @@ public class AppTest
     public void fakeMessage()
     {
     	Storage store = new Storage();
-    	Notary notary = new Notary(1,store,1);
+    	Notary notary = new Notary(1,store,1,false);
     	
     	signature[] signatures = new signature[] {};
     	Recorded recorded = new Recorded("state",1,1);
-    	X509Certificate certificate = null;
+    	signature certificate = null;
     	Message resultMessage = null;
     	Message fakeMessage = new Message("notary1","conteudo",signatures,recorded,certificate);
     	try {
