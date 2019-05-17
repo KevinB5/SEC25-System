@@ -454,7 +454,7 @@ public class Library {
 
 		 		Message temp = (Message) inU.readObject();
 		 		if (temp.getClass().equals(String.class)) {
-		 			System.out.println(temp);
+//		 			System.out.println(temp);
 		 			return null;
 		 		}
 		 		else {

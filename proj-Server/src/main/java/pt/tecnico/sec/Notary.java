@@ -141,6 +141,8 @@ public enum GoodState {
 				this.readies.put(server,"");
 			}
 		}
+		sentReady=false;
+		sentEcho=false;
 	}
 	
 //	private void updateState(){
@@ -440,7 +442,7 @@ public enum GoodState {
 	    	if(op.equals("transfer")) {
 	    		/* TRANSFER +" "+ buyer+" "+ good +" "+ counter+" " + wts;  */
 	    		
-	    		this.startBroadCast(command.getText(), command.getSellSig());
+	    		this.startBroadCast(command.getText(), command.getWriteSignature());
 	    		while(!delivered) {
 	    			 try { 
 	    				 waitID=Thread.currentThread().getId();
@@ -464,7 +466,6 @@ public enum GoodState {
 		    			System.out.println("okay, writing cert");
 						signature certsig = null;
 						
-						
 						System.out.println("putting "+ts+" as the timestamp");
 						timestamps.put(good,ts);
 						writesignatures.put(good,command.getWriteSignature());
@@ -486,8 +487,11 @@ public enum GoodState {
 			    		Message response = new Message(this.idNotary, mess, sigs, rec,certsig);
 			    		response.setSignature(new signature(PKI.sign(response.getHash(),idNotary,PASS),response.getHash()));
 			    		return response;
-		    		}else
+		    			
+		    		}	   		
+		    		else
 		    			error = "notvalidtransfer "+ts;
+		    		System.out.println("notvalidtransfer");
 		    		sigs[0]=  new signature(PKI.sign(error,idNotary,PASS), error);
 		    		Recorded rec = new Recorded("", -1, -1);
 		    		
@@ -500,7 +504,29 @@ public enum GoodState {
 		    		return result;
 
 		    		//return new Message(this.idNotary, error,sigs, rec,null);
+	    		}else if((command.getRec().getCounter()+1) == (counters.get(message[2]))
+	    				&& command.getID().equals(previousowner.get(message[2]))) {
+	    			System.out.println("okay, writing cert");
+					signature certsig = null;
+					
+					
+					System.out.println("putting "+ts+" as the timestamp");
+					timestamps.put(good,ts);
+					writesignatures.put(good,command.getWriteSignature());
+					buyersignatures.put(good,command.buyerSignature());
+										
+					String mess = ACK +" "+ts;						
+
+					sigs = new signature[3];
+		    		Recorded rec = new Recorded("", counters.get(message[2]), ts);
+
+		    		sigs[2]= buyersignatures.get(good);
+		    		sigs[1]= writesignatures.get(good);
+		    		Message response = new Message(this.idNotary, mess, sigs, rec,certsig);
+		    		response.setSignature(new signature(PKI.sign(response.getHash(),idNotary,PASS),response.getHash()));
+		    		return response;
 	    		}else
+	    			System.out.println("wrong counter");
 	    			error = "wrongcounter "+command.getRec().getCounter();
 	    		sigs[0]=  new signature(PKI.sign(error,idNotary,PASS), error);
 	    		Recorded rec = new Recorded("", 0, ts);
@@ -515,6 +541,7 @@ public enum GoodState {
 
 	    		//return new Message(this.idNotary, error,sigs, rec,null);
 	    	}else
+	    		System.out.println("not valid");
 	    		error = "notValidOperation";
 	    		sigs[0]=  new signature(PKI.sign(error,idNotary,PASS), error);
 	    		Recorded rec = new Recorded("", -1, -1);
@@ -529,6 +556,7 @@ public enum GoodState {
 
 	    		//return new Message(this.idNotary, error,sigs, rec,null);
 		}else
+			System.out.println("notvalid");
 			System.out.println("Signature not Valid");
 			error = "signatureNotValid";
 		    sigs[0]=  new signature(PKI.sign(error,idNotary,PASS), error);
