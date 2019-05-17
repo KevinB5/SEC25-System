@@ -72,7 +72,8 @@ public enum GoodState {
 	private boolean  citizencard;
 
 	private KeyPair keypair = null;
-	private final String hashLimit = "0000";
+	static MessageDigest digest;
+	static String hashLimit ="0000";
 	private int responses=0;
 
 	private	JSONGood json = new JSONGood();
@@ -88,7 +89,6 @@ public enum GoodState {
         N=3*f+1;
         this.lib=new SLibrary(this);
         this.citizencard = citizencard;
-
 //        this.updateState();
 //		System.out.println(goods);
         System.out.println(json.getGoodList(idNotary));
@@ -96,6 +96,14 @@ public enum GoodState {
 			counters.put(goodID, 0);
 			timestamps.put(goodID, 0);
 		}
+		 
+		 try {
+			 digest = MessageDigest.getInstance("SHA-1");
+		 } catch (NoSuchAlgorithmException e) {
+			 // TODO Auto-generated catch block
+			 e.printStackTrace();
+		 }
+
 
 		
 		PASS = idNotary;
@@ -277,8 +285,8 @@ public enum GoodState {
     	//System.out.println("signature verification: "+this.verifySignature(command.getText(), command.getSig(), command.getID()));
 
     	
-    	System.out.println("NONCE: "+command.getNonce());
-    	System.out.println("HASH: "+verifyHash(command.getText(),command.getNonce()));
+//    	System.out.println("NONCE: "+command.getNonce());
+    	System.out.println("HASH: "+verifyHash(command.getNonce(),command.getText()));
     	
     	
     	if(true && (PKI.verifySignature(command.getHash(), command.getSig().getBytes(), user)
@@ -792,19 +800,18 @@ public enum GoodState {
 	}
 	
 	
-	public boolean verifyHash(String content,String hashValue) {
-		content = content+hashValue;
-		MessageDigest digest;
+	public static boolean verifyHash(String hashValue,String content) {
+		String testContent = content+hashValue;
+//		System.out.println(testContent);
 		byte[] hash = null;
-		try {
-			digest = MessageDigest.getInstance("SHA-256");
-			hash = digest.digest(content.getBytes(StandardCharsets.UTF_8));
-			content = DatatypeConverter.printHexBinary(hash);
-			content = content.substring(0,4);
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-		System.out.println("CONTENT VS HASHLIMIT: "+content + " "+hashLimit);
+		content = testContent;
+//			System.out.println(content);
+		hash = digest.digest(content.getBytes(StandardCharsets.UTF_8));
+//			System.out.println(hash);
+		content = DatatypeConverter.printHexBinary(hash);
+		content = content.substring(0,4);
+//			System.out.println(content);
+		digest.reset();
 		if(content.equals(hashLimit))
 			return true;
 		return false;

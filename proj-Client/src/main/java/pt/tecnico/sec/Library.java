@@ -47,7 +47,7 @@ public class Library {
 	private static int PORT;
     private User user;
     
-    private final String hashLimit = "0000";
+    
 
 
 	private HashMap<String,Boolean> acklist= new HashMap<String,Boolean>();
@@ -59,6 +59,9 @@ public class Library {
 	private HashMap<String, RecordString> textlist = new HashMap<String,RecordString>();
 	private HashMap<String,RecordSig> certlist = new HashMap<String,RecordSig>();
 	boolean citizencard =false;
+	
+	static MessageDigest digest;
+	static String hashLimit ="0000";
     
     public Library(User user, String _ip, HashMap<String, Integer> servPorts, boolean citizencard) {
     	this.ip =_ip;
@@ -67,7 +70,12 @@ public class Library {
     	this.PORT = user.gtPort();
     	this.user = user;
     	this.citizencard=citizencard;
-    
+    	try {
+			digest = MessageDigest.getInstance("SHA-1");
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	
     }
     
@@ -478,25 +486,25 @@ public class Library {
 
 	    }
 	
-	public String powHash(String content) {
+	public static String powHash(String content) {
 		/* Returns string i such that content+i hashes to a string with hashLimit in the beginning */
-		MessageDigest digest;
+		digest.reset();
+		System.out.println("POWHashing: "+content);
+		String originalContent = content;
 		byte[] hash = null;
 		String hashString= null;
 		int i=0;
 		do {
-			hashString = content+i;
-			try {
-				digest = MessageDigest.getInstance("SHA-256");
-				hash = digest.digest(hashString.getBytes(StandardCharsets.UTF_8));
-				hashString = DatatypeConverter.printHexBinary(hash);
-				hashString = hashString.substring(0,4);
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-			}
 			i++;
+			hashString = originalContent+i;
+//			System.out.println(hashString);
+			hash = digest.digest(hashString.getBytes(StandardCharsets.UTF_8));
+			content = DatatypeConverter.printHexBinary(hash);
+			hashString = content.substring(0,4);
+//				System.out.println("hashString: "+hashString);
 		}
 		while(!hashString.equals(hashLimit)); 
+//		System.out.println(i);
 		return ""+i;
 	}
 }

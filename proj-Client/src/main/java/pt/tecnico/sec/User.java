@@ -149,11 +149,11 @@ public enum GoodState {
 	}
 	
 	public int gtPort() {
-		return this.PORT;
+		return User.PORT;
 	}
 	
 	public String getID() {
-		return this.idUser;
+		return User.idUser;
 	}
 	
 	public void printgoods() {
@@ -204,7 +204,7 @@ public enum GoodState {
 					uid=res[i];
 				
 				if(i%2!=0) {
-					if(res[i].equals("#"+this.idUser)) {
+					if(res[i].equals("#"+User.idUser)) {
 						PORT = Integer.parseInt(res[i+1]);
 						continue;
 					}
@@ -492,7 +492,7 @@ public enum GoodState {
 		    	sigs[1] = new signature(PKI.sign(msg,idUser,PASS), msg);
 
 	    		Recorded rec = new Recorded("", integer, wts);
-	    		Message message =  new Message(idUser, msg,sigs , rec, null,lib.powHash(msg));
+	    		Message message =  new Message(idUser, msg,sigs , rec, null,Library.powHash(msg));
 	    		
 	    		message.setSignature(
 	    				new signature(
@@ -543,7 +543,7 @@ public enum GoodState {
 
 	    		Recorded rec = new Recorded("", counters.get(good), wts);
 	    		
-	    		Message message =  new Message(idUser, msg,sigs , rec, null,lib.powHash(msg));
+	    		Message message =  new Message(idUser, msg,sigs , rec, null,Library.powHash(msg));
 	    		
 	    		message.setSignature(
 	    				new signature(
@@ -733,7 +733,7 @@ public enum GoodState {
 //			result.setSignature(new signature(PKI.sign("", idUser, PASS), ""));
 			Recorded rec = new Recorded("", counter, -1);
     		
-    		Message mess =  new Message(idUser, msg,sigs,rec,null,lib.powHash(msg));
+    		Message mess =  new Message(idUser, msg,sigs,rec,null,Library.powHash(msg));
     		
     		byte[] sig = PKI.sign(mess.getHash(), idUser, PASS);
     		
@@ -850,7 +850,7 @@ public enum GoodState {
         	sigs[1]=null;
         	sigs[2]=null;
     		Recorded rec = new Recorded("", -1, -1);
-    		Message message =  new Message(idUser, error,sigs , rec, null,lib.powHash(error));
+    		Message message =  new Message(idUser, error,sigs , rec, null,Library.powHash(error));
     		
     		message.setSignature(
     				new signature(
@@ -883,7 +883,7 @@ public enum GoodState {
 	        	sigs[2]=null;
 	    		int counter=counters.get(good);
 	    		Recorded rec = new Recorded("", counter, 0);
-	    		Message message =  new Message(idUser, rep,sigs , rec, null,lib.powHash(rep));
+	    		Message message =  new Message(idUser, rep,sigs , rec, null,Library.powHash(rep));
 	    		
 	    		message.setSignature(
 	    				new signature(
@@ -932,6 +932,9 @@ public enum GoodState {
 		getStateOfGood(goodID,true);
 		
 	}
+	
+	
+	
 	
 	
 }
