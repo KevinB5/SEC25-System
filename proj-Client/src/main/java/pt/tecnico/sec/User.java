@@ -537,7 +537,7 @@ public enum GoodState {
 				
 				signature[] sigs = new signature[3];//propria write buyer
 		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
-		    	sigs[1]=null;
+		    	sigs[1]=new signature(PKI.sign(msg,idUser,PASS), msg);
 		    	sigs[2]=new signature(buyerSig, text);
 //		    	System.out.println("transfering with counter: "+counters.get(good));
 

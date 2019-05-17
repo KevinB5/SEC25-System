@@ -274,7 +274,12 @@ public enum GoodState {
     	String error ="";
     	//System.out.println("signature verification: "+this.verifySignature(command.getText(), command.getSig(), command.getID()));
 
-    	if(verifyHash(command.getText(),command.getNonce()) && (PKI.verifySignature(command.getHash(), command.getSig().getBytes(), user)
+    	
+    	System.out.println("NONCE: "+command.getNonce());
+    	System.out.println("HASH: "+verifyHash(command.getText(),command.getNonce()));
+    	
+    	
+    	if(true && (PKI.verifySignature(command.getHash(), command.getSig().getBytes(), user)
     			|| PKI.verifySignature(command.getWriteSignature().getData(), command.getWriteSignature().getBytes(),user))) {
 			
 			System.out.println("user's "+ user + " signature validated");
@@ -296,7 +301,8 @@ public enum GoodState {
 	    	String op =  message[0]; //the first word is the operation required
 	    	//array de assinaturas
 	    	String good = message[1];
-	    	
+	    	if(op.equals("transfer"))
+	    		good= message[2];
 	    	
 	    	if(op .equals("sell")) {
 	    		this.startBroadCast(command.getText(), command.getSellSig());
@@ -416,7 +422,7 @@ public enum GoodState {
 	    			Recorded rec=  this.verifiyStateOfGood(message[1],message[2]);//goodID, userID , counter , challenge
 	    			System.out.println(timestamps);
 	    			System.out.println(message[1]);
-	    			rec.setTS(timestamps.get(message[1])); 
+	    			rec.setTS(timestamps.get(message[1]));
 	    			String mess ="state "+ rec.getState() + " "+ message[2] +  " "+ message[3];
 	    			if(previousowner.containsKey(good))
 	    				mess+=" "+previousowner.get(good);
@@ -447,7 +453,7 @@ public enum GoodState {
 	    		}
 	    		delivered=false;
 
-    			String ts =message[4];
+    			Integer ts =command.getRec().timestamp;
 	    		System.out.println("transfering "+message[2]+"...");
 	    		System.out.println("Counter from seller: "+command.getRec().getCounter()+ "counter here: "+counters.get(message[2]));
 	    		if(command.getRec().getCounter() == (counters.get(message[2]))){
@@ -457,8 +463,12 @@ public enum GoodState {
 		    		if(!rs.equals(NOK)) {
 		    			System.out.println("okay, writing cert");
 						signature certsig = null;
-						timestamps.put(good, Integer.parseInt(ts));
 						
+						
+						System.out.println("putting "+ts+" as the timestamp");
+						timestamps.put(good,ts);
+						writesignatures.put(good,command.getWriteSignature());
+						buyersignatures.put(good,command.buyerSignature());
 						if(citizencard) {
 							eIDLib eid = new eIDLib();
 				    		X509Certificate cert = eid.getCert();
@@ -468,7 +478,7 @@ public enum GoodState {
 						String mess = ACK +" "+ts;						
 
 						sigs = new signature[3];
-			    		Recorded rec = new Recorded("", counters.get(message[2]), Integer.parseInt(ts));
+			    		Recorded rec = new Recorded("", counters.get(message[2]), ts);
 
 
 			    		sigs[2]= buyersignatures.get(good);
@@ -493,7 +503,7 @@ public enum GoodState {
 	    		}else
 	    			error = "wrongcounter "+command.getRec().getCounter();
 	    		sigs[0]=  new signature(PKI.sign(error,idNotary,PASS), error);
-	    		Recorded rec = new Recorded("", 0, Integer.parseInt(ts));
+	    		Recorded rec = new Recorded("", 0, ts);
 
 	    		result =  new Message(this.idNotary, error,sigs,rec,null);
 	    		//notario assina totalidade da mensagem
@@ -550,8 +560,8 @@ public enum GoodState {
 				System.out.println("verifying signature for :"+ buyer);
 				if(PKI.verifySignature(sigBuyer.getData(), sigBuyer.getBytes(), buyer)){
 					previousowner.put(goodID, seller);
-					writesignatures.put(goodID, sigSeller);
-					buyersignatures.put(goodID,sigBuyer);
+//					writesignatures.put(goodID, sigSeller);
+//					buyersignatures.put(goodID,sigBuyer);
 					System.out.println("buyer intention verified");
 					//store.writeLog(goodID,seller,buyer,""+counters.get(goodID),sigSeller,sigBuyer);
 					json.updateFile(goodID,buyer,"notonsale",idNotary);
@@ -766,6 +776,7 @@ public enum GoodState {
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
+		System.out.println("CONTENT VS HASHLIMIT: "+content + " "+hashLimit);
 		if(content.equals(hashLimit))
 			return true;
 		return false;

@@ -268,9 +268,11 @@ public class Library {
 
 
 					}else {
-						msg ="transfer " +owner +" "+ good + " "+(counter-1)+" "+split[split.length-2];
+//						ts = Integer.parseInt(split[split.length-3]);
+						msg ="transfer " +owner +" "+ good + " "+(counter-1)+" "+ts;
 						System.out.println("testing with: "+msg);
-						writerVerified = true;
+						writerVerified = PKI.verifySignature(msg, res.getWriteSignature().getBytes(), split[5]);
+						
 					}
 					
 				}
@@ -295,8 +297,7 @@ public class Library {
 
 				System.out.println("Writer Verified: "+writerVerified);
 				
-				if(writerVerified)
-					writesignaturelist.put(serv, new RecordSig(res.getWriteSignature(),ts));
+				
 					
 				////// a verificar duas vezes a assinatura do notrio //////////
 				
@@ -306,6 +307,7 @@ public class Library {
 					&& writerVerified) {
 
 
+						writesignaturelist.put(serv, new RecordSig(res.getWriteSignature(),ts));
 						textlist.put(serv,new RecordString(res.getText(),ts));
 						readlist.put(serv,res.getRec());
 						buyersignaturelist.put(serv, new RecordSig(res.buyerSignature(),ts));
@@ -318,7 +320,7 @@ public class Library {
 						Recorded WBRec = maximumValue(readlist);
 						signature maxBuySig = maxSig(buyersignaturelist);
 						signature maxWriteSig = maxSig(writesignaturelist);
-						String maxseller = maxString(textlist);
+
 						
 						int maxts = WBRec.getTS();
 						
@@ -336,23 +338,26 @@ public class Library {
 						String maxowner = maxownerstate[0];
 						String wb = null; //Write-Back message
 
+						signature[] WBSig = new signature[3];
+						WBSig[1]= maxWriteSig;
+						WBSig[2]=maxBuySig;
+						
+						Message writeBack = null;			
 						/* Creating winner message */
 						if(maxstate.toLowerCase().equals("onsale")) {
 
 							// message was "sell goodID"
 							wb="sell "+good+ " " +(maxcounter-1)+" "+ maxts;
+							writeBack = new Message(maxowner, wb, WBSig,  WBRec, null,powHash(wb));
 						}else {
 
 							wb= "transfer "+maxowner+" "+good+" "+ (maxcounter-1) +" "+ maxts;
 							WBRec= new Recorded("",maxcounter-1,maxts);
 							System.out.println("sending: "+wb);
+							writeBack = new Message(split[5], wb, WBSig,  WBRec, null,powHash(wb));
 						}
-						signature[] WBSig = new signature[3];
 						
 						
-						WBSig[1]= maxWriteSig;
-						WBSig[2]=maxBuySig;
-						Message writeBack = new Message(maxowner, wb, WBSig,  WBRec, null,powHash(wb));			
 						
 						return writeBack;
 					}
