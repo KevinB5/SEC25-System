@@ -30,6 +30,8 @@ public class App
     	int id = Integer.parseInt(args[1]);
     	System.out.println("What is the number of faulty processes?");
         String nu;
+        
+       
         nu= System.console().readLine();
         int f = Integer.parseInt(nu);
         int N = 2*f+1; //expression to calculate total number of processes needed - might not be this
@@ -37,10 +39,14 @@ public class App
         System.out.println("Are we using the Citizen Card? (Y/N)");
         nu = System.console().readLine(); //nu will be Y or N which we use to obtain keys for notaries 
         
+        boolean citizencard = false;
+        if(nu.equals("y")||nu.equals("Y"))
+        	citizencard = true;
+        
         Storage store = new Storage(id);
         store.writeServ("notary"+id, PORT);
         
-    	notary= new Notary(id, store,f);//atribuir aqui a porta
+    	notary= new Notary(id, store,f,citizencard);//atribuir aqui a porta
         try {
 			serverSocket = new ServerSocket(PORT);
 	        System.out.println("Server accepting connections on port: "+ PORT);

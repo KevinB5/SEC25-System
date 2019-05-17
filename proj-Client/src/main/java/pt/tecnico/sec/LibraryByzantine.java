@@ -60,7 +60,7 @@ public class LibraryByzantine {
 	
 	private HashMap<String,RecordSig> signaturelist = new HashMap<String,RecordSig>();
 	private HashMap<String,RecordSig> writesignaturelist = new HashMap<String,RecordSig>();
-	private HashMap<String,RecordCert> certlist = new HashMap<String,RecordCert>();
+	private HashMap<String,RecordSig> certlist = new HashMap<String,RecordSig>();
 	
     
     public LibraryByzantine(UserByzantine user, String _ip, HashMap<String, Integer> servPorts) {
@@ -158,7 +158,7 @@ public class LibraryByzantine {
 
 				
 			if(!(res.getCertSig()==null))
-				certlist.put(serv,new RecordCert(res.getCertSig(),ts));
+				certlist.put(serv,new RecordSig(res.getCertSig(),ts));
 			//System.out.println("message from notary: "+res.getText());
 			//int ts=res.getRec().getTS();
 			System.out.println("verifying answer");
@@ -175,7 +175,7 @@ public class LibraryByzantine {
 				System.out.println(acks);
 				if(acks> (n+f)/2) {
 					System.out.println("Achieved Quorum of Acks");
-					X509Certificate maxcert= maxCert(certlist);
+					signature maxcert= maxSig(certlist);
 					System.out.println("Certificate Received:\n"+maxcert);
 					acks=0;
 					return "OK";

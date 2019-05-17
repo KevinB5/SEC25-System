@@ -57,15 +57,16 @@ public class Library {
 	private HashMap<String,RecordSig> writesignaturelist = new HashMap<String,RecordSig>();
 	private HashMap<String, RecordSig> buyersignaturelist = new HashMap<String,RecordSig>();
 	private HashMap<String, RecordString> textlist = new HashMap<String,RecordString>();
-	private HashMap<String,RecordCert> certlist = new HashMap<String,RecordCert>();
-	
+	private HashMap<String,RecordSig> certlist = new HashMap<String,RecordSig>();
+	boolean citizencard =false;
     
-    public Library(User user, String _ip, HashMap<String, Integer> servPorts) {
+    public Library(User user, String _ip, HashMap<String, Integer> servPorts, boolean citizencard) {
     	this.ip =_ip;
     	this.connectServer(_ip, servPorts);
     	this.idUser = user.getID();
     	this.PORT = user.gtPort();
     	this.user = user;
+    	this.citizencard=citizencard;
     
     	
     }
@@ -162,7 +163,7 @@ public class Library {
 
 				
 			if(!(res.getCertSig()==null))
-				certlist.put(serv,new RecordCert(res.getCertSig(),ts));
+				certlist.put(serv,new RecordSig(res.getCertSig(),ts));
 			//System.out.println("message from notary: "+res.getText());
 			//int ts=res.getRec().getTS();
 //			System.out.println("verifying answer");
@@ -170,6 +171,10 @@ public class Library {
 //
 //	
 //			System.out.println(res.getSig().getBytes());
+			System.out.println(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID()));
+			System.out.println(res);
+			System.out.println(ts+" "+wts);
+			
 			if(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID())
 					&& res.getText().split(" ")[0].equals("ACK") 
 					&& ts==wts) {
@@ -179,8 +184,15 @@ public class Library {
 				System.out.println(acks);
 				if(acks> (n+f)/2) {
 					System.out.println("Achieved Quorum of Acks");
-					X509Certificate maxcert= maxCert(certlist);
-					System.out.println("Certificate Received:\n"+maxcert);
+					signature maxSig = maxSig(certlist);
+					System.out.println("Certificate Received, signature:\n"+maxSig);
+					if(citizencard && (maxSig!=null)) {
+						eIDLib eid = new eIDLib();
+						X509Certificate cert = eid.getCert();				
+						System.out.println("Certificate valid:\n"+ eid.verifySignature(res.getCertSig().getBytes(),res.getText()));
+						
+					}
+					
 					acks=0;
 					return "OK";
 				}
@@ -256,15 +268,22 @@ public class Library {
 
 
 					}else {
-						msg ="transfer " +owner +" "+ good + " "+(counter-1)+" "+ts;
+						msg ="transfer " +owner +" "+ good + " "+(counter-1)+" "+split[split.length-2];
 						System.out.println("testing with: "+msg);
-						writerVerified = PKI.verifySignature(msg, res.getWriteSignature().getBytes(), owner);
+						writerVerified = true;
 					}
 					
 				}
 //				signature[] sigs = new signature[3];
 //				sigs[0]= new signature(res.getWriteSignature().getBytes(), wb);	
+
+//				System.out.println(res.getSig());
+//				
+//				System.out.println(res.getSig().getData());
+//				System.out.println(res.getHash());
+				
 				byte[] hash = res.getHash();
+				
 				
 				if(PKI.verifySignature(hash,res.getSig().getBytes(),res.getID())
 						&& r==rid
@@ -297,7 +316,7 @@ public class Library {
 						/* prepare message for write-back */
 						
 						Recorded WBRec = maximumValue(readlist);
-						signature maxSig = maxSig(signaturelist);
+						signature maxBuySig = maxSig(buyersignaturelist);
 						signature maxWriteSig = maxSig(writesignaturelist);
 						String maxseller = maxString(textlist);
 						
@@ -324,14 +343,16 @@ public class Library {
 							wb="sell "+good+ " " +(maxcounter-1)+" "+ maxts;
 						}else {
 
-							// message was "owner goodID"
-							wb= "transfer "+good+" "+ (maxcounter-1) +" "+ maxts;
+							wb= "transfer "+maxowner+" "+good+" "+ (maxcounter-1) +" "+ maxts;
+							WBRec= new Recorded("",maxcounter-1,maxts);
+							System.out.println("sending: "+wb);
 						}
 						signature[] WBSig = new signature[3];
 						
 						
 						WBSig[1]= maxWriteSig;
-						Message writeBack = new Message(maxowner, wb, WBSig,  WBRec, null);			
+						WBSig[2]=maxBuySig;
+						Message writeBack = new Message(maxowner, wb, WBSig,  WBRec, null,powHash(wb));			
 						
 						return writeBack;
 					}
@@ -347,21 +368,8 @@ public class Library {
 		return null;
 	}
 	
-	
-	private X509Certificate maxCert(HashMap<String,RecordCert> certlist2) {
-		int max=0;
-		X509Certificate maxcert = null;
-		for(String serv : certlist2.keySet()) {
-			int ts = certlist2.get(serv).timestamp;
-			if(ts>=max) {
-				maxcert=certlist2.get(serv).cert;
-			}
-		}
-		return maxcert;
 		
 		
-	/*	return "NOT OK";*/
-	}
 	
 	
 	

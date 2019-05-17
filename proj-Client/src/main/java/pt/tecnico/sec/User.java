@@ -79,7 +79,9 @@ public class User {
 	public static KeyStore KEYSTORE;
 	public PublicKey notarypublickey;
 	private String challenge;
-
+	private boolean citizencard;
+	
+	
 	private int wts=0;
 	private int rid=0;
 	private Set<String> servs;
@@ -99,10 +101,11 @@ public enum GoodState {
 }
 
 	
-	public User(String id, String ip) throws Exception {
+	public User(String id, String ip, boolean citizencard) throws Exception {
 		
 		idUser = id;
 		this.ip=ip;
+		this.citizencard = citizencard;
 		
 		this.getPort();
 		
@@ -111,7 +114,7 @@ public enum GoodState {
 			Storage store = new Storage(1);
 			HashMap<String, Integer> h = store.readServs();
 			servs= h.keySet(); 
-			lib = new Library(this, ip,h);
+			lib = new Library(this, ip,h,citizencard);
 			
 //			HashMap<String, String> res =store.getGoods(id);
 			List<String> res = json.getGoodList(id.charAt(id.length()-1)+"");
@@ -126,7 +129,7 @@ public enum GoodState {
 			System.out.println(res);
 			for(String good : res) {
 				counters.put(good, 0);
-				if(json.getGoodState(good,"").equals("NOTONSALE"))
+				if(json.getGoodState(good,"").equals("notonsale"))
 					goods.put(good, GoodState.NOTONSALE);
 				else 
 					goods.put(good, GoodState.ONSALE);
@@ -322,7 +325,7 @@ public enum GoodState {
 
 		return res;
 	}
-
+/*
 	private void ownerGood(String good) throws Exception {
 		
 //		getStateOfGood(good, true);
@@ -349,7 +352,7 @@ public enum GoodState {
 	}
 	
 	
-	
+	*/
 	
 	
 	
@@ -405,7 +408,7 @@ public enum GoodState {
 				printgoods();
 				if(counters.get(good)>wts)
 					wts=counters.get(good);
-				ownerGood(good);
+//				ownerGood(good);
 			}else {
 				System.out.println("Not OK");
 			}
@@ -489,7 +492,7 @@ public enum GoodState {
 		    	sigs[1] = new signature(PKI.sign(msg,idUser,PASS), msg);
 
 	    		Recorded rec = new Recorded("", integer, wts);
-	    		Message message =  new Message(idUser, msg,sigs , rec, null);
+	    		Message message =  new Message(idUser, msg,sigs , rec, null,lib.powHash(msg));
 	    		
 	    		message.setSignature(
 	    				new signature(
@@ -530,15 +533,17 @@ public enum GoodState {
 			String res= "";
 			try {
 				String msg=TRANSFER +" "+ buyer+" "+ good+" "+counters.get(good) +" "+wts; 
+				System.out.println("MESSAGE HERE: "+msg);
+				
 				signature[] sigs = new signature[3];//propria write buyer
 		    	sigs[0]= new signature(PKI.sign(msg,idUser,PASS), msg);
 		    	sigs[1]=null;
 		    	sigs[2]=new signature(buyerSig, text);
-		    	System.out.println("transfering with counter: "+counters.get(good));
+//		    	System.out.println("transfering with counter: "+counters.get(good));
 
 	    		Recorded rec = new Recorded("", counters.get(good), wts);
 	    		
-	    		Message message =  new Message(idUser, msg,sigs , rec, null);
+	    		Message message =  new Message(idUser, msg,sigs , rec, null,lib.powHash(msg));
 	    		
 	    		message.setSignature(
 	    				new signature(
@@ -728,7 +733,7 @@ public enum GoodState {
 //			result.setSignature(new signature(PKI.sign("", idUser, PASS), ""));
 			Recorded rec = new Recorded("", counter, -1);
     		
-    		Message mess =  new Message(idUser, msg,sigs,rec,null);
+    		Message mess =  new Message(idUser, msg,sigs,rec,null,lib.powHash(msg));
     		
     		byte[] sig = PKI.sign(mess.getHash(), idUser, PASS);
     		
@@ -841,7 +846,7 @@ public enum GoodState {
         	sigs[1]=null;
         	sigs[2]=null;
     		Recorded rec = new Recorded("", -1, -1);
-    		Message message =  new Message(idUser, error,sigs , rec, null);
+    		Message message =  new Message(idUser, error,sigs , rec, null,lib.powHash(error));
     		
     		message.setSignature(
     				new signature(
@@ -874,7 +879,7 @@ public enum GoodState {
 	        	sigs[2]=null;
 	    		int counter=counters.get(good);
 	    		Recorded rec = new Recorded("", counter, 0);
-	    		Message message =  new Message(idUser, rep,sigs , rec, null);
+	    		Message message =  new Message(idUser, rep,sigs , rec, null,lib.powHash(rep));
 	    		
 	    		message.setSignature(
 	    				new signature(

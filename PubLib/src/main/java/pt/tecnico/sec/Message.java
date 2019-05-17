@@ -22,11 +22,12 @@ private signature sellSig;
 private final signature writeSignature;
 private final String id;
 private final signature buyerSignature;
-private final X509Certificate certsig;
+private final signature certsig;
 private final Recorded rec;
 private byte[] encodedhash;
+private String nonce=null;
 
- public Message(String id, String text, signature[] signatures, Recorded recorded, X509Certificate certsig) {
+ public Message(String id, String text, signature[] signatures, Recorded recorded, signature certsig) {
      this.text = text;
      this.sellSig = signatures[0];
 //     this.key = key;
@@ -37,6 +38,23 @@ private byte[] encodedhash;
      this.rec = recorded;
      hash();
  }
+ 
+ 
+ public Message(String id, String text, signature[] signatures, Recorded recorded, signature certsig,String nonce) {
+     this.text = text;
+     this.sellSig = signatures[0];
+//     this.key = key;
+     this.writeSignature=signatures[1];
+     this.id=id;
+     this.buyerSignature=signatures[2];
+     this.certsig = certsig;
+     this.rec = recorded;
+     this.nonce=nonce;
+     hash();
+ }
+ 
+ 
+ 
  
  public Message(String id, String text, signature[] signatures, Recorded recorded) {
 	 this.id=id;
@@ -98,8 +116,12 @@ private byte[] encodedhash;
 	 return writeSignature;
  }
  
- public X509Certificate getCertSig() {
+ public signature getCertSig() {
 	 return certsig;
+ }
+ 
+ public String getNonce() {
+	 return nonce;
  }
  
  public void setSignature(signature sig) {
