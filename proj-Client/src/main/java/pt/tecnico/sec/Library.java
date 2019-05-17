@@ -60,7 +60,6 @@ public class Library {
 	private HashMap<String,RecordSig> certlist = new HashMap<String,RecordSig>();
 	boolean citizencard =false;
 	
-	static MessageDigest digest;
 	static String hashLimit ="0000";
     
     public Library(User user, String _ip, HashMap<String, Integer> servPorts, boolean citizencard) {
@@ -70,12 +69,6 @@ public class Library {
     	this.PORT = user.gtPort();
     	this.user = user;
     	this.citizencard=citizencard;
-    	try {
-			digest = MessageDigest.getInstance("SHA-1");
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
     	
     }
     
@@ -218,7 +211,7 @@ public class Library {
 	}
 	
 	public Message read(Message intent, int rid, String challenge, String good) throws Exception {
-		System.out.println("Sending ReadRequest...");
+//		System.out.println("Sending ReadRequest...");
 		clearReadList();
 		int reads=0;
 		Message res=null;
@@ -252,8 +245,8 @@ public class Library {
 				int counter = rec.getCounter();
 				int ts = rec.getTS();
 								
-				System.out.println("owner,state,challenge,counter,ts,r\n");
-				System.out.println(owner+"//"+state+"//"+challnge+"//"+counter+"//"+ts+"//"+split[4]);
+//				System.out.println("owner,state,challenge,counter,ts,r\n");
+//				System.out.println(owner+"//"+state+"//"+challnge+"//"+counter+"//"+ts+"//"+split[4]);
 				
 				
 				int r = Integer.parseInt(split[4]);
@@ -262,7 +255,7 @@ public class Library {
 				
 				
 				
-				System.out.println(state + " "+ counter + " "+ts);
+//				System.out.println(state + " "+ counter + " "+ts);
 				
 				
 				/* checks if signature of writer is okay -- contains special case for counter = ts = 0  */
@@ -271,14 +264,14 @@ public class Library {
 				else{
 					if(state.equals("onsale")) {
 					msg ="sell " +good + " "+(counter-1)+" "+ts;
-					System.out.println("testing with: "+msg);
+//					System.out.println("testing with: "+msg);
 					writerVerified = PKI.verifySignature(msg, res.getWriteSignature().getBytes(), owner);
 
 
 					}else {
 //						ts = Integer.parseInt(split[split.length-3]);
 						msg ="transfer " +owner +" "+ good + " "+(counter-1)+" "+ts;
-						System.out.println("testing with: "+msg);
+//						System.out.println("testing with: "+msg);
 						writerVerified = PKI.verifySignature(msg, res.getWriteSignature().getBytes(), split[5]);
 						
 					}
@@ -298,12 +291,12 @@ public class Library {
 				if(PKI.verifySignature(hash,res.getSig().getBytes(),res.getID())
 						&& r==rid
 						&& split[3].equals(challenge)) {
-					System.out.println("heyyy");
+//					System.out.println("heyyy");
 					
 					
 					///// nao é o writer q está verified mas sim o notario///////
 
-				System.out.println("Writer Verified: "+writerVerified);
+//				System.out.println("Writer Verified: "+writerVerified);
 				
 				
 					
@@ -333,7 +326,7 @@ public class Library {
 						int maxts = WBRec.getTS();
 						
 						if(maxts==0) {
-							System.out.println("ZERO COUNTER");
+//							System.out.println("ZERO COUNTER");
 							signature[] zcsig = new signature[3];
 							Message zerocounter = new Message(owner,"zerocounter",zcsig,WBRec,null);
 //							System.out.println("message" + zerocounter.getText());
@@ -361,7 +354,7 @@ public class Library {
 
 							wb= "transfer "+maxowner+" "+good+" "+ (maxcounter-1) +" "+ maxts;
 							WBRec= new Recorded("",maxcounter-1,maxts);
-							System.out.println("sending: "+wb);
+//							System.out.println("sending: "+wb);
 							writeBack = new Message(split[5], wb, WBSig,  WBRec, null,powHash(wb));
 						}
 						
@@ -488,6 +481,13 @@ public class Library {
 	
 	public static String powHash(String content) {
 		/* Returns string i such that content+i hashes to a string with hashLimit in the beginning */
+		MessageDigest digest=null;
+		try {
+			 digest = MessageDigest.getInstance("SHA-1");
+		 } catch (NoSuchAlgorithmException e) {
+			 // TODO Auto-generated catch block
+			 e.printStackTrace();
+		 }
 		digest.reset();
 		System.out.println("POWHashing: "+content);
 		String originalContent = content;

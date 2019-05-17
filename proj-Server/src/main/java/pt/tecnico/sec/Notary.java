@@ -72,7 +72,7 @@ public enum GoodState {
 	private boolean  citizencard;
 
 	private KeyPair keypair = null;
-	static MessageDigest digest;
+
 	static String hashLimit ="0000";
 	private int responses=0;
 
@@ -97,12 +97,7 @@ public enum GoodState {
 			timestamps.put(goodID, 0);
 		}
 		 
-		 try {
-			 digest = MessageDigest.getInstance("SHA-1");
-		 } catch (NoSuchAlgorithmException e) {
-			 // TODO Auto-generated catch block
-			 e.printStackTrace();
-		 }
+		 
 
 
 		
@@ -289,7 +284,7 @@ public enum GoodState {
     	System.out.println("HASH: "+verifyHash(command.getNonce(),command.getText()));
     	
     	
-    	if(true && (PKI.verifySignature(command.getHash(), command.getSig().getBytes(), user)
+    	if(verifyHash(command.getNonce(),command.getText()) && (PKI.verifySignature(command.getHash(), command.getSig().getBytes(), user)
     			|| PKI.verifySignature(command.getWriteSignature().getData(), command.getWriteSignature().getBytes(),user))) {
 			
 			System.out.println("user's "+ user + " signature validated");
@@ -801,6 +796,13 @@ public enum GoodState {
 	
 	
 	public static boolean verifyHash(String hashValue,String content) {
+		MessageDigest digest=null;
+		try {
+			 digest = MessageDigest.getInstance("SHA-1");
+		 } catch (NoSuchAlgorithmException e) {
+			 // TODO Auto-generated catch block
+			 e.printStackTrace();
+		 }
 		String testContent = content+hashValue;
 //		System.out.println(testContent);
 		byte[] hash = null;
