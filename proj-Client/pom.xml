@@ -33,14 +33,19 @@
   			<artifactId>PubLib</artifactId>
   		<version>1.0-SNAPSHOT</version>
     </dependency>
-    
-    <dependency>
+     <dependency>
+    	<groupId>pt.tecnico.sec</groupId>
+		<artifactId>pteidlibj</artifactId>
+		<version>1.0-SNAPSHOT</version>
+		<!--  packaging>jar</packaging>-->
+	</dependency>
+   <!--  dependency>
 	    <groupId>pteidlibj</groupId>
 	    <artifactId>pteid</artifactId>
 	    <version>1.0</version>
 	    <scope>system</scope>
     <systemPath>${project.basedir}/lib/pteidlibj.jar</systemPath>
-    </dependency>
+    </dependency>-->
     <dependency>
 	   <groupId>com.googlecode.json-simple</groupId>
     	<artifactId>json-simple</artifactId>

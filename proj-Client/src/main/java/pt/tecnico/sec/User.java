@@ -276,7 +276,7 @@ public enum GoodState {
     		ExecutorService executor = Executors.newWorkStealingPool();
     		
     		for(Future<String> answer : executor.invokeAll(tasks)) {
-    			System.out.println(answer.get());
+//    			System.out.println(answer.get());
     			if(answer.get().equals(OK)) {
     				System.out.println(good+" is on sale");
     				goods.replace(good, GoodState.ONSALE);
@@ -309,7 +309,7 @@ public enum GoodState {
     		ExecutorService executor = Executors.newWorkStealingPool();
     		
     		for(Future<String> answer : executor.invokeAll(tasks)) {
-    			System.out.println(answer.get());
+//    			System.out.println(answer.get());
     			if(answer.get().equals(OK)) {
     				System.out.println("Transfer done. Replacing state of good");
     				//goods.replace(good, GoodState.ONSALE);

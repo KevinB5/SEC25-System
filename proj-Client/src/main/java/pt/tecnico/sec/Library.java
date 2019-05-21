@@ -200,7 +200,7 @@ public class Library {
 			//System.out.println("message from notary: "+res.getText());
 			Thread.sleep(1000*2);
 			//int ts=res.getRec().getTS();
-			System.out.println("verifying answer");
+//			System.out.println("verifying answer");
 		
 			///System.out.println(res.getSig().getBytes());
 			
@@ -222,14 +222,14 @@ public class Library {
 //
 //	
 //			System.out.println(res.getSig().getBytes());
-			System.out.println(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID()));
-			System.out.println(res);
-			System.out.println(ts+" "+wts);
+//			System.out.println(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID()));
+//			System.out.println(res);
+//			System.out.println(ts+" "+wts);
 			
 			if(PKI.verifySignature(res.getHash(),res.getSig().getBytes(),res.getID())
 					&& res.getText().split(" ")[0].equals("ACK") 
 					&& ts==wts) {
-				System.out.println("YAYYYY");
+//				System.out.println("YAYYYY");
 				this.acklist.put(serv, true);
 				acks++;
 				System.out.println(acks);
@@ -539,7 +539,7 @@ public class Library {
 			 e.printStackTrace();
 		 }
 		digest.reset();
-		System.out.println("POWHashing: "+content);
+//		System.out.println("POWHashing: "+content);
 		String originalContent = content;
 		byte[] hash = null;
 		String hashString= null;
